@@ -1,0 +1,23 @@
+/* Style the layout */
+.layout {
+    text-align: center;
+    padding: 10px;
+  }
+  
+  /* 🔹 Positioning the top UI */
+  .top-header {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 10px;
+  }
+  
+  /* 🔹 Style the gems display */
+  .gems-display {
+    font-size: 18px;
+    color: white;
+    font-weight: bold;
+  }
+  
