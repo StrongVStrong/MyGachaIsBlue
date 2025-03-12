@@ -9,28 +9,12 @@ import Dev from "./pages/Dev";
 import Results from "./pages/SummonResults";
 import Login from "./pages/Login";
 import PrivateRoute from "./components/PrivateRoute";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "./firebase"; // Import Firestore instance
+
 
 function App() {
-  // 🔹 Firestore Test Function
-  const testFirestoreWrite = async () => {
-    try {
-      const testRef = doc(db, "users", "testUser123");
-      await setDoc(testRef, { name: "Test User", gems: 1000 });
-      console.log("✅ Firestore write successful!");
-    } catch (error) {
-      console.error("❌ Firestore write failed:", error);
-    }
-  };
 
   return (
     <>
-      {/* 🔥 Firestore Test Button (Temporary) */}
-      <button onClick={testFirestoreWrite} style={{ position: "absolute", top: 10, right: 10, zIndex: 1000 }}>
-        Test Firestore Write
-      </button>
-
       {/* 🔥 Router Setup */}
       <Router>
         <Routes>

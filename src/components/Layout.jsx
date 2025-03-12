@@ -8,10 +8,10 @@ function Layout() {
   return (
     <div className="layout">
       <header className="top-header">
-        <h2 className="gems-display">💎 Gems: {gems}</h2> {/* Gems will always be visible */}
+        <h2 className="gems-display">💎 Gems: {gems}</h2> {/* Gems visible */}
       </header>
       <main>
-        <Outlet /> {/* This is where the pages will render */}
+        <Outlet /> {/* All pages will render here */}
       </main>
     </div>
   );

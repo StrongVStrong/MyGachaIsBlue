@@ -54,9 +54,28 @@ const logout = async () => {
 
 // 🔹 Listen for Auth State Changes (Useful for checking user login status)
 const checkAuthState = (callback) => {
-    onAuthStateChanged(auth, (user) => {
-        callback(user);
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            console.log("✅ Auth state changed: User is logged in", user);
+
+            // 🔥 Fetch Firestore Data
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                console.log("✅ User data loaded from Firestore:", userSnap.data());
+                localStorage.setItem("userData", JSON.stringify(userSnap.data())); // Save locally
+                callback(userSnap.data()); // Send data to UI
+            } else {
+                console.warn("⚠️ No Firestore data found for user!");
+            }
+        } else {
+            console.log("🚪 User is logged out");
+            localStorage.removeItem("userData");
+            callback(null);
+        }
     });
 };
+
 
 export { auth, db, signIn, logout, checkAuthState, provider };
