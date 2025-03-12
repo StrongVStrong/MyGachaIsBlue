@@ -11,6 +11,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  width: 100vw;
+  height: 100vh;
 }
 
 a {
@@ -24,6 +27,7 @@ a:hover {
 
 body {
   margin: 0;
+  justify-content: center;
   display: flex;
   place-items: center;
   min-width: 320px;
@@ -75,6 +79,7 @@ button:focus-visible {
   background-color: rgba(0, 0, 0, 0.6);
   padding: 10px 20px;
   border-radius: 10px;
+  z-index: 1000;
 }
 
 /* Gems text */

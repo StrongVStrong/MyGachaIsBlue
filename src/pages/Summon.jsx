@@ -50,8 +50,10 @@ const banners = {
       // Add new characters to inventory
       setCharacters([...characters, ...newCharacters]);
       
-  
+      
+
       navigate("/results", { state: { amountSummoned: amount, summonedCharacters: newCharacters } });
+      window.location.reload();
     };
   
     return (

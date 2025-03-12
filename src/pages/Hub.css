@@ -1,0 +1,57 @@
+.hub-container {
+    position: relative;
+    align-items:center;
+    justify-content:center;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.hub-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url(../assets/Background.jpg);
+    background-size: cover;
+    background-position: center;
+    filter: brightness(50%); 
+    z-index: 0;
+}
+
+.hub-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: white;
+    text-align: center;
+}
+
+.summon-btn {
+    position: absolute;
+    top: 90%;
+    left: 20%;
+}
+
+.battle-btn {
+    position: absolute;
+    top: 90%;
+    left: 90%;
+}
+
+.inventory-btn {
+    position: absolute;
+    top: 90%;
+    right: 85%;
+}
+
+.dev-btn {
+    position: absolute;
+    bottom: 95%;
+    left: 95%;
+}
