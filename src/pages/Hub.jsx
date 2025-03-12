@@ -29,9 +29,10 @@ function Hub() {
           <button onClick = {() => navigate("/dev")} className="dev-btn">Dev</button>
         </div>
 
-        <audio ref={audioRef} loop>
-          <source src="/assets/bgm.mp3" type="audio/mp3" />
+        <audio loop autoPlay>
+          <source src={`${import.meta.env.BASE_URL}assets/bgm.mp3`} type="audio/mp3" />
         </audio>
+
 
       </div>
     </div>
