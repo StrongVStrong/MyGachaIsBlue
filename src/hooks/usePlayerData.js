@@ -1,71 +1,57 @@
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
+import { auth, db } from "../firebase";
+import { doc, updateDoc, onSnapshot } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
-const MAX_COOKIE_SIZE = 3800; // Maximum size for a single cookie
+
 
 export function usePlayerData() {
-  // Load inventory from cookies
-  const loadInventory = () => {
-    let allCharacters = [];
-    let index = 1;
-    let cookieData;
 
-    while ((cookieData = Cookies.get(`Characters${index}`))) {
-      const chunk = JSON.parse(cookieData);
-      allCharacters = [...allCharacters, ...chunk];
-      index++;
-    }
+  const [gems, setGems] = useState(0);
+  const [characters, setCharacters] = useState([]);
+  const [userId, setUserId] = useState(null);
 
-    return allCharacters;
-  };
+  //Load Firestore data
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUserId(user.uid);
+        const userRef = doc(db, "users", user.uid);
 
-  // Load gems and inventory
-  const [gems, setGems] = useState(() => {
-    return parseInt(Cookies.get("Gems") || "0", 10);
-  });
-  const [characters, setCharacters] = useState(() => loadInventory());
+        // Real time Firebase
+        const unsubscribeSnapshot = onSnapshot(userRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            setGems(userData.gems || 0);
+            setCharacters(userData.characters || []);
+            console.log("🔄 Live Firestore Update:", userData);
+          }
+        });
 
-  // Save inventory to cookies
-  const saveInventory = (newInventory) => {
-    const inventoryJSON = JSON.stringify(newInventory);
-    const charactersArray = newInventory;
-
-    let chunkIndex = 1;
-    let chunk = [];
-    let chunkSize = 0;
-
-    charactersArray.forEach((character, index) => {
-      const characterJSON = JSON.stringify(character);
-      chunkSize += characterJSON.length;
-
-      // If adding this character exceeds the max cookie size, save the current chunk
-      if (chunkSize > MAX_COOKIE_SIZE) {
-        Cookies.set(`Characters${chunkIndex}`, JSON.stringify(chunk), { expires: 999 });
-        chunkIndex++;
-        chunk = [];
-        chunkSize = characterJSON.length;
+        return () => unsubscribeSnapshot();
       }
-
-      // Add the character to the current chunk
-      chunk.push(character);
     });
 
-    // Save the last chunk
-    if (chunk.length > 0) {
-      Cookies.set(`Characters${chunkIndex}`, JSON.stringify(chunk), { expires: 999 });
-    }
+    return () => unsubscribeAuth();
+  }, []);
 
-    console.log(`✅ Inventory saved across ${chunkIndex} cookies`);
-  };
 
   // Save gems when they change
   useEffect(() => {
-    Cookies.set("Gems", gems, { expires: 999 });
+    if (userId != null) {
+      const userRef = doc(db, "users", userId);
+      updateDoc(userRef, { gems });
+      console.log("Gems updated", gems);
+    }
   }, [gems]);
 
   // Save inventory when it changes
   useEffect(() => {
-    saveInventory(characters);
+    if (userId != null) {
+      const userRef = doc(db, "users", userId);
+      updateDoc(userRef, { characters });
+      console.log("Characters updated", characters)
+    }
   }, [characters]);
 
   return { gems, setGems, characters, setCharacters };

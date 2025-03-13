@@ -35,7 +35,7 @@ const banners = {
       }
   
       // Deduct gems
-      setGems(gems - cost);
+      setGems((prevGems) => prevGems - cost);
   
       // Get banner pool
       const summonPool = banners[selectedBanner];
@@ -48,12 +48,10 @@ const banners = {
       }
   
       // Add new characters to inventory
-      setCharacters([...characters, ...newCharacters]);
+      setCharacters((prevCharacters) => [...prevCharacters, ...newCharacters]);
       
-      
-
       navigate("/results", { state: { amountSummoned: amount, summonedCharacters: newCharacters } });
-      window.location.reload();
+      
     };
   
     return (
