@@ -1,33 +1,44 @@
 import React from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import BackButton from "../components/BackButton";
+import "./Inventory.css";
+import characterList from "../data/characters";
 
 function Inventory() {
-  const { characters } = usePlayerData(); // ✅ Get inventory
+  const { characters } = usePlayerData();
 
-  // ✅ Count duplicate characters
-  const characterCount = characters.reduce((acc, char) => {
-    const key = `${char.name} (Power: ${char.power})`;
-    acc[key] = (acc[key] || 0) + 1;
+  // Dupes
+  const ownedCount = characters.reduce((acc, id) => {
+    acc[id] = (acc[id] || 0) + 1;
     return acc;
   }, {});
+
+  const ownedIds = new Set(characters);
+
+  const owned = characterList.filter((char) => ownedIds.has(char.id));
+  const unowned = characterList.filter((char) => !ownedIds.has(char.id));
+  const sortedList = [...owned, ...unowned];
 
   return (
     <div className="inventory-container">
       <BackButton />
-      <h1>📦 Your Inventory 📦</h1>
+      <h1 className = "inv-title">Characters</h1>
 
-      {characters.length > 0 ? (
-        <ul className="character-list">
-          {Object.entries(characterCount).map(([charName, count], index) => (
-            <li key={index} className="character-item">
-              <span>{charName} {count > 1 ? `x${count}` : ""}</span> {/* ✅ Show count */}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No characters in inventory. Try summoning!</p> // ✅ Prevents blank inventory
-      )}
+      <div className="character-grid">
+        {sortedList.map((char) => {
+          const count = ownedCount[char.id] || 0;
+          const isOwned = count > 0;
+
+          return (
+            <div key={char.id} className={`portrait ${isOwned ? "owned" : "unowned"}`}>
+              <img src={`./assets/characterPortraits/${char.id}.png`} alt={char.name} />
+              <span className="name">
+                {char.name} (Power: {char.power}) {count > 1 ? `x${count}` : ""}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

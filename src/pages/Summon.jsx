@@ -4,19 +4,19 @@ import BackButton from "../components/BackButton";
 import { useNavigate } from "react-router-dom";
 
 const banners = {
-    "Saiyan Warriors": [
-      { name: "Super Saiyan Goku", power: 9000 },
-      { name: "Vegeta", power: 8500 },
-      { name: "Broly", power: 9500 },
-      { name: "Raditz", power: 7000 },
-      { name: "Nappa", power: 7500 },
+    "Saiyan Day": [
+      { id: 1, name: "Super Saiyan Goku", power: 9000 },
+      { id: 2, name: "Super Vegeta", power: 8500 },
+      { id: 3, name: "Full Power SSJ Broly", power: 9500 },
+      { id: 4, name: "Super Vegito", power: 10500 },
+      { id: 5, name: "Super Gogeta", power: 10500 },
     ],
-    "Galactic Tyrants": [
-      { name: "Frieza", power: 9200 },
-      { name: "Cooler", power: 8800 },
-      { name: "Ginyu", power: 8200 },
-      { name: "Zarbon", power: 7800 },
-      { name: "Dodoria", power: 7600 },
+    "Daima": [
+      { id: 6, name: "Super Saiyan 4 Goku (Daima)", power: 11000 },
+      { id: 7, name: "Super Saiyan Goku (Daima)", power: 8000 },
+      { id: 8, name: "Super Saiyan 3 Vegeta (Daima)", power: 8400 },
+      { id: 9, name: "Glorio", power: 7800 },
+      { id: 10, name: "Goma", power: 10000 },
     ],
   };
 
@@ -48,7 +48,7 @@ const banners = {
       }
   
       // Add new characters to inventory
-      setCharacters((prevCharacters) => [...prevCharacters, ...newCharacters]);
+      setCharacters((prevCharacters) => [...prevCharacters, ...newCharacters.map(char => char.id)]);
       
       navigate("/results", { state: { amountSummoned: amount, summonedCharacters: newCharacters } });
       
