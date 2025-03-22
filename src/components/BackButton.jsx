@@ -14,7 +14,7 @@ function BackButton() {
   }
 
   return (
-    <button className="back-button" onClick={handleBack}>🔙 Back</button>
+    <button className="back-button" onClick={handleBack}>⬅️</button>
   );
 }
 

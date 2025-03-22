@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Hub.css";
 
@@ -6,14 +6,21 @@ function Hub() {
   const navigate = useNavigate();
   const audioRef = useRef(null);
 
+  const [selectedAudio, setSelectedAudio] = useState("");
+
+  useEffect(() => {
+    const randomTrack = Math.random() < 0.5 ? "hub1.mp3" : "hub2.mp3";
+    setSelectedAudio(`${import.meta.env.BASE_URL}assets/${randomTrack}`);
+  }, []);
+
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = 0.1;
       audioRef.current.play().catch((error) => {
-        console.warn("Blocked", error);
+        console.warn("Audio playback blocked:", error);
       });
     }
-  }, []);
+  }, [selectedAudio]);
 
   return (
     <div className = "hub-container">
@@ -29,9 +36,11 @@ function Hub() {
           <button onClick = {() => navigate("/dev")} className="dev-btn">Dev</button>
         </div>
 
-        <audio loop autoPlay>
-          <source src={`${import.meta.env.BASE_URL}assets/bgm.mp3`} type="audio/mp3" />
-        </audio>
+        {selectedAudio && (
+          <audio ref={audioRef} loop autoPlay>
+            <source src={selectedAudio} type="audio/mp3" />
+          </audio>
+        )}
 
 
       </div>

@@ -38,6 +38,11 @@ function Inventory() {
             </div>
           );
         })}
+
+        <audio loop autoPlay>
+          <source src={`${import.meta.env.BASE_URL}assets/inventory.mp3`} type="audio/mp3" />
+        </audio>
+
       </div>
     </div>
   );

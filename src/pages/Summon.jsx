@@ -69,6 +69,10 @@ const banners = {
         
         <button onClick={() => handleSummon(1)}>Single Summon (100 Gems)</button>
         <button onClick={() => handleSummon(10)}>Multi Summon (1000 Gems)</button>
+
+        <audio loop autoPlay>
+          <source src={`${import.meta.env.BASE_URL}assets/summon.mp3`} type="audio/mp3" />
+        </audio>
         
         
       </div>

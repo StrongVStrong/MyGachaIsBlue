@@ -20,9 +20,8 @@
   
   .portrait {
     text-align: center;
-    border: 2px solid #ccc;
+    border: 2px solid #ffffff;
     border-radius: 12px;
-    padding: 10px;
     transition: 0.3s;
     width: 150px;
     height: 200px;
@@ -30,12 +29,19 @@
   
   .portrait img {
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: cover;
     border-radius: 8px;
     filter: brightness(0.3);
   }
   
+  .portrait:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    border-width: 2px;
+  }
+
   .portrait.owned img {
     filter: brightness(1);
   }
