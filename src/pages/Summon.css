@@ -109,15 +109,16 @@
   
   .banner-overlay {
     position: absolute;
-    top: 90%;
+    top: 85%;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 2rem;
+    font-size: 4vw;
     font-weight: bold;
-    color: #ffe1e1;
+    color: #00c8ff;
     text-shadow: 2px 2px 8px #000;
     animation: pulse 1.5s infinite;
     z-index: 2;
+    text-align: center;
   }
 
   .banner-overlay2 {
@@ -125,7 +126,8 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 4rem;
+    font-size: 4vw;
+    text-align: center;
     font-weight: bold;
     color: #ffffff;
     text-shadow: 2px 2px 8px #000;
@@ -138,18 +140,22 @@
     position: absolute;
     top: 80%;
     left: 20%;
+    width: 28vw;
   }
 
   .multi-summon {
     position: absolute;
     top: 80%;
     right: 20%;
+    width: 28vw;
   }
 
   .head {
     position: absolute;
-    top:10%;
+    top:0;
     left: 50%;
+    font-size: 4vw !important;
+    text-align: center;
     transform: translateX(-50%);
   }
 
@@ -157,7 +163,7 @@
     display: flex;
     gap: 0.05em;
     font-weight: bold;
-    font-size: 2.5rem;
+    font-size: 2.5vw;
     color: #00f2ff;
     text-shadow: 0 0 4px #000;
     -webkit-text-stroke: 1.5px #000;
@@ -189,3 +195,17 @@
     }
   }
   
+
+  /* Smaller screens */
+@media screen and (max-width: 768px) {
+  .banner-overlay {
+      -webkit-text-stroke: none; 
+  }
+}
+
+/* Very small screens */
+@media screen and (max-width: 480px) {
+  .banner-overlay {
+      -webkit-text-stroke: none; 
+  }
+}

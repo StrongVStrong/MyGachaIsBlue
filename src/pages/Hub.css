@@ -36,18 +36,33 @@
     position: absolute;
     top: 90%;
     left: 20%;
+    height: 8vh;
+    width: 13vw;
+    font-size: 2vw;
+    line-height: 1vh;
+    border-radius: 15px;
 }
 
 .battle-btn {
     position: absolute;
     top: 90%;
-    left: 90%;
+    left: 85%;
+    height: 8vh;
+    width: 13vw;
+    font-size: 2vw;
+    line-height: 1vh;
+    border-radius: 15px;
 }
 
 .inventory-btn {
     position: absolute;
     top: 90%;
     right: 85%;
+    height: 8vh;
+    width: 13vw;
+    font-size: 2vw;
+    line-height: 1vh;
+    border-radius: 15px;
 }
 
 .dev-btn {
@@ -55,3 +70,75 @@
     bottom: 95%;
     left: 95%;
 }
+
+.hub-title {
+    font-size: 8rem;
+    opacity: 0;
+    transform: scale(0);
+    animation: popUp 1s ease-out forwards, slideUp 0.5s ease-out 1s forwards; 
+    -webkit-text-stroke: 3.5px black;
+    letter-spacing: -0.04em;
+  }
+  
+  .animated-word {
+    opacity: 0;
+    transform: scale(0);
+    animation: popUpWord 1s ease-out forwards, slideUpWord 0.5s ease-out 1s forwards;
+  }
+  
+  @keyframes popUp {
+    0% {
+      opacity: 0;
+      transform: scale(0);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(1); 
+      color: white;
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1.1); 
+      color: rgb(255, 255, 255); 
+    }
+  }
+  
+  @keyframes slideUp {
+    0% {
+      opacity: 1;
+      transform: scale(1.1); 
+      color: rgb(255, 255, 255); 
+    }
+    100% {
+      opacity: 0;
+      transform: scale(20); 
+      color: rgb(255, 255, 255); 
+    }
+  }
+  
+  @keyframes popUpWord {
+    0% {
+      opacity: 0.5;
+      transform: scale(0);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+      color: rgb(255, 255, 255);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1.1);
+      color: rgb(0, 217, 255);
+    }
+  }
+  
+  @keyframes slideUpWord {
+    0% {
+      transform: translateY(20px);
+    }
+    100% {
+      transform: translateY(-1000px);
+    }
+  }
+  

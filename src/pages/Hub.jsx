@@ -27,7 +27,7 @@ function Hub() {
       <div className ="hub-bg"></div>
 
       <div className="hub-content">
-        <h1 className="hub-title">My Gacha is Blue</h1>
+        <h1 className="hub-title">My Gacha is <span className="animated-word">Blue</span></h1>
         <p className="hub-subtitle"></p>
         <div className = "hub-btns">
           <button onClick = {() => navigate("/summon")} className="summon-btn">Summon</button>

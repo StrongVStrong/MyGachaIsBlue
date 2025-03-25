@@ -1,6 +1,7 @@
 import React from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import { Outlet } from "react-router-dom";
+import "./Layout.css";
 
 function Layout() {
   const { gems } = usePlayerData(); // Get gems
