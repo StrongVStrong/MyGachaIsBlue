@@ -1,0 +1,138 @@
+.results-container {
+    padding: 2rem;
+    text-align: center;
+    color: #fff;
+    position: relative;
+  }
+  
+  .results-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .results-grid {
+    display: grid;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  
+  .results-grid.multi {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .results-grid.single {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .results-portrait {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  }
+  
+  .portrait-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+  
+  .char-name {
+    font-weight: bold;
+    margin-top: 0.5rem;
+  }
+  
+  .char-power {
+    font-size: 0.9rem;
+    color: #ccc;
+  }
+  
+  .return-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: #222;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .return-button:hover {
+    background-color: #444;
+  }
+  
+  .results-portrait {
+    padding: 1rem;
+    background: #222;
+    border-radius: 0.75rem;
+    text-align: center;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .portrait-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 0.5rem;
+    object-fit: cover;
+  }
+  
+  
+  @keyframes legendaryGlow {
+    0% {
+      box-shadow: 0 0 10px #ff2d2d;
+      opacity: 1;
+    }
+    50% {
+      box-shadow: 0 0 20px #ff2d2d, 0 0 40px #ff2d2d;
+      opacity: 1;
+    }
+    100% {
+      box-shadow: 0 0 10px #ff2d2d;
+      opacity: 1;
+    }
+  }
+  
+  
+  .rarity-common {
+    border: 2px solid #3498db; /* Blue */
+    box-shadow: 0 0 10px #3498db;
+    background-color: rgba(52, 152, 219, 0.08);
+  }
+  
+  .rarity-rare {
+    border: 2px solid #9b59b6; /* Purple */
+    box-shadow: 0 0 12px #9b59b6;
+    background-color: rgba(155, 89, 182, 0.08);
+  }
+  
+  .rarity-ultra {
+    border: 3px solid gold;
+    box-shadow: 0 0 15px gold;
+    background-color: rgba(255, 215, 0, 0.08);
+  }
+  
+  .rarity-legendary {
+    border: 3px solid #8b0000;
+    animation: legendaryGlow 1s infinite ease-in-out;
+    background-color: rgba(139, 0, 0, 0.08);
+  }
+  
+.type-fire {
+    border: 3px solid #d11500;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+  }
+  
+  .type-water {
+    border: 3px solid #003cff;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+  }
+  
+  .type-grass {
+    border: 3px solid #098b3f;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+  }
+  

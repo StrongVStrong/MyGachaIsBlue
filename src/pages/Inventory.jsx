@@ -30,11 +30,8 @@ function Inventory() {
           const isOwned = count > 0;
 
           return (
-            <div key={char.id} className={`portrait ${isOwned ? "owned" : "unowned"}`}>
+            <div key={char.id} className={`portrait ${isOwned ? "owned" : "unowned"} type-${char.type}`}>
               <img src={`./assets/characterPortraits/${char.id}.png`} alt={char.name} />
-              <span className="name">
-                {char.name} (Power: {char.power}) {count > 1 ? `x${count}` : ""}
-              </span>
             </div>
           );
         })}
