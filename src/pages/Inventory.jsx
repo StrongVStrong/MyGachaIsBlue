@@ -21,6 +21,7 @@ function Inventory() {
 
   return (
     <div className="inventory-container">
+      <title>Inventory</title>
       <BackButton />
       <h1 className = "inv-title">Characters</h1>
 

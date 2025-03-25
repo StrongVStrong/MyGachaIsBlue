@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { auth, signIn, db } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -35,10 +36,11 @@ function Login() {
 
   return (
     <div className="login-container">
-      <h1>Login</h1>
+      <div className="login-bg"></div>
+      <h1 className = "login-text">Welcome to the Greatest Gacha</h1>
       <button onClick={signIn} className="login-btn">Sign in with Google</button>
     </div>
   );
 }
 
-export default Login; // ✅ Ensure Login component is exported
+export default Login;

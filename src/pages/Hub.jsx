@@ -24,6 +24,8 @@ function Hub() {
 
   return (
     <div className = "hub-container">
+      <title>My Gacha is Blue</title>
+      <link rel="icon" href="./assets/icons/default.ico" />
       <div className ="hub-bg"></div>
 
       <div className="hub-content">

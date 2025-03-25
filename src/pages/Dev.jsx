@@ -16,6 +16,7 @@ function Dev() {
   return (
     
     <div className="dev-container">
+      <title>Get out</title>
         <BackButton /> {/*Back button*/}
       <h1>Admin Dev Panel</h1>
       <p>💎 Current Gems: {gems}</p>

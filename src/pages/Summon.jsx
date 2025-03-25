@@ -12,6 +12,8 @@ const banners = {
       { id: 3, name: "Full Power SSJ Broly" },
       { id: 4, name: "Super Vegito" },
       { id: 5, name: "Super Gogeta" },
+      { id: 11, name: "UI Goku" },
+      { id: 12, name: "SSJ4 Goku" },
     ],
     "Daima": [
       { id: 6, name: "Super Saiyan 4 Goku (Daima)" },
@@ -19,6 +21,8 @@ const banners = {
       { id: 8, name: "Super Saiyan 3 Vegeta (Daima)" },
       { id: 9, name: "Glorio" },
       { id: 10, name: "Goma" },
+      { id: 11, name: "UI Goku" },
+      { id: 12, name: "SSJ4 Goku" },
     ],
   };
 
@@ -36,7 +40,8 @@ const banners = {
     common: 0.5,
     rare: 0.3,
     ultra: 0.15,
-    legendary: 0.05,
+    legendary: 0.045,
+    godly: 0.005,
   };
 
   const renderGlowingText = (text) =>
@@ -108,6 +113,7 @@ const banners = {
   
     return (
       <div className="summon-container">
+        <title>Summon</title>
         <BackButton /> {/*Back button*/}
         <h1 className = "head">Summon Characters</h1>
         
