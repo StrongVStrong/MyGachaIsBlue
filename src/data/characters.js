@@ -7,7 +7,7 @@ const characters = [
     { "id": 6, "name": "Super Saiyan 4 Goku (Daima)", "power": 11000, "rarity": "legendary", "type": "fire" },
     { "id": 7, "name": "Super Saiyan Goku (Daima)", "power": 8000, "rarity": "common", "type": "grass" },
     { "id": 8, "name": "Super Saiyan 3 Vegeta (Daima)", "power": 8400, "rarity": "rare", "type": "fire" },
-    { "id": 9, "name": "Glorio", "power": 7800, "rarity": "common", "type": "grass" },
+    { "id": 9, "name": "Glorio", "power": 7800, "rarity": "common", "type": "water" },
     { "id": 10, "name": "Goma", "power": 10000, "rarity": "ultra", "type": "water" }
 ];
 
