@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import BackButton from "../components/BackButton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import characterList from "../data/characters";
 import "./Summon.css";
 
@@ -51,13 +51,25 @@ const banners = {
 
   function Summon() {
     const { gems, setGems, characters, setCharacters } = usePlayerData();
+    const location = useLocation();
     const bannerNames = Object.keys(banners);
-    const [bannerIndex, setBannerIndex] = useState(0);
+
+    const startingBanner = location.state?.selectedBanner;
+    const defaultIndex = startingBanner && bannerNames.includes(startingBanner)
+      ? bannerNames.indexOf(startingBanner)
+      : 0;
+
+    const [bannerIndex, setBannerIndex] = useState(defaultIndex);
+
     const selectedBanner = bannerNames[bannerIndex];
     const bannerImages = {
       "Saiyan Day": "./assets/banners/saiyanday.jpg",
       "Daima": "./assets/banners/daima.jpg"
     }
+
+    const resummon = location.state?.resummon;
+    const resummonAmount = location.state?.amountSummoned;
+
     const navigate = useNavigate();
     const singleCost = 100;
     const multiCost = 1000;
@@ -106,10 +118,23 @@ const banners = {
       // Add new characters to inventory
       setCharacters((prev) => [...prev, ...newCharacters.map((char) => char.id)]);
       navigate("/results", {
-        state: { amountSummoned: amount, summonedCharacters: newCharacters.map((char) => char.id) },
+        state: { amountSummoned: amount, summonedCharacters: newCharacters.map((char) => char.id), selectedBanner },
       });
+
+      
       
     };
+
+    useEffect(() => {
+      if (resummon && resummonAmount && gems >= (resummonAmount === 1 ? 100 : 1000)) {
+        const timeout = setTimeout(() => {
+          handleSummon(resummonAmount);
+        }, 1);
+    
+        return () => clearTimeout(timeout);
+      }
+    }, [resummon, resummonAmount, gems]);
+    
   
     return (
       <div className="summon-container">

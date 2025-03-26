@@ -11,6 +11,8 @@ const characters = [
     { "id": 10, "name": "Goma", "power": 10000, "rarity": "ultra", "type": "water" },
     { "id": 11, "name": "Ultra Instinct Goku", "power": 15000, "rarity": "godly", "type": "water"},
     { "id": 12, "name": "Super Saiyan 4 Goku (GT)", "power": 15000, "rarity": "godly", "type": "grass"},
+    { "id": 13, "name": "Super Saiyan 3 Goku", "power": 9500, "rarity": "legendary", "type": "fire"},
+    { "id": 14, "name": "Super Saiyan Blue Goku", "power": 12000, "rarity": "legendary", "type": "water"},
 ];
 
 

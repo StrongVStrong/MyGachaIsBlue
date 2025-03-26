@@ -158,3 +158,22 @@
     box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
   }
   
+  @media (max-width: 768px) {
+    .portrait-image {
+      width: 60px;
+      height: 60px;
+    }
+  
+    .results-portrait {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+  
+    .char-name {
+      font-size: 0.8rem;
+    }
+  
+    .char-power {
+      font-size: 0.7rem;
+    }
+  }

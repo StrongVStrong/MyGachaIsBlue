@@ -8,6 +8,7 @@ import Inventory from "./pages/Inventory";
 import Dev from "./pages/Dev";
 import Results from "./pages/SummonResults";
 import Login from "./pages/Login";
+import UserProfile from "./pages/UserProfile"
 import PrivateRoute from "./components/PrivateRoute";
 
 
@@ -27,6 +28,7 @@ function App() {
             <Route path="/summon" element={<PrivateRoute><Summon /></PrivateRoute>} />
             <Route path="/results" element={<PrivateRoute><Results /></PrivateRoute>} />
             <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
+            <Route path="/userprofile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
           </Route>
           <Route path="/battle" element={<PrivateRoute><Battle /></PrivateRoute>} />
           <Route path="/dev" element={<PrivateRoute><Dev /></PrivateRoute>} />

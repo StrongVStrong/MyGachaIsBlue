@@ -2,15 +2,17 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SummonResults.css";
 import characterList from "../data/characters";
+import { usePlayerData } from "../hooks/usePlayerData";
 
 function Results() {
+  const { gems } = usePlayerData();
   const navigate = useNavigate();
   const location = useLocation();
-  const { summonedCharacters = [] } = location.state || {};
+  const { summonedCharacters = [], selectedBanner, amountSummoned } = location.state || {};
 
   const isMulti = summonedCharacters.length > 1;
 
-  // Create a lookup map from characterList
+  // Lookup map from characterList
   const characterMap = characterList.reduce((acc, char) => {
     acc[char.id] = char;
     return acc;
@@ -44,8 +46,30 @@ function Results() {
         <p className="no-summons">No summons found. Try summoning again!</p>
       )}
 
-      <button className="return-button" onClick={() => navigate("/summon")}>
+      <button className="return-button" onClick={() => navigate("/summon", { state: { selectedBanner }})}>
         Return to Summon
+      </button>
+
+      <button
+        className="summon-again-button"
+        onClick={() => {
+
+          const cost = amountSummoned === 1 ? 100 : 1000;
+          if (gems < cost) {
+            alert("Not enough gems to summon again!");
+            return;
+          }
+
+          navigate("/summon", {
+            state: {
+              selectedBanner,
+              amountSummoned,
+              resummon: true
+            },
+          });
+        }}
+      >
+        Summon Again ({amountSummoned === 10 ? "1000" : "100"} Gems)
       </button>
 
       <audio loop autoPlay>
