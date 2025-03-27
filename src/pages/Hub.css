@@ -68,13 +68,6 @@
     white-space: nowrap;
 }
 
-.dev-btn {
-    position: absolute;
-    top:20%;
-    left: 80%;
-    font-size: 1vw;
-}
-
 .hub-title {
     font-size: 8rem;
     opacity: 0;
@@ -170,7 +163,7 @@
   /* Matches summon button scaling */
   .exp-bar {
     position: absolute;
-    top: 20%;
+    top: 10%;
     left: 1%;
     height: 8vh;
     width: 25vw;
@@ -250,6 +243,54 @@
     user-select: none;
     white-space: nowrap;
   }
+
+  .settings-btn {
+    position: absolute;
+    right:0%;
+    width: 1vw;
+    height: 6vh;
+    display:flex;
+    font-size: 2vw;
+    line-height: 1vh;
+    border-radius: 15px;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .dev-btn {
+    position: absolute;
+    right: 19%;
+    width: auto;
+    height: 6vh;
+    padding: 0.5vw 1vw;
+    display: flex;
+    font-size: 1vw;
+    line-height: 1vh;
+    border-radius: 15px;
+    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+}
+
+  /* Gems UI at the top-right corner */
+  .gems-head {
+    position: absolute;
+    right: 6%;
+    height: 6.5vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 0.5vw 1vw;
+    border-radius: 15px;
+    line-height: 2vh;
+    width: 10vw;
+    font-size: .8vw;
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   
   @media (max-width: 700px) {
     /* Left side */
@@ -286,6 +327,5 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 0vw;
-    
   }
   }

@@ -5,7 +5,7 @@ import "./Hub.css";
 
 function Hub() {
   const navigate = useNavigate();
-  const { level, playerExp, progressPercent, expToNextLevel, expForNextLevel, displayName } = usePlayerData();
+  const { level, playerExp, progressPercent, expToNextLevel, expForNextLevel, displayName, gems } = usePlayerData();
   const audioRef = useRef(null);
 
   const [selectedAudio, setSelectedAudio] = useState("");
@@ -23,6 +23,7 @@ function Hub() {
       });
     }
   }, [selectedAudio]);
+  
 
   return (
     <div className = "hub-container">
@@ -41,7 +42,11 @@ function Hub() {
           </div>
         </div>
         <div className = "hub-bar-top">
+          <div className="gems-head">
+            <h2 className="gems">💎 Gems: {gems}</h2> {/* Gems visible */}
+          </div>
           <button onClick = {() => navigate("/dev")} className="dev-btn">Dev</button>
+          <button onClick = {() => navigate("/settings")} className="settings-btn">⚙️</button>
 
           <div 
           className="exp-bar"

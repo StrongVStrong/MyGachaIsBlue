@@ -24,12 +24,13 @@ function App() {
 
           {/* Protected Routes */}
           <Route element={<Layout />}>
-            <Route path="/" element={<PrivateRoute><Hub /></PrivateRoute>} />
+            
             <Route path="/summon" element={<PrivateRoute><Summon /></PrivateRoute>} />
             <Route path="/results" element={<PrivateRoute><Results /></PrivateRoute>} />
             <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
             <Route path="/userprofile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
           </Route>
+          <Route path="/" element={<PrivateRoute><Hub /></PrivateRoute>} />
           <Route path="/battle" element={<PrivateRoute><Battle /></PrivateRoute>} />
           <Route path="/dev" element={<PrivateRoute><Dev /></PrivateRoute>} />
 
