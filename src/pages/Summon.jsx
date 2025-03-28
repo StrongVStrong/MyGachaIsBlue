@@ -6,42 +6,107 @@ import characterList from "../data/characters";
 import "./Summon.css";
 
 const banners = {
-    "Saiyan Day": [
+  "Saiyan Day": {
+    type: "Limited",
+    characters: [
       { id: 1, name: "Super Saiyan Goku" },
       { id: 2, name: "Super Vegeta" },
       { id: 3, name: "Full Power SSJ Broly" },
       { id: 4, name: "Super Vegito" },
       { id: 5, name: "Super Gogeta" },
       { id: 11, name: "UI Goku" },
-      { id: 12, name: "SSJ4 Goku" },
     ],
-    "Daima": [
+  },
+  "Daima": {
+    type: "Limited",
+    characters: [
       { id: 6, name: "Super Saiyan 4 Goku (Daima)" },
       { id: 7, name: "Super Saiyan Goku (Daima)" },
       { id: 8, name: "Super Saiyan 3 Vegeta (Daima)" },
       { id: 9, name: "Glorio" },
       { id: 10, name: "Goma" },
-      { id: 11, name: "UI Goku" },
       { id: 12, name: "SSJ4 Goku" },
     ],
-  };
+  },
+  "Dragon Ball Super": {
+    type: "Limited",
+    characters: [
+      { id: 1, name: "Super Saiyan Goku" },
+      { id: 2, name: "Super Vegeta" },
+      { id: 13, name: "Super Saiyan 3 Goku" },
+      { id: 14, name: "Super Saiyan Blue Goku" },
+      { id: 15, name: "Super Saiyan Blue Kaioken Goku" },
+      { id: 16, name: "Vegito Blue" },
+      { id: 17, name: "Gogeta Blue" },
+      { id: 11, name: "UI Goku" },
+    ],
+  },
+  "Hunter X Hunter": {
+    type: "Limited",
+    characters: [
+      { id: 1, name: "Super Saiyan Goku" },
+      { id: 3, name: "Full Power SSJ Broly" },
+      { id: 18, name: "Kurapika" },
+      { id: 19, name: "Killua" },
+      { id: 20, name: "Gon" },
+      { id: 21, name: "Leoreo" },
+    ],
+  },
+  "Other": {
+    type: "2x",
+    characters: [
+      { id: 22, name: "Jotaro" },
+      { id: 23, name: "Dio" },
+      { id: 24, name: "Giorno" },
+      { id: 25, name: "Isagi" },
+      { id: 26, name: "Rafal" },
+      { id: 27, name: "Sung Jin Woo" },
+      { id: 28, name: "Lelouch" },
+      { id: 29, name: "Ash" },
+      { id: 30, name: "Gary" },
+    ],
+  },
+};
+
 
   const bannerLabel = {
     "Saiyan Day": "Saiyan Day",
     "Daima": "Daima",
+    "Dragon Ball Super": "DB Super",
+    "Hunter X Hunter": "Hunters",
+    "Other": "Other",
   };
 
   const bannerLabels = {
     "Saiyan Day": "Limited!",
     "Daima": "Limited!",
+    "Dragon Ball Super": "Limited!",
+    "Hunter X Hunter": "Limited!",
+    "Other": "2x rates",
   };
-
+  
   const rarityRates = {
-    common: 0.5,
-    rare: 0.3,
-    ultra: 0.15,
-    legendary: 0.045,
-    godly: 0.005,
+    Default: {
+      common: 0.5,
+      rare: 0.3,
+      ultra: 0.15,
+      legendary: 0.045,
+      godly: 0.005,
+    },
+    Limited: {
+      common: 0.5,
+      rare: 0.3,
+      ultra: 0.15,
+      legendary: 0.045,
+      godly: 0.005,
+    },
+    "2x": {
+      common: 0.4,
+      rare: 0.3,
+      ultra: 0.2,
+      legendary: 0.09,
+      godly: 0.01,
+    },
   };
 
   const renderGlowingText = (text) =>
@@ -64,7 +129,10 @@ const banners = {
     const selectedBanner = bannerNames[bannerIndex];
     const bannerImages = {
       "Saiyan Day": "./assets/banners/saiyanday.jpg",
-      "Daima": "./assets/banners/daima.jpg"
+      "Daima": "./assets/banners/daima.jpg",
+      "Dragon Ball Super": "./assets/banners/dragonballsuper.gif",
+      "Hunter X Hunter": "./assets/banners/hxh.gif",
+      "Other": "./assets/banners/other.gif",
     }
 
     const resummon = location.state?.resummon;
@@ -74,7 +142,7 @@ const banners = {
     const singleCost = 100;
     const multiCost = 1000;
   
-    const buildWeightedPool = (ids) => {
+    const buildWeightedPool = (ids, bannerType) => {
       const pool = [];
       const filtered = characterList.filter((char) => ids.includes(char.id));
   
@@ -84,9 +152,11 @@ const banners = {
         acc[rarity].push(char);
         return acc;
       }, {});
+
+      const currentRates = rarityRates[bannerType] || rarityRates["Default"];
   
       for (const [rarity, chars] of Object.entries(grouped)) {
-        const rate = rarityRates[rarity] || 0;
+        const rate = currentRates[rarity] || 0;
         const perCharRate = rate / chars.length;
   
         for (const char of chars) {
@@ -106,8 +176,10 @@ const banners = {
       }
   
       setGems((prev) => prev - cost);
-      const bannerIds = banners[selectedBanner].map((char) => char.id);
-      const summonPool = buildWeightedPool(bannerIds);
+      const bannerData = banners[selectedBanner];
+      const bannerType = bannerData.type || "Default";
+      const bannerIds = bannerData.characters.map((char) => char.id);
+      const summonPool = buildWeightedPool(bannerIds, bannerType);
   
       const newCharacters = [];
       for (let i = 0; i < amount; i++) {
