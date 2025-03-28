@@ -10,7 +10,7 @@ function Dev() {
 
   const addGems = () => {
     if (!isNaN(amount) && amount.trim() !== "") {
-      setGems(gems + parseInt(amount, 10));
+      setGems((prev) => prev + parseInt(amount, 10));
       setAmount("");
     }
   };

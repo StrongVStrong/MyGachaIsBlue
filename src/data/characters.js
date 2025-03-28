@@ -19,16 +19,16 @@ const characters = [
     { "id": 18, "name": "Kurapika (Emperor's Time", "power": 13000, "rarity": "godly", "type": "fire"},
     { "id": 19, "name": "Killua (Godspeed)", "power": 12500, "rarity": "godly", "type": "water"},
     { "id": 20, "name": "Gon (All Out)", "power": 13500, "rarity": "godly", "type": "grass"},
-    { "id": 21, "name": "Leoreo", "power": 8000, "rarity": "common", "type": "water"},
+    { "id": 21, "name": "Leoreo (Serious)", "power": 8000, "rarity": "common", "type": "water"},
     { "id": 22, "name": "Jotaro (Star Platinum)", "power": 10000, "rarity": "ultra", "type": "fire"},
     { "id": 23, "name": "Dio (The World)", "power": 10000, "rarity": "legendary", "type": "grass"},
     { "id": 24, "name": "Giorno (GER)", "power": 15000, "rarity": "godly", "type": "water"},
-    { "id": 25, "name": "Isagi", "power": 8500, "rarity": "common", "type": "water"},
-    { "id": 26, "name": "Rafal", "power": 8000, "rarity": "common", "type": "fire"},
-    { "id": 27, "name": "Sung Jin Woo", "power": 9000, "rarity": "rare", "type": "water"},
+    { "id": 25, "name": "Isagi (Bloodlust)", "power": 8500, "rarity": "common", "type": "water"},
+    { "id": 26, "name": "Rafal (All-knowing)", "power": 8000, "rarity": "common", "type": "fire"},
+    { "id": 27, "name": "Sung Jin Woo (Farmer)", "power": 9000, "rarity": "rare", "type": "water"},
     { "id": 28, "name": "Lelouch (Full Geass)", "power": 12000, "rarity": "godly", "type": "grass"},
     { "id": 29, "name": "Ash Ketchum (Omnipotent)", "power": 15000, "rarity": "godly", "type": "water"},
-    { "id": 30, "name": "Gary Oak (Arceus)", "power": 14000, "rarity": "godly", "type": "fire"},
+    { "id": 30, "name": "Gary Oak (Arceus)", "power": 14000, "rarity": "godly", "type": "fire", },
 ];
 
 

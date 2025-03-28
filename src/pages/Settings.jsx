@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { auth } from "../firebase";
 import { useAudio } from "../context/AudioContext";
 import BackButton from "../components/BackButton";
 import { usePlayerData } from "../hooks/usePlayerData";
@@ -7,7 +8,7 @@ function Settings() {
   const { preferences, setPreferences } = usePlayerData();
   const { setVolume } = useAudio();
 
-  const [tempVolume, setTempVolume] = useState(preferences.volume ?? 0.5);
+  const [tempVolume, setTempVolume] = useState(null);
 
   useEffect(() => {
     if (preferences?.volume !== undefined) {
@@ -28,6 +29,14 @@ function Settings() {
     }));
   };
 
+  const handleLogout = () => {
+    auth.signOut();
+    localStorage.removeItem("guestMode");
+    localStorage.removeItem("guestData");
+    localStorage.removeItem("userData");
+    window.location.href = "/login";
+  };
+
   return (
     <div className="settings-page">
       <BackButton />
@@ -45,6 +54,10 @@ function Settings() {
         onMouseUp={commitVolume}
         onTouchEnd={commitVolume}
       />
+
+    <button onClick={handleLogout} className="logout-btn">
+    🔓 Log Out
+    </button>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SummonResults.css";
 import characterList from "../data/characters";
@@ -6,13 +6,20 @@ import { usePlayerData } from "../hooks/usePlayerData";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
 
 function Results() {
-  const { gems } = usePlayerData();
+  const { gems, isGuest } = usePlayerData();
   const navigate = useNavigate();
   const location = useLocation();
   const { summonedCharacters = [], selectedBanner, amountSummoned } = location.state || {};
   const audioRef = useRef(null);
   const OST = `${import.meta.env.BASE_URL}assets/results.mp3`;
   useSyncedAudio(audioRef, OST);
+
+  useEffect(() => {
+    if (isGuest && !sessionStorage.getItem("guestRefreshed")) {
+      sessionStorage.setItem("guestRefreshed", "true");
+      window.location.reload();
+    }
+  }, []);
 
   const isMulti = summonedCharacters.length > 1;
 
@@ -58,6 +65,7 @@ function Results() {
         className="summon-again-button"
         onClick={() => {
 
+          if (isGuest) sessionStorage.removeItem("guestRefreshed");
           const cost = amountSummoned === 1 ? 100 : 1000;
           if (gems < cost) {
             alert("Not enough gems to summon again!");

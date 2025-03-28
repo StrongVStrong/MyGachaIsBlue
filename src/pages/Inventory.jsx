@@ -1,23 +1,19 @@
 import React, {useEffect, useRef, useState } from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import BackButton from "../components/BackButton";
+import { useNavigate } from "react-router-dom";
 import "./Inventory.css";
 import characterList from "../data/characters";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
 
 function Inventory() {
+  const navigate = useNavigate();
   const { characters } = usePlayerData();
   const audioRef = useRef(null);
   const OST = `${import.meta.env.BASE_URL}assets/inventory.mp3`;
   useSyncedAudio(audioRef, OST);
 
-  // Dupes
-  const ownedCount = characters.reduce((acc, id) => {
-    acc[id] = (acc[id] || 0) + 1;
-    return acc;
-  }, {});
-
-  const ownedIds = new Set(characters);
+  const ownedIds = new Set(Object.keys(characters).map(Number));
 
   const owned = characterList.filter((char) => ownedIds.has(char.id));
   const unowned = characterList.filter((char) => !ownedIds.has(char.id));
@@ -31,12 +27,11 @@ function Inventory() {
 
       <div className="character-grid">
         {sortedList.map((char) => {
-          const count = ownedCount[char.id] || 0;
-          const isOwned = count > 0;
+          const isOwned = ownedIds.has(char.id);
 
           return (
             <div key={char.id} className={`portrait ${isOwned ? "owned" : "unowned"} type-${char.type}`}>
-              <img src={`./assets/characterPortraits/${char.id}.png`} alt={char.name} />
+              <img src={`./assets/characterPortraits/${char.id}.png`} alt={char.name} onClick={() => navigate(`/character/${char.id}`)}/>
             </div>
           );
         })}

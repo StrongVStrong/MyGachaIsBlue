@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Settings from "./pages/Settings"
 import UserProfile from "./pages/UserProfile"
 import PrivateRoute from "./components/PrivateRoute";
+import CharacterPage from "./pages/CharacterPage";
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
             <Route path="/userprofile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
           </Route>
           <Route path="/" element={<PrivateRoute><Hub /></PrivateRoute>} />
+          <Route path="/character/:id" element={<PrivateRoute><CharacterPage /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/battle" element={<PrivateRoute><Battle /></PrivateRoute>} />
           <Route path="/dev" element={<PrivateRoute><Dev /></PrivateRoute>} />

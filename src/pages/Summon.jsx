@@ -119,7 +119,7 @@ const banners = {
 
 
   function Summon() {
-    const { gems, setGems, characters, setCharacters } = usePlayerData();
+    const { gems, setGems, isGuest, addCharacter } = usePlayerData();
     const location = useLocation();
     const bannerNames = Object.keys(banners);
     const audioRef = useRef(null);
@@ -195,7 +195,7 @@ const banners = {
       }
   
       // Add new characters to inventory
-      setCharacters((prev) => [...prev, ...newCharacters.map((char) => char.id)]);
+      newCharacters.forEach((char) => addCharacter(char.id));
       navigate("/results", {
         state: { amountSummoned: amount, summonedCharacters: newCharacters.map((char) => char.id), selectedBanner },
       });
@@ -256,8 +256,26 @@ const banners = {
 
         </div>
         
-        <button className = "single-summon" onClick={() => handleSummon(1)}>Single Summon (100 Gems)</button>
-        <button className = "multi-summon" onClick={() => handleSummon(10)}>Multi Summon (1000 Gems)</button>
+        <button
+          className="single-summon"
+          onClick={() => {
+            if (isGuest) sessionStorage.removeItem("guestRefreshed");
+            handleSummon(1);
+          }}
+        >
+          Single Summon (100 Gems)
+        </button>
+
+        <button
+          className="multi-summon"
+          onClick={() => {
+            if (isGuest) sessionStorage.removeItem("guestRefreshed");
+            handleSummon(10);
+          }}
+        >
+          Multi Summon (1000 Gems)
+        </button>
+
 
         <audio ref={audioRef} loop autoPlay>
           <source src={OST} type="audio/mp3" />
