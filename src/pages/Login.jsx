@@ -32,6 +32,19 @@ function Login() {
     return () => unsubscribe();
   }, [navigate]);
 
+  const handleGuestMode = () => {
+    localStorage.setItem("guestMode", "true");
+    localStorage.setItem("guestData", JSON.stringify({
+      gems: 500,
+      characters: [],
+      exp: 0,
+      displayName: "Guest",
+      preferences: { volume: 0.5 }
+    }));
+
+    navigate("/");
+  };
+
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -39,6 +52,9 @@ function Login() {
       <div className="login-bg"></div>
       <h1 className = "login-text">Welcome to the Greatest Gacha</h1>
       <button onClick={signIn} className="login-btn">Sign in with Google</button>
+      <button onClick={handleGuestMode} className="guest-btn">
+        Continue as Guest
+      </button>
     </div>
   );
 }

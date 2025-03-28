@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SummonResults.css";
 import characterList from "../data/characters";
 import { usePlayerData } from "../hooks/usePlayerData";
+import { useSyncedAudio } from "../hooks/useSyncedAudio";
 
 function Results() {
   const { gems } = usePlayerData();
   const navigate = useNavigate();
   const location = useLocation();
   const { summonedCharacters = [], selectedBanner, amountSummoned } = location.state || {};
+  const audioRef = useRef(null);
+  const OST = `${import.meta.env.BASE_URL}assets/results.mp3`;
+  useSyncedAudio(audioRef, OST);
 
   const isMulti = summonedCharacters.length > 1;
 
@@ -72,11 +76,8 @@ function Results() {
         Summon Again ({amountSummoned === 10 ? "1000" : "100"} Gems)
       </button>
 
-      <audio loop autoPlay>
-        <source
-          src={`${import.meta.env.BASE_URL}assets/results.mp3` } 
-          type="audio/mp3"
-        />
+      <audio ref={audioRef} loop autoPlay>
+        <source src={OST} type="audio/mp3" />
       </audio>
     </div>
   );

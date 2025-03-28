@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePlayerData } from "../hooks/usePlayerData";
 import "./Hub.css";
+import { useSyncedAudio } from "../hooks/useSyncedAudio";
 
 function Hub() {
   const navigate = useNavigate();
@@ -15,14 +16,7 @@ function Hub() {
     setSelectedAudio(`${import.meta.env.BASE_URL}assets/${randomTrack}`);
   }, []);
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.1;
-      audioRef.current.play().catch((error) => {
-        console.warn("Audio playback blocked:", error);
-      });
-    }
-  }, [selectedAudio]);
+  useSyncedAudio(audioRef, selectedAudio);
   
 
   return (

@@ -8,6 +8,7 @@ import Inventory from "./pages/Inventory";
 import Dev from "./pages/Dev";
 import Results from "./pages/SummonResults";
 import Login from "./pages/Login";
+import Settings from "./pages/Settings"
 import UserProfile from "./pages/UserProfile"
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -31,6 +32,7 @@ function App() {
             <Route path="/userprofile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
           </Route>
           <Route path="/" element={<PrivateRoute><Hub /></PrivateRoute>} />
+          <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/battle" element={<PrivateRoute><Battle /></PrivateRoute>} />
           <Route path="/dev" element={<PrivateRoute><Dev /></PrivateRoute>} />
 

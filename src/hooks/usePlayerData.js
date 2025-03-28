@@ -3,7 +3,10 @@ import { auth, db } from "../firebase";
 import { doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
-
+function saveToGuest(key, value) {
+  const current = JSON.parse(localStorage.getItem("guestData")) || {};
+  localStorage.setItem("guestData", JSON.stringify({ ...current, [key]: value }));
+}
 
 export function usePlayerData() {
 
@@ -12,10 +15,25 @@ export function usePlayerData() {
   const [userId, setUserId] = useState(null);
   const [playerExp, setPlayerExp] = useState(0);
   const [displayName, setDisplayName] = useState("Player");
+  const [preferences, setPreferences] = useState({
+    volume: 0.5
+  });
 
+  const isGuest = localStorage.getItem("guestMode") === "true";
 
   //Load Firestore data
   useEffect(() => {
+
+    if (isGuest) {
+      const guestData = JSON.parse(localStorage.getItem("guestData")) || {};
+      setGems(guestData.gems ?? 500);
+      setCharacters(guestData.characters ?? []);
+      setPlayerExp(guestData.exp ?? 0);
+      setDisplayName(guestData.displayName ?? "Guest");
+      setPreferences(guestData.preferences ?? { volume: 0.5 });
+      return;
+    }
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
@@ -29,7 +47,10 @@ export function usePlayerData() {
             setCharacters(userData.characters || []);
             setPlayerExp(userData.exp || 0);
             setDisplayName(userData.displayName || "Player");
-            console.log("Firestore Update:", userData);
+            const prefs = userData.preferences || {};
+            setPreferences({
+              volume: prefs.volume ?? 0.5
+            });
           }
         });
 
@@ -43,6 +64,11 @@ export function usePlayerData() {
 
   // Save gems when they change
   useEffect(() => {
+    if (isGuest) {
+      saveToGuest("gems", gems)
+      return;
+    }
+
     if (userId != null) {
       const userRef = doc(db, "users", userId);
       updateDoc(userRef, { gems });
@@ -52,6 +78,11 @@ export function usePlayerData() {
 
   // Save inventory when it changes
   useEffect(() => {
+    if (isGuest) {
+      saveToGuest("inventory", characters);
+      return;
+    }
+
     if (userId != null) {
       const userRef = doc(db, "users", userId);
       updateDoc(userRef, { characters });
@@ -86,12 +117,31 @@ export function usePlayerData() {
 
   // Save player exp when it changes
   useEffect(() => {
+    if (isGuest) {
+      saveToGuest("exp", playerExp);
+      return;
+    }
+
     if (userId != null) {
       const userRef = doc(db, "users", userId);
       updateDoc(userRef, { exp: playerExp });
       console.log("EXP updated", playerExp);
     }
   }, [playerExp]);
+
+  // Save player preferences
+  useEffect(() => {
+    if (isGuest) {
+      saveToGuest("preferences", preferences);
+      return;
+    }
+
+    if (userId != null) {
+      const userRef = doc(db, "users", userId);
+      updateDoc(userRef, { preferences });
+      console.log("Preferences updated", preferences);
+    }
+  }, [preferences]);
   
 
   return { 
@@ -105,6 +155,9 @@ export function usePlayerData() {
   expToNextLevel: levelStats.expToNextLevel,
   expForNextLevel: levelStats.expForNextLevel,
   progressPercent: levelStats.progressPercent,
-  displayName
+  displayName,
+  preferences,
+  setPreferences,
+  isGuest
  };
 }

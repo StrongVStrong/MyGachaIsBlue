@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import BackButton from "../components/BackButton";
 import { useNavigate, useLocation } from "react-router-dom";
 import characterList from "../data/characters";
+import { useSyncedAudio } from "../hooks/useSyncedAudio";
 import "./Summon.css";
 
 const banners = {
@@ -114,10 +115,16 @@ const banners = {
       <span key={i}>{char}</span>
   ));
 
+  
+
+
   function Summon() {
     const { gems, setGems, characters, setCharacters } = usePlayerData();
     const location = useLocation();
     const bannerNames = Object.keys(banners);
+    const audioRef = useRef(null);
+    const OST = `${import.meta.env.BASE_URL}assets/summon.mp3`;
+    useSyncedAudio(audioRef, OST);
 
     const startingBanner = location.state?.selectedBanner;
     const defaultIndex = startingBanner && bannerNames.includes(startingBanner)
@@ -252,8 +259,8 @@ const banners = {
         <button className = "single-summon" onClick={() => handleSummon(1)}>Single Summon (100 Gems)</button>
         <button className = "multi-summon" onClick={() => handleSummon(10)}>Multi Summon (1000 Gems)</button>
 
-        <audio loop autoPlay>
-          <source src={`${import.meta.env.BASE_URL}assets/summon.mp3`} type="audio/mp3" />
+        <audio ref={audioRef} loop autoPlay>
+          <source src={OST} type="audio/mp3" />
         </audio>
         
         

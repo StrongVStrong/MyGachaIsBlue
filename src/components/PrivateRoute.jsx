@@ -7,6 +7,7 @@ import { doc, getDoc } from "firebase/firestore";
 const PrivateRoute = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isGuest = localStorage.getItem("guestMode") === "true";
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -40,7 +41,7 @@ const PrivateRoute = ({ children }) => {
 
   if (loading) return <div>Loading...</div>;
 
-  return userData ? children : <Navigate to="/login" />;
+  return (userData || isGuest) ? children : <Navigate to="/login" />;
 };
 
 export default PrivateRoute;

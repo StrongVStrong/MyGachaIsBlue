@@ -9,7 +9,19 @@
 
 .login-btn {
     position: absolute;
-    top: 70%;
+    top: 65%;
+    left: 50%;
+    font-size: 2vw;
+    min-height: 10vh;
+    height: auto;
+    min-width: 20vw;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.guest-btn {
+    position: absolute;
+    top: 80%;
     left: 50%;
     font-size: 2vw;
     min-height: 10vh;
