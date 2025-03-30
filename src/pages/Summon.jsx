@@ -4,6 +4,7 @@ import BackButton from "../components/BackButton";
 import { useNavigate, useLocation } from "react-router-dom";
 import characterList from "../data/characters";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
+import { useClickSFX } from "../hooks/useClickSFX";
 import "./Summon.css";
 
 const banners = {
@@ -117,14 +118,15 @@ const banners = {
 
   
 
-
   function Summon() {
+    const playClick = useClickSFX();
     const { gems, setGems, isGuest, addCharacter } = usePlayerData();
     const location = useLocation();
     const bannerNames = Object.keys(banners);
     const audioRef = useRef(null);
     const OST = `${import.meta.env.BASE_URL}assets/summon.mp3`;
     useSyncedAudio(audioRef, OST);
+    const failSFX = new Audio("./assets/sfx/failure.mp3");
 
     const startingBanner = location.state?.selectedBanner;
     const defaultIndex = startingBanner && bannerNames.includes(startingBanner)
@@ -178,10 +180,12 @@ const banners = {
     const handleSummon = (amount) => {
       const cost = amount === 1 ? singleCost : multiCost;
       if (gems < cost) {
+        failSFX.volume = 1;
+        failSFX.play();
         alert("Not enough gems to summon!");
         return;
       }
-  
+      
       setGems((prev) => prev - cost);
       const bannerData = banners[selectedBanner];
       const bannerType = bannerData.type || "Default";
@@ -228,7 +232,7 @@ const banners = {
 
             <button
             className = "banner-arrow left"
-            onClick={() => setBannerIndex((i) => i - 1)}
+            onClick={() => {playClick(); setBannerIndex((i) => i - 1);}}
             disabled = {bannerIndex === 0 }
             > ← </button>
 
@@ -246,7 +250,7 @@ const banners = {
 
             <button
             className = "banner-arrow right"
-            onClick={() => setBannerIndex((i) => i + 1)}
+            onClick={() => {playClick(); setBannerIndex((i) => i + 1);}}
             disabled={bannerIndex === bannerNames.length - 1}
             > → </button>
 
@@ -259,6 +263,7 @@ const banners = {
         <button
           className="single-summon"
           onClick={() => {
+            playClick();
             if (isGuest) sessionStorage.removeItem("guestRefreshed");
             handleSummon(1);
           }}
@@ -269,6 +274,7 @@ const banners = {
         <button
           className="multi-summon"
           onClick={() => {
+            playClick();
             if (isGuest) sessionStorage.removeItem("guestRefreshed");
             handleSummon(10);
           }}

@@ -1,5 +1,5 @@
 const characters = [
-    { "id": 1, "name": "Super Saiyan Goku", "power": 9000, "rarity": "rare", "type": "grass" },
+    { "id": 1, "name": "Super Saiyan Goku", "power": 9000, "rarity": "rare", "type": "grass", music: "./assets/OSTs/1.mp3" },
     { "id": 2, "name": "Super Vegeta", "power": 8500, "rarity": "common", "type": "water" },
     { "id": 3, "name": "Full Power SSJ Broly", "power": 9500, "rarity": "ultra", "type": "grass" },
     { "id": 4, "name": "Super Vegito", "power": 10500, "rarity": "legendary", "type": "grass" },
@@ -16,7 +16,7 @@ const characters = [
     { "id": 15, "name": "Super Saiyan Blue Goku (Kaioken x10)", "power": 15000, "rarity": "godly", "type": "fire"},
     { "id": 16, "name": "Vegito Blue", "power": 13500, "rarity": "legendary", "type": "water"},
     { "id": 17, "name": "Gogeta Blue", "power": 13500, "rarity": "legendary", "type": "grass"},
-    { "id": 18, "name": "Kurapika (Emperor's Time", "power": 13000, "rarity": "godly", "type": "fire"},
+    { "id": 18, "name": "Kurapika (Emperor's Time)", "power": 13000, "rarity": "godly", "type": "fire"},
     { "id": 19, "name": "Killua (Godspeed)", "power": 12500, "rarity": "godly", "type": "water"},
     { "id": 20, "name": "Gon (All Out)", "power": 13500, "rarity": "godly", "type": "grass"},
     { "id": 21, "name": "Leoreo (Serious)", "power": 8000, "rarity": "common", "type": "water"},

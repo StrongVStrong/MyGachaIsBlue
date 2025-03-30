@@ -3,6 +3,7 @@ import { auth } from "../firebase";
 import { useAudio } from "../context/AudioContext";
 import BackButton from "../components/BackButton";
 import { usePlayerData } from "../hooks/usePlayerData";
+import "./Settings.css";
 
 function Settings() {
   const { preferences, setPreferences } = usePlayerData();
@@ -38,26 +39,29 @@ function Settings() {
   };
 
   return (
-    <div className="settings-page">
+    <div className="settings-container">
       <BackButton />
-      <h2>Settings</h2>
+      <div className="settings-page">
+        <title>Settings</title>
+        <h2>Settings</h2>
 
-      <label htmlFor="volume">Volume: {Math.round(tempVolume * 100)}%</label>
-      <input
-        id="volume"
-        type="range"
-        min="0"
-        max="1"
-        step="0.01"
-        value={tempVolume}
-        onChange={handleVolumeChange}
-        onMouseUp={commitVolume}
-        onTouchEnd={commitVolume}
-      />
+        <label htmlFor="volume">Background Music: {Math.round(tempVolume * 100)}%</label>
+        <input
+          id="volume"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={tempVolume}
+          onChange={handleVolumeChange}
+          onMouseUp={commitVolume}
+          onTouchEnd={commitVolume}
+        />
 
-    <button onClick={handleLogout} className="logout-btn">
-    🔓 Log Out
-    </button>
+        <button onClick={handleLogout} className="logout-btn">
+        🔓 Log Out
+        </button>
+      </div>
     </div>
   );
 }

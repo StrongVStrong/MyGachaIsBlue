@@ -10,20 +10,30 @@ function saveToGuest(key, value, loaded = true) {
   localStorage.setItem("guestData", JSON.stringify(updated));
 }
 
-const defaultCharacterState = (id) => ({
+const defaultCharacterState = () => ({
   count: 1,
   trait: null,
   limitBreak: 0,
+});
+
+const defaultCurrencyState = () => ({
+  gold: 0,
+  traitRerolls: 0,
+});
+
+const defaultPreferences = () => ({
+  volume: 0.5,
 });
 
 export function usePlayerData() {
 
   const [gems, setGems] = useState(0);
   const [characters, setCharacters] = useState({});
+  const [currency, setCurrency] = useState(defaultCurrencyState());
   const [userId, setUserId] = useState(null);
   const [playerExp, setPlayerExp] = useState(0);
   const [displayName, setDisplayName] = useState("Player");
-  const [preferences, setPreferences] = useState({ volume: 0.5 });
+  const [preferences, setPreferences] = useState(defaultPreferences());
   const [loadedGuestData, setLoadedGuestData] = useState(false);
 
 
@@ -36,9 +46,10 @@ export function usePlayerData() {
       const guestData = JSON.parse(localStorage.getItem("guestData")) || {};
       setGems(guestData.gems ?? 500);
       setCharacters(guestData.characters ?? {});
+      setCurrency(guestData.currency ?? defaultCurrencyState());
       setPlayerExp(guestData.exp ?? 0);
       setDisplayName(guestData.displayName ?? "Guest");
-      setPreferences(guestData.preferences ?? { volume: 0.5 });
+      setPreferences(guestData.preferences ?? defaultPreferences());
       setLoadedGuestData(true);
       return;
     }
@@ -54,11 +65,13 @@ export function usePlayerData() {
             const userData = docSnap.data();
             setGems(userData.gems || 0);
             setCharacters(userData.characters || {});
+            setCurrency(userData.currency || defaultCurrencyState());
             setPlayerExp(userData.exp || 0);
             setDisplayName(userData.displayName || "Loading");
             const prefs = userData.preferences || {};
             setPreferences({
-              volume: prefs.volume ?? 0.5
+              ...defaultPreferences(),
+              ...prefs
             });
           }
         });
@@ -69,6 +82,24 @@ export function usePlayerData() {
 
     return () => unsubscribeAuth();
   }, []);
+
+  // Save display name changes
+  useEffect(() => {
+    if (displayName === "Player" || displayName === "Guest") return;
+
+    if (isGuest) {
+      alert("⚠️ Create an account to change your display name.");
+      return;
+    }
+
+    if (userId != null) {
+      const userRef = doc(db, "users", userId);
+      updateDoc(userRef, { displayName })
+        .then(() => console.log("✅ Display name updated:", displayName))
+        .catch((err) => console.error("❌ Error updating name:", err));
+    }
+  }, [displayName]);
+
 
 
   // Save gems when they change
@@ -98,6 +129,20 @@ export function usePlayerData() {
       console.log("Characters updated", characters)
     }
   }, [characters]);
+
+  // Save currency
+  useEffect(() => {
+    if (isGuest) {
+      saveToGuest("currency", currency, loadedGuestData);
+      return;
+    }
+  
+    if (userId != null) {
+      const userRef = doc(db, "users", userId);
+      updateDoc(userRef, { currency });
+      console.log("Currency updated", currency);
+    }
+  }, [currency]);
 
   function calculateLevelStats(totalExp) {
     let level = 1;
@@ -158,7 +203,7 @@ export function usePlayerData() {
       if (existing) {
         return { ...prev, [id]: { ...existing, count: existing.count + 1 } };
       } else {
-        return { ...prev, [id]: defaultCharacterState(id) };
+        return { ...prev, [id]: defaultCharacterState() };
       }
     });
   };
@@ -170,6 +215,8 @@ export function usePlayerData() {
   characters, 
   setCharacters,
   addCharacter,
+  currency,
+  setCurrency,
   playerExp, 
   setPlayerExp, 
   level: levelStats.level,
@@ -177,6 +224,7 @@ export function usePlayerData() {
   expForNextLevel: levelStats.expForNextLevel,
   progressPercent: levelStats.progressPercent,
   displayName,
+  setDisplayName,
   preferences,
   setPreferences,
   isGuest

@@ -30,8 +30,9 @@ function App() {
             <Route path="/summon" element={<PrivateRoute><Summon /></PrivateRoute>} />
             <Route path="/results" element={<PrivateRoute><Results /></PrivateRoute>} />
             <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
-            <Route path="/userprofile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            
           </Route>
+          <Route path="/userprofile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
           <Route path="/" element={<PrivateRoute><Hub /></PrivateRoute>} />
           <Route path="/character/:id" element={<PrivateRoute><CharacterPage /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />

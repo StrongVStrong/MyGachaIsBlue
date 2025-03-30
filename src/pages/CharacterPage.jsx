@@ -5,16 +5,19 @@ import BackButton from "../components/BackButton";
 import { usePlayerData } from "../hooks/usePlayerData";
 import "./CharacterPage.css";
 import { rerollTrait } from "../utils/RerollTraits";
+import { useClickSFX } from "../hooks/useClickSFX";
 
 function CharacterPage() {
+  const playClick = useClickSFX();
   const { id } = useParams();
   const charId = parseInt(id, 10);
   const character = characterList.find((char) => char.id === charId);
-  const { characters, setCharacters } = usePlayerData();
+  const { characters, setCharacters, currency, setCurrency, preferences } = usePlayerData();
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
   const [glowRarity, setGlowRarity] = useState(null);
   const rerollBtnRef = useRef(null);
   const godlyTraits = ["Ultra Instinct", "Enlightened"];
+  const audioRef = useRef(null);
 
 
   if (!character) return <div>Character not found</div>;
@@ -25,11 +28,43 @@ function CharacterPage() {
     }
   }, [character]);
 
+  useEffect(() => {
+    if (!character) return;
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  
+    const isDev = import.meta.env.DEV;
+    const timestamp = isDev ? `?v=${Date.now()}` : "";
+    const track = (character.music || `./assets/OSTs/${character.id}.mp3`) + timestamp;
+
+    const newAudio = new Audio(track);
+    audioRef.current = newAudio;
+    newAudio.loop = true;
+    newAudio.volume = preferences.volume ?? 0.5;
+    newAudio.play();
+
+    return () => {
+      newAudio.pause();
+      newAudio.currentTime = 0;
+    };
+  }, [character, preferences.volume]);
+
   const charData = characters[charId];
   const isOwned = !!charData;
+  const failSFX = new Audio("./assets/sfx/failure.mp3");
 
   const handleRerollTrait = () => {
     if (!isOwned) return;
+
+    if (currency.traitRerolls <= 0) {
+      failSFX.volume = 1;
+      failSFX.play();
+      alert("❌ You don't have any Trait Reroll tokens!");
+      return;
+    }
+
     const currentTrait = charData.trait;
 
     if (godlyTraits.includes(currentTrait)) {
@@ -39,6 +74,14 @@ function CharacterPage() {
         if (!confirm) return;
     }
     const { name, rarity } = rerollTrait(currentTrait);
+
+    const rerollSFX = new Audio(
+      rarity === "godly" 
+        ? "./assets/sfx/godly.mp3" 
+        : "./assets/sfx/reroll.mp3"
+    );
+    rerollSFX.volume = 1;
+    rerollSFX.play();
   
     if (rerollBtnRef.current) {
         rerollBtnRef.current.classList.remove(`${glowRarity}-glow`);
@@ -46,7 +89,12 @@ function CharacterPage() {
         rerollBtnRef.current.classList.add(`${rarity}-glow`);
       }
       
-      setGlowRarity(rarity);
+    setGlowRarity(rarity);
+
+    setCurrency((prev) => ({
+      ...prev,
+      traitRerolls: prev.traitRerolls - 1,
+    }));
   
     setCharacters((prev) => ({
       ...prev,
@@ -59,7 +107,15 @@ function CharacterPage() {
   
 
   const handleLimitBreak = () => {
-    if (!isOwned || charData.count <= 1 || charData.limitBreak >= 5) return;
+    if (!isOwned) return;
+
+    if (charData.count <= 1) {
+      failSFX.volume = 1;
+      failSFX.play();
+      alert("📦 You need a dupe to Limit Break!");
+      return;
+    }
+    
     setCharacters((prev) => ({
       ...prev,
       [charId]: {
@@ -98,14 +154,14 @@ function CharacterPage() {
                 <p>📦 Dupes: {charData.count - 1}</p>
                 <button
                 ref={rerollBtnRef}
-                onClick={handleRerollTrait}
+                onClick={() => {handleRerollTrait();}}
                 className={`reroll-button ${glowRarity ? `${glowRarity}-glow` : ""}`}
                 >
-                🔁 Reroll Trait
+                🔁 Reroll Trait ({currency.traitRerolls})
                 </button>
                 <button
                 onClick={handleLimitBreak}
-                disabled={charData.limitBreak >= 5 || charData.count <= 1}
+                disabled={charData.limitBreak >= 5}
                 >
                 ⭐ Limit Break
                 </button>

@@ -4,8 +4,10 @@ import "./SummonResults.css";
 import characterList from "../data/characters";
 import { usePlayerData } from "../hooks/usePlayerData";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
+import { useClickSFX } from "../hooks/useClickSFX";
 
 function Results() {
+  const playClick = useClickSFX();
   const { gems, isGuest } = usePlayerData();
   const navigate = useNavigate();
   const location = useLocation();
@@ -13,6 +15,7 @@ function Results() {
   const audioRef = useRef(null);
   const OST = `${import.meta.env.BASE_URL}assets/results.mp3`;
   useSyncedAudio(audioRef, OST);
+  const failSFX = new Audio("./assets/sfx/failure.mp3");
 
   useEffect(() => {
     if (isGuest && !sessionStorage.getItem("guestRefreshed")) {
@@ -57,17 +60,19 @@ function Results() {
         <p className="no-summons">No summons found. Try summoning again!</p>
       )}
 
-      <button className="return-button" onClick={() => navigate("/summon", { state: { selectedBanner }})}>
+      <button className="return-button" onClick={() => {playClick(); navigate("/summon", { state: { selectedBanner }});}}>
         Return to Summon
       </button>
 
       <button
         className="summon-again-button"
         onClick={() => {
-
+          playClick();
           if (isGuest) sessionStorage.removeItem("guestRefreshed");
           const cost = amountSummoned === 1 ? 100 : 1000;
           if (gems < cost) {
+            failSFX.volume = 1;
+            failSFX.play();
             alert("Not enough gems to summon again!");
             return;
           }

@@ -5,8 +5,10 @@ import { useNavigate } from "react-router-dom";
 import "./Inventory.css";
 import characterList from "../data/characters";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
+import { useClickSFX } from "../hooks/useClickSFX";
 
 function Inventory() {
+  const playClick = useClickSFX();
   const navigate = useNavigate();
   const { characters } = usePlayerData();
   const audioRef = useRef(null);
@@ -31,7 +33,7 @@ function Inventory() {
 
           return (
             <div key={char.id} className={`portrait ${isOwned ? "owned" : "unowned"} type-${char.type}`}>
-              <img src={`./assets/characterPortraits/${char.id}.png`} alt={char.name} onClick={() => navigate(`/character/${char.id}`)}/>
+              <img src={`./assets/characterPortraits/${char.id}.png`} alt={char.name} onClick={() => {playClick(); navigate(`/character/${char.id}`)}}/>
             </div>
           );
         })}

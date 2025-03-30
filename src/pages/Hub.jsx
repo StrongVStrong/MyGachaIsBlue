@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { usePlayerData } from "../hooks/usePlayerData";
 import "./Hub.css";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
+import { useClickSFX } from "../hooks/useClickSFX";
 
 function Hub() {
+  const playClick = useClickSFX();
   const navigate = useNavigate();
   const { level, playerExp, progressPercent, expToNextLevel, expForNextLevel, displayName, gems } = usePlayerData();
   const audioRef = useRef(null);
@@ -30,21 +32,21 @@ function Hub() {
         <p className="hub-subtitle"></p>
         <div className = "hub-bar-bottom">
           <div className = "hub-btns">
-            <button onClick = {() => navigate("/summon")} className="summon-btn">✨ Summon</button>
-            <button onClick = {() => navigate("/battle")} className="battle-btn">⚔️ Battle</button>
-            <button onClick = {() => navigate("/inventory")} className="inventory-btn">📦 Inventory</button>
+            <button onClick = {() => {navigate("/summon"); playClick();}} className="summon-btn">✨ Summon</button>
+            <button onClick = {() => {navigate("/battle"); playClick();}} className="battle-btn">⚔️ Battle</button>
+            <button onClick = {() => {navigate("/inventory"); playClick();}} className="inventory-btn">📦 Inventory</button>
           </div>
         </div>
         <div className = "hub-bar-top">
           <div className="gems-head">
             <h2 className="gems">💎 Gems: {gems}</h2> {/* Gems visible */}
           </div>
-          <button onClick = {() => navigate("/dev")} className="dev-btn">Dev</button>
-          <button onClick = {() => navigate("/settings")} className="settings-btn">⚙️</button>
+          <button onClick = {() => {navigate("/dev"); playClick();}} className="dev-btn">Dev</button>
+          <button onClick = {() => {navigate("/settings"); playClick();}} className="settings-btn">⚙️</button>
 
           <div 
           className="exp-bar"
-          onClick={() => navigate("/userprofile")}
+          onClick={() => {playClick(); navigate("/userprofile");}}
           style={{ cursor : "pointer" }}
           >
             <div className = "level">

@@ -1,57 +1,137 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import BackButton from "../components/BackButton";
+import characterList from "../data/characters";
+import "./UserProfile.css";
 
-function Dev() {
-  const { gems, setGems, playerExp, setPlayerExp } = usePlayerData();
-  const [amount, setAmount] = useState("");
-  const [expAmount, setExpAmount] = useState("");
+function UserProfile() {
+  const {
+    displayName,
+    preferences,
+    setPreferences,
+    isGuest,
+    setDisplayName,
+    characters
+  } = usePlayerData();
+  const [selectorVisible, setSelectorVisible] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const audioRef = useRef(null);
 
-
-  const addGems = () => {
-    if (!isNaN(amount) && amount.trim() !== "") {
-      setGems(gems + parseInt(amount, 10));
-      setAmount("");
+  useEffect(() => {
+    if (displayName) {
+      setNameInput(displayName);
     }
+  }, [displayName]);
+
+
+  const handleNameChange = () => {
+    if (isGuest) {
+      alert("⚠️ You must be logged in to change your name!");
+      return;
+    }
+    setDisplayName(nameInput);
   };
 
-  const addExp = () => {
-    if (!isNaN(expAmount) && expAmount.trim() !== "") {
-      setPlayerExp(playerExp + parseInt(expAmount, 10));
-      setExpAmount("");
+  const handleSelectFavorite = (charId) => {
+    if (isGuest) {
+      alert("⚠️ You must be logged in to select a favorite character!");
+      return;
     }
+    setPreferences((prev) => ({
+      ...prev,
+      favorite: charId,
+    }));
   };
+
+  const favoriteCharacter = characterList.find(
+    (char) => char.id === preferences?.favorite
+  );
+
+  useEffect(() => {
+    if (!favoriteCharacter) return;
   
+    const isDev = import.meta.env.DEV;
+    const timestamp = isDev ? `?v=${Date.now()}` : "";
+    const track = (favoriteCharacter.music || `./assets/OSTs/${favoriteCharacter.id}.mp3`) + timestamp;
+  
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  
+    const newAudio = new Audio(track);
+    audioRef.current = newAudio;
+    newAudio.loop = true;
+    newAudio.volume = preferences.volume ?? 0.5;
+    newAudio.play();
+  
+    return () => {
+      newAudio.pause();
+      newAudio.currentTime = 0;
+    };
+  }, [favoriteCharacter, preferences.volume]);  
 
   return (
-    
-    <div className="dev-container">
-      <title>Get out</title>
-        <BackButton /> {/*Back button*/}
-      <h1>Admin Dev Panel</h1>
-      <p>💎 Current Gems: {gems}</p>
+    <div className="profile-page">
+      <BackButton />
 
-      <input
-        type="number"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        placeholder="Enter gems amount"
-      />
-      <button onClick={addGems}>Add Gems</button>
+      <div className="profile-left">
+        <h2>Player Info</h2>
+        <input
+          type="text"
+          value={nameInput}
+          onChange={(e) => setNameInput(e.target.value)}
+          placeholder="Enter display name"
+        />
+        <button onClick={handleNameChange}>💾 Save Name</button>
+      </div>
 
-      <p>🧪 Current EXP: {playerExp}</p>
+      <div className="profile-right">
+        <div
+        className={`favorite-portrait ${selectorVisible ? "selector-open" : ""}`}
+        onClick={() => {
+          if (isGuest) {
+            alert("⚠️ You must be logged in to change your favorite character!");
+            return;
+          }
+          setSelectorVisible(prev => !prev);
+        }}
+        style={{ cursor: "pointer" }}
+        >
+          {favoriteCharacter ? (
+            <img
+              src={`./assets/characterPortraits/${favoriteCharacter.id}.png`}
+              alt={favoriteCharacter.name}
+              className={`border-${favoriteCharacter.type}`}
+            />
+          ) : (
+            <div className="empty-slot">+</div>
+          )}
+        </div>
 
-      <input
-        type="number"
-        value={expAmount}
-        onChange={(e) => setExpAmount(e.target.value)}
-        placeholder="Enter EXP amount"
-      />
-      <button onClick={addExp}>Add EXP</button>
+        {selectorVisible && (
+        <div className="favorite-selector">
+          {Object.keys(characters).map((charId) => {
+            const char = characterList.find((c) => c.id === Number(charId));
+            if (!char) return null;
+            return (
+              <img
+                key={char.id}
+                src={`./assets/characterPortraits/${char.id}.png`}
+                alt={char.name}
+                onClick={() => {
+                  handleSelectFavorite(char.id);
+                  setSelectorVisible(false); // hide after selection
+                }}
+                className={`tiny-icon border-${char.type}`}
+              />
+            );
+          })}
+        </div>
+      )}
 
-
+      </div>
     </div>
   );
 }
 
-export default Dev;
+export default UserProfile;

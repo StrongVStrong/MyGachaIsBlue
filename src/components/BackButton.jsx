@@ -1,7 +1,9 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useClickSFX } from "../hooks/useClickSFX";
 
 function BackButton() {
+  const playClick = useClickSFX();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,7 +16,7 @@ function BackButton() {
   }
 
   return (
-    <button className="back-button" onClick={handleBack}>⬅️</button>
+    <button className="back-button" onClick={() => {handleBack(); playClick();}}>⬅️</button>
   );
 }
 

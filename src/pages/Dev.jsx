@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import BackButton from "../components/BackButton";
+import "./Dev.css";
 
 function Dev() {
-  const { gems, setGems, playerExp, setPlayerExp } = usePlayerData();
+  const { gems, setGems, playerExp, setPlayerExp, currency, setCurrency } = usePlayerData();
   const [amount, setAmount] = useState("");
   const [expAmount, setExpAmount] = useState("");
+  const [rerollAmount, setRerollAmount] = useState("");
 
 
   const addGems = () => {
@@ -21,6 +23,17 @@ function Dev() {
       setExpAmount("");
     }
   };
+
+  const addCurrency = (key, value) => {
+    const num = parseInt(value, 10);
+    if (!isNaN(num)) {
+      setCurrency((prev) => ({
+        ...prev,
+        [key]: (prev[key] ?? 0) + num,
+      }));
+    }
+  };
+  
   
 
   return (
@@ -29,8 +42,8 @@ function Dev() {
       <title>Get out</title>
         <BackButton /> {/*Back button*/}
       <h1>Admin Dev Panel</h1>
-      <p>💎 Current Gems: {gems}</p>
 
+      <p>💎 Current Gems: {gems}</p>
       <input
         type="number"
         value={amount}
@@ -40,7 +53,6 @@ function Dev() {
       <button onClick={addGems}>Add Gems</button>
 
       <p>🧪 Current EXP: {playerExp}</p>
-
       <input
         type="number"
         value={expAmount}
@@ -49,6 +61,21 @@ function Dev() {
       />
       <button onClick={addExp}>Add EXP</button>
 
+      <p>🎲 Trait Rerolls: {currency.traitRerolls}</p>
+      <input
+        type="number"
+        value={rerollAmount}
+        onChange={(e) => setRerollAmount(e.target.value)}
+        placeholder="Enter reroll amount"
+      />
+      <button
+        onClick={() => {
+          addCurrency("traitRerolls", rerollAmount);
+          setRerollAmount("");
+        }}
+      >
+        Add Rerolls
+      </button>
 
     </div>
   );
