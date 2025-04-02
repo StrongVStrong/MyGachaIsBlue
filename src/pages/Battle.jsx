@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import BackButton from "../components/BackButton";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
+import BattleScene from "../battle/battleScene";
 
 function Battle() {
     const audioRef = useRef(null);
@@ -11,8 +12,12 @@ function Battle() {
     return (
     <div>
       <BackButton /> {/*Back button*/}
-      Welcome to the Battle Page!
+      Welcome to the Battle Page! (wip)
       <title>Battle</title>
+
+      <div className="min-h-screen bg-black text-white">
+        <BattleScene />
+      </div>
       
       <audio ref={audioRef} loop autoPlay>
         <source src={OST} type="audio/mp3" />

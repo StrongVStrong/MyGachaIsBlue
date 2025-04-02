@@ -35,7 +35,7 @@ function Settings() {
     localStorage.removeItem("guestMode");
     localStorage.removeItem("guestData");
     localStorage.removeItem("userData");
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   return (

@@ -12,6 +12,7 @@ import Settings from "./pages/Settings"
 import UserProfile from "./pages/UserProfile"
 import PrivateRoute from "./components/PrivateRoute";
 import CharacterPage from "./pages/CharacterPage";
+import TeamPresets from "./pages/TeamPresets";
 
 
 function App() {
@@ -30,14 +31,16 @@ function App() {
             <Route path="/summon" element={<PrivateRoute><Summon /></PrivateRoute>} />
             <Route path="/results" element={<PrivateRoute><Results /></PrivateRoute>} />
             <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
-            
+
           </Route>
+          
           <Route path="/userprofile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
           <Route path="/" element={<PrivateRoute><Hub /></PrivateRoute>} />
           <Route path="/character/:id" element={<PrivateRoute><CharacterPage /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/battle" element={<PrivateRoute><Battle /></PrivateRoute>} />
           <Route path="/dev" element={<PrivateRoute><Dev /></PrivateRoute>} />
+          <Route path="/teams" element={<PrivateRoute><TeamPresets /></PrivateRoute>} />
 
           {/* Redirect all unknown routes to login */}
           <Route path="*" element={<Navigate to="/login" />} />

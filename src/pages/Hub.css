@@ -68,6 +68,18 @@
     white-space: nowrap;
 }
 
+.team-btn {
+  position: absolute;
+  top: 20%;
+  right: 64%;
+  height: 8vh;
+  width: auto;
+  font-size: 2vw;
+  line-height: 1vh;
+  border-radius: 15px;
+  white-space: nowrap;
+}
+
 .hub-title {
     font-size: 8rem;
     opacity: 0;
