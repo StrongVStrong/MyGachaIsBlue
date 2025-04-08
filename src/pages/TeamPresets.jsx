@@ -1,20 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { usePlayerData } from "../hooks/usePlayerData";
 import characters from "../data/characters";
 import { useNavigate } from "react-router-dom";
 import { useClickSFX } from "../hooks/useClickSFX";
 import styles from "./TeamPresets.module.css";
 import BackButton from "../components/BackButton";
+import { useSyncedAudio } from "../hooks/useSyncedAudio";
 
 function TeamPresets() {
     const { preferences, setPreferences, characters: ownedCharacters } = usePlayerData();
     const playClick = useClickSFX();
     const navigate = useNavigate();
-  
+    const audioRef = useRef(null);
+    const OST = `${import.meta.env.BASE_URL}assets/teams.mp3`;
+    useSyncedAudio(audioRef, OST);
+
     const [selectedTeamId, setSelectedTeamId] = useState(1);
     const [activeSlot, setActiveSlot] = useState(null);
     const teams = preferences.teams ?? { 1: [], 2: [], 3: [], 4: [], 5: [] };
     const currentTeam = teams[selectedTeamId] ?? [];
+    const [draggedSlot, setDraggedSlot] = useState(null);
+    const [draggedCharId, setDraggedCharId] = useState(null);
+    const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   
     const handleCharacterSelect = (charId) => {
         if (activeSlot === null) return;
@@ -53,6 +60,8 @@ function TeamPresets() {
         return characters.find(c => c.id === id);
       }).filter(Boolean);
     };
+
+    const owned = getOwnedCharacters();
   
     return (
       <div className={styles["team-presets-page"]}>
@@ -64,17 +73,17 @@ function TeamPresets() {
             <button
               key={num}
               onClick={() => {
+                playClick();
                 setSelectedTeamId(num);
                 setActiveSlot(null);
               }}
-              className={selectedTeamId === num ? 'active' : ''}
+              className={`${styles["team-button"]} ${selectedTeamId === num ? styles["active"] : ""}`}
             >
               Team {num}
             </button>
           ))}
         </div>
-  
-        <h2 className={styles["section-title"]}>📋 Current Team:</h2>
+
         <div className={styles["team-row"]}>
           {[...Array(6)].map((_, idx) => {
             const charId = currentTeam[idx];
@@ -85,34 +94,90 @@ function TeamPresets() {
 
             return (
               <div
-                key={charId ? `${idx}-${charId}` : `empty-${idx}`}
-                className={`${styles["portrait-slot"]} ${activeSlot === idx ? styles["active-slot"] : ""}`}
-                onClick={() => {
-                  if (activeSlot === idx) {
-                    setActiveSlot(null);
-                  } else {
-                    setActiveSlot(idx);
-                  }
-                }}
-                style={slotStyle}
-              >
-                {charId ? (
-                  <img
-                    src={`/assets/characterPortraits/${charId}.png`}
-                    alt={char?.name}
-                    className={`${styles["portrait-image"]} border-${char?.type ?? "neutral"}`}
-                  />
-                ) : (
-                  <div className={styles["empty-slot"]}>+</div>
-                )}
-              </div>
+              key={charId ? `${idx}-${charId}` : `empty-${idx}`}
+              className={`${styles["portrait-slot"]} ${activeSlot === idx ? styles["active-slot"] : ""}`}
+              draggable={charId !== undefined}
+              onDragStart={(e) => {
+                setDraggedSlot(idx);
+                setDraggedCharId(charId);
+                e.dataTransfer.setDragImage(new Image(), 0, 0); // disable default ghost image
+              }}
+              onDrag={(e) => {
+                setDragPosition({ x: e.clientX, y: e.clientY });
+              }}
+              onDragEnd={() => {
+                setDraggedSlot(null);
+                setDraggedCharId(null);
+              }}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (draggedSlot === null || draggedSlot === idx) return;
+                const newTeam = [...currentTeam];
+                const temp = newTeam[draggedSlot];
+                newTeam[draggedSlot] = newTeam[idx];
+                newTeam[idx] = temp;
+                const filteredTeam = newTeam.filter(Boolean).slice(0, 6);
+                setPreferences(prev => ({
+                  ...prev,
+                  teams: { ...teams, [selectedTeamId]: filteredTeam }
+                }));
+                playClick();
+                setDraggedSlot(null);
+                setActiveSlot(null);
+              }}
+              onClick={() => {
+                playClick();
+                if (activeSlot === idx) {
+                  setActiveSlot(null);
+                } else {
+                  setActiveSlot(idx);
+                }
+              }}
+              style={slotStyle}
+            >
+              {charId ? (
+                <img
+                  src={`/assets/characterPortraits/${charId}.png`}
+                  alt={char?.name}
+                  className={`${styles["portrait-image"]} border-${char?.type ?? "neutral"}`}
+                />
+              ) : (
+                <div className={styles["empty-slot"]}>+</div>
+              )}
+            </div>
+
+
             );
           })}
         </div>
 
         {activeSlot !== null && (
-          <div className={styles["character-selector"]}>
-            <h3 className={styles["selector-title"]}>Select Character</h3>
+        <div className={styles["character-selector"]}>
+          <button
+            className={styles["close-button"]}
+            onClick={() => {
+              playClick();
+              setActiveSlot(null);
+            }}
+          >
+            ✖
+          </button>
+          <h3 className={styles["selector-title"]}>Select Character</h3>
+
+          {getOwnedCharacters().length === 0 ? (
+            <div className={styles["empty-message"]}>
+              <p>No characters! 🎲 Summon to get characters!</p>
+              <button
+                onClick={() => {
+                  playClick();
+                  navigate("/summon");
+                }}
+                className={styles["summon-button"]}
+              >
+                ➕ Go to Summon
+              </button>
+            </div>
+          ) : (
             <div className={styles["character-grid"]}>
               {getOwnedCharacters().map(char => (
                 <img
@@ -129,8 +194,14 @@ function TeamPresets() {
                 />
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      )}
+
+      <audio ref={audioRef} loop autoPlay>
+        <source src={OST} type="audio/mp3" />
+      </audio>
+
       </div>
     );
 }

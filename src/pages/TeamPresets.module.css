@@ -29,21 +29,27 @@
   padding: 0.5rem 1rem;
   border-radius: 8px;
   background-color: #3f3f3f;
-  transition: all 0.2s ease;
   color: white;
   border: none;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1.5rem;
+  margin-top: 1%;
+  margin-bottom: 1%;
 }
 
-.team-button-row button:hover {
+.team-button:hover:not(.active) {
   background-color: #555;
   transform: scale(1.05);
 }
 
 .team-button-row .active {
-  background-color: #22c55e;
-  transform: scale(1.05);
+  background-color: #7f0000;
+  box-shadow: 0 0 8px 1px white;
+  border: 2px solid white;
+}
+
+.team-button-row .active:hover {
+  transform: scale(1.08);
 }
 
 .section-title {
@@ -159,6 +165,9 @@
       width: 70px;
       height: 70px;
   }
+  .team-button-row button {
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -203,3 +212,58 @@
 [type="fire"] { --border-fire: #ff4444; }
 [type="water"] { --border-water: #4488ff; }
 [type="grass"] { --border-grass: #44ff44; }
+
+.empty-message {
+  text-align: center;
+  color: #ccc;
+  padding: 1rem;
+}
+
+.summon-button {
+  margin-top: 1rem;
+  background-color: #3b3b3b;
+  color: rgb(255, 255, 255);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.summon-button:hover {
+  background-color: #494949;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: transparent;
+  color: white;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.2s ease;
+}
+
+.close-button:hover {
+  color: #f87171;
+}
+
+.close-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.drag-preview {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  transform: translate(-50%, -50%) scale(1.1);
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.5);
+}
