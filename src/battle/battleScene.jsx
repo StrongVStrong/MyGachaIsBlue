@@ -49,12 +49,12 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx) {
   const isDisadvantaged = beats[defenderType] === attackerType;
 
   if (defenderGuards && !isDisadvantaged) {
-    return { multiplier: 0.5, label: "🛡️ Guard Activated" };
+    return { multiplier: 0.5, label: "🛡️" };
   }
 
   if (isAdvantaged) return { multiplier: 1.5, label: "⬆️" };
   if (isDisadvantaged) return { multiplier: 0.5, label: "⬇️" };
-  return { multiplier: 1.0, label: "—" };
+  return { multiplier: 1.0, label: "➖" };
 }
 
 
@@ -65,36 +65,15 @@ export default function BattleScene() {
   const turnLogRef = useRef(null);
   const [isTurnInProgress, setIsTurnInProgress] = useState(false);
   const [superAttackCounts, setSuperAttackCounts] = useState({});
-
-  // Get team 1 from preferences or use default
-  const teamIds = preferences?.teams?.[1] || [2, 1];
+  const [hasUsedTurn, setHasUsedTurn] = useState(false);
 
   // Initialize player team state
   const [playerTeam, setPlayerTeam] = useState(() => {
-    return teamIds.map(charId => {
-      const unit = characterDetails[charId];
-      const type = unit?.type;
-      if (!unit) {
-        console.error(`Character ${charId} not found in characterDetails`);
-        return null;
-      }
-      const maxHp = Math.floor(unit.baseHp * leaderMultiplier);
-      return {
-        id: charId,
-        ...unit,
-        type,
-        maxHp,
-        currentHp: maxHp
-      };
-    }).filter(Boolean); // Remove any null entries from invalid character IDs
-  });
-
-  // Update team when preferences change
-  useEffect(() => {
-    const newTeam = teamIds.map(charId => {
+    const defaultIds = [2, 1];
+    return defaultIds.map(charId => {
       const unit = characterDetails[charId];
       if (!unit) {
-        console.error(`Character ${charId} not found in characterDetails`);
+        console.error(`Character ${charId} not found`);
         return null;
       }
       const maxHp = Math.floor(unit.baseHp * leaderMultiplier);
@@ -105,25 +84,34 @@ export default function BattleScene() {
         currentHp: maxHp
       };
     }).filter(Boolean);
+  });
 
-    if (newTeam.length > 0) {
-      setPlayerTeam(newTeam);
-      setActiveUnitIndex(0); // Reset to first unit when team changes
-    } else {
-      // Fallback if no valid characters found
-      const defaultTeam = [1, 2].map(id => {
-        const unit = characterDetails[id];
-        const maxHp = Math.floor(unit.baseHp * leaderMultiplier);
-        return {
-          id: charId,
-          ...unit,
-          maxHp,
-          currentHp: maxHp
-        };
-      });
-      setPlayerTeam(defaultTeam);
-    }
-  }, [teamIds]);
+  // Update team when preferences change
+  useEffect(() => {
+    if (!preferences?.teams) return;
+  
+    const ids = preferences.teams[1] || [2, 1];
+  
+    const newTeam = ids.map(charId => {
+      const unit = characterDetails[charId];
+      if (!unit) {
+        console.error(`Character ${charId} not found`);
+        return null;
+      }
+      const maxHp = Math.floor(unit.baseHp * leaderMultiplier);
+      return {
+        id: charId,
+        ...unit,
+        maxHp,
+        currentHp: maxHp
+      };
+    }).filter(Boolean);
+  
+    setPlayerTeam(newTeam);
+    setActiveUnitIndex(0);
+  
+  }, [preferences]);
+  
 
   const [activeUnitIndex, setActiveUnitIndex] = useState(0);
   const [enemyPhaseIndex, setEnemyPhaseIndex] = useState(0);
@@ -140,25 +128,32 @@ export default function BattleScene() {
 
   const [superEffects, setSuperEffects] = useState({});
 
-  const battleContext = {
-    turnNow: turn,
-    turnEntered: Object.fromEntries(playerTeam.map((_, idx) => [idx + 1, 1])),
-    evaded: Object.fromEntries(playerTeam.map((_, idx) => [idx + 1, false])),
-    leaderAtkMultiplier: leaderMultiplier,
-    leaderDefMultiplier: leaderMultiplier,
-    superEffects,
-    team: playerTeam,
-    superAttackCounts,
-  };
+  const [switchInTurnMap, setSwitchInTurnMap] = useState({});
+
+  function getBattleContext() {
+    return {
+      turnNow: turn,
+      switchInTurn: switchInTurnMap,
+      turnEntered: Object.fromEntries(playerTeam.map(unit => [unit.id, 1])),
+      evaded: Object.fromEntries(playerTeam.map(unit => [unit.id, false])),
+      leaderAtkMultiplier: leaderMultiplier,
+      leaderDefMultiplier: leaderMultiplier,
+      superEffects,
+      team: playerTeam,
+      superAttackCounts
+    };
+  }  
 
   const handleAttack = async (attackerId) => {
+    if (hasUsedTurn || isTurnInProgress) return;
     setIsTurnInProgress(true);
+    setHasUsedTurn(true);
     try {
       const attacker = playerTeam[activeUnitIndex];
     const activeUnit = playerTeam[activeUnitIndex];
     
     // Calculate initial defense
-    let activeUnitStats = calculatePreAttackStats(activeUnit, battleContext, activeUnit.id);
+    let activeUnitStats = calculatePreAttackStats(activeUnit, getBattleContext(), activeUnit.id);
     
     const attacksThisTurn = currentEnemy.attacks || 1;
     let superAttackUsed = false;
@@ -171,7 +166,7 @@ export default function BattleScene() {
       const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
         if (
           (p.type === "startOfTurn" || p.type === "onAttack") &&
-          (!p.condition || p.condition(battleContext, activeUnit.id))
+          (!p.condition || p.condition(getBattleContext(), activeUnit.id))
         ) {
           return total + (p.evadeChance ?? 0);
         }
@@ -189,18 +184,19 @@ export default function BattleScene() {
           ]
         }));
 
-        battleContext.evaded[activeUnit.id] = true;
+        getBattleContext().evaded[activeUnit.id] = true;
 
         continue; // Skip damage
       }
 
       const enemyWithId = { ...currentEnemy, id: -1 };
-      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, battleContext);
+      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, getBattleContext());
 
       const rawDmg = isSuper ? currentEnemy.SAatk : currentEnemy.atk;
       let baseDamage = rawDmg * typeMultiplier;
 
-      const dmgReduction = getPassiveValue(activeUnit, "damageReduction", battleContext, activeUnit.id);
+      const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
+      const drLabel = (dmgReduction ?? 0) > 0 ? ` -${Math.round((dmgReduction ?? 0) * 100)}% DR ` : "";
       baseDamage *= 1 - (dmgReduction ?? 0);
 
       const reduced = Math.max(0, baseDamage - activeUnitStats.def);
@@ -218,7 +214,7 @@ export default function BattleScene() {
         [turn]: [
           ...(prev[turn] ?? []),
           `${isSuper ? "💥 Super Attack! " : "🛡️"}${currentEnemy.name} attacked ${activeUnit.name} ` +
-          `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel} - ${activeUnitStats.def} DEF = ${damage} damage] ` +
+          `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${activeUnitStats.def} DEF = ${damage} damage] ` +
           `(before your action)`
         ]
       }));
@@ -231,7 +227,7 @@ export default function BattleScene() {
     // Player attack
     if (playerTeam[activeUnitIndex].currentHp > 0) {
       // OnAttack boosts for the attack
-      const attackStats = calculateFinalStats(activeUnit, battleContext, activeUnit.id);
+      const attackStats = calculateFinalStats(activeUnit, getBattleContext(), activeUnit.id);
       const attackerWithStats = {
         ...attacker,
         id: attacker.id,
@@ -240,7 +236,7 @@ export default function BattleScene() {
       };
 
       const enemyWithType = { ...currentEnemy, id: -1 };
-      const result = performAttack(attackerWithStats, enemyWithType, battleContext, attackerId);
+      const result = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, true);
       setSuperAttackCounts(prev => ({
         ...prev,
         [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
@@ -263,7 +259,7 @@ export default function BattleScene() {
       currentEnemy.hp -= result.damage;
       
       // Update activeUnitStats for post-attack defense
-      activeUnitStats = calculateFinalStats(playerTeam[activeUnitIndex], battleContext, playerTeam[activeUnitIndex].id);
+      activeUnitStats = calculateFinalStats(playerTeam[activeUnitIndex], getBattleContext(), playerTeam[activeUnitIndex].id);
       
       setLog(prev => ({
         ...prev,
@@ -271,42 +267,55 @@ export default function BattleScene() {
       }));
 
       // Additional attack check
-      const hasAdditionalAttackPassive = activeUnit.passives.some(p => p.extraAttackChance !== undefined);
-      const shouldDoNormalAdditional = hasAdditionalAttackPassive && (!result.guaranteedSuper && !result.extraAttackChance);
-      if (hasAdditionalAttackPassive && (result.extraAttackChance || result.guaranteedSuper || shouldDoNormalAdditional)) {
-        const addResult = performAttack(attackerWithStats, enemyWithType, battleContext, attackerId, !shouldDoNormalAdditional);
-        
-        if (!addResult.isNormalAdditional) {
-          setSuperAttackCounts(prev => ({
-            ...prev,
-            [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
-          }));
-          const superPassives = activeUnit.passives.filter(p => p.type === "superAttack");
-        
-          setSuperEffects(prev => {
-            const existing = prev[activeUnit.id] ?? [];
-            const newBuffs = superPassives.map(p => ({
-              atkBoost: p.atkBoost ?? 0,
-              defBoost: p.defBoost ?? 0,
-              expiresOn: turn + (p.turns ?? 1)
-            }));
-            return {
+      const extraAttackPassives = activeUnit.passives.filter(
+        p => ["startOfTurn", "onAttack"].includes(p.type) && p.extraAttackChance !== undefined
+      );
+      
+      for (const p of extraAttackPassives) {
+        if (!p.condition || p.condition(getBattleContext(), activeUnit.id)) {
+          const superChance = p.extraAttackChance;
+          const isSuper = Math.random() < superChance;
+      
+          const addResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, isSuper);
+      
+          if (isSuper) {
+            setSuperAttackCounts(prev => ({
               ...prev,
-              [activeUnit.id]: [...existing, ...newBuffs]
-            };
-          });
+              [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
+            }));
+      
+            const superPassives = activeUnit.passives.filter(p => p.type === "superAttack");
+            setSuperEffects(prev => {
+              const existing = prev[activeUnit.id] ?? [];
+              const newBuffs = superPassives.map(p => ({
+                atkBoost: p.atkBoost ?? 0,
+                defBoost: p.defBoost ?? 0,
+                expiresOn: turn + (p.turns ?? 1)
+              }));
+              return {
+                ...prev,
+                [activeUnit.id]: [...existing, ...newBuffs]
+              };
+            });
+      
+            setLog(prev => ({
+              ...prev,
+              [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}`]
+            }));
+          } else {
+            addResult.damage = Math.floor(addResult.damage / 10);
+            addResult.description = `${attacker.name} did a normal additional for ${addResult.damage} damage`;
+      
+            setLog(prev => ({
+              ...prev,
+              [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${addResult.description}`]
+            }));
+          }
+      
+          currentEnemy.hp -= addResult.damage;
         }
-        
-        if (shouldDoNormalAdditional) {
-          addResult.damage = Math.floor(addResult.damage / 10);
-          addResult.description = `${attacker.name} did a normal additional for ${addResult.damage} damage`;
-        }
-        currentEnemy.hp -= addResult.damage;
-        setLog(prev => ({
-          ...prev,
-          [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${addResult.description}`]
-        }));
       }
+      
 
     }
   
@@ -319,7 +328,7 @@ export default function BattleScene() {
       const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
         if (
           (p.type === "startOfTurn" || p.type === "onAttack") &&
-          (!p.condition || p.condition(battleContext, activeUnit.id))
+          (!p.condition || p.condition(getBattleContext(), activeUnit.id))
         ) {
           return total + (p.evadeChance ?? 0);
         }
@@ -337,17 +346,18 @@ export default function BattleScene() {
           ]
         }));
 
-        battleContext.evaded[activeUnit.id] = true;
+        getBattleContext().evaded[activeUnit.id] = true;
 
         continue;
       }
       const enemyWithId = { ...currentEnemy, id: -1 };
-      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, battleContext);
+      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, getBattleContext());
       
       const rawDmg = isSuper ? currentEnemy.SAatk : currentEnemy.atk;
       let baseDamage = rawDmg * typeMultiplier;
       
-      const dmgReduction = getPassiveValue(activeUnit, "damageReduction", battleContext, activeUnit.id);
+      const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
+      const drLabel = (dmgReduction ?? 0) > 0 ? ` -${Math.round((dmgReduction ?? 0) * 100)}% DR ` : "";
       baseDamage *= 1 - (dmgReduction ?? 0);
       
       const reduced = Math.max(0, baseDamage - activeUnitStats.def);
@@ -366,7 +376,7 @@ export default function BattleScene() {
           [turn]: [
             ...(prev[turn] ?? []),
             `${isSuper ? "💥 Super Attack! " : "🛡️"}${currentEnemy.name} attacked ${activeUnit.name} ` +
-            `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel} - ${activeUnitStats.def} DEF = ${damage} dmg] (after your action)`
+            `${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${activeUnitStats.def} DEF = ${damage} dmg] (after your action)`
           ]
         }));
         
@@ -384,6 +394,24 @@ export default function BattleScene() {
       );
   
       if (nextAliveIndex >= 0) {
+        const outgoingUnit = playerTeam[activeUnitIndex];
+        const incomingUnit = playerTeam[nextAliveIndex];
+
+        const swapBuffs = outgoingUnit.passives?.filter(p => p.type === "onDeath") ?? [];
+
+        setSuperEffects(prev => {
+          const existing = prev[incomingUnit.id] ?? [];
+          const newBuffs = swapBuffs.map(p => ({
+            atkBoost: p.atkBoost ?? 0,
+            defBoost: p.defBoost ?? 0,
+            expiresOn: turn + (p.turns ?? 1) - 1
+          }));
+          return {
+            ...prev,
+            [incomingUnit.id]: [...existing, ...newBuffs]
+          };
+        });
+
         setActiveUnitIndex(nextAliveIndex);
         setLog(prev => ({
           ...prev,
@@ -419,7 +447,7 @@ export default function BattleScene() {
       }
     }
   
-    setTurn(prev => prev + 1);
+    endTurnCleanup();
     } finally {
       setIsTurnInProgress(false);
     }
@@ -437,6 +465,20 @@ export default function BattleScene() {
 
   const activeChar = characterMap[playerTeam[activeUnitIndex]?.id] || {};
   const activeTypeIcon = typeEmojis[activeChar.type] || "❓";
+
+  function endTurnCleanup() {
+    setTurn(prev => prev + 1);
+    setHasUsedTurn(false);
+    setIsTurnInProgress(false);
+  
+    setSuperEffects(prev => {
+      const updated = {};
+      for (const id in prev) {
+        updated[id] = prev[id].filter(buff => turn + 1 <= buff.expiresOn);
+      }
+      return updated;
+    });
+  }  
 
   return (
     <div className="p-6 bg-zinc-900 text-white rounded-xl">
@@ -484,7 +526,109 @@ export default function BattleScene() {
             idx !== activeUnitIndex && (
               <button
                 key={unit.id}
-                onClick={() => setActiveUnitIndex(idx)}
+                onClick={async () => {
+                  if (hasUsedTurn || isTurnInProgress) return;
+                
+                  const outgoingUnit = playerTeam[activeUnitIndex];
+                  const incomingUnit = playerTeam[idx];
+                  const swapBuffs = outgoingUnit.passives?.filter(p => p.type === "onSwitchOut") ?? [];
+                
+                  setHasUsedTurn(true);
+                  setIsTurnInProgress(true);
+
+                  const newBuffs = swapBuffs.map(p => ({
+                    atkBoost: p.atkBoost ?? 0,
+                    defBoost: p.defBoost ?? 0,
+                    expiresOn: turn + (p.turns ?? 1) - 1
+                  }));
+                  
+                  // Immediately apply buffs to context
+                  const simulatedEffects = {
+                    ...superEffects,
+                    [incomingUnit.id]: [...(superEffects[incomingUnit.id] ?? []), ...newBuffs]
+                  };
+                  
+                  const simulatedCtx = {
+                    ...getBattleContext(),
+                    superEffects: simulatedEffects
+                  };
+                  
+                  let activeUnitStats = calculatePreAttackStats(incomingUnit, simulatedCtx, incomingUnit.id);
+                  
+                  // Commit the buff to state
+                  setSuperEffects(simulatedEffects);
+              
+                  setActiveUnitIndex(idx);
+
+                  setSwitchInTurnMap(prev => ({
+                    ...prev,
+                    [incomingUnit.id]: turn
+                  }));
+                
+                  const logMessages = [`🔁 Switched to ${incomingUnit.name}`];
+                  if (swapBuffs.length > 0) {
+                    const effectDescriptions = swapBuffs.map(p => p.description || `+${(p.defBoost ?? 0) * 100}% DEF`).join(", ");
+                    logMessages.push(`✨ Gained Buffs: ${effectDescriptions}`);
+                  }
+                
+                  setLog(prev => ({
+                    ...prev,
+                    [turn]: [...(prev[turn] ?? []), ...logMessages]
+                  }));
+                
+                  // 🧠 simulate enemy phase after switch
+                  const currentEnemy = stage.phases[enemyPhaseIndex];
+                  const activeUnit = incomingUnit;
+                  const attacksThisTurn = currentEnemy.attacks || 1;
+                
+                  for (let i = 0; i < attacksThisTurn; i++) {
+                    const isSuper = Math.random() < (currentEnemy.SA ?? 0) / 100;
+                    const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
+                      if ((p.type === "startOfTurn" || p.type === "onAttack") && (!p.condition || p.condition(getBattleContext(), activeUnit.id))) {
+                        return total + (p.evadeChance ?? 0);
+                      }
+                      return total;
+                    }, 0);
+                
+                    const evaded = Math.random() < evadeChance;
+                    if (evaded) {
+                      setLog(prev => ({
+                        ...prev,
+                        [turn]: [...(prev[turn] ?? []), `💨 ${activeUnit.name} dodged ${currentEnemy.name}'s ${isSuper ? "Super Attack" : "attack"}!`]
+                      }));
+                      continue;
+                    }
+                
+                    const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(currentEnemy, activeUnit, getBattleContext());
+                    const rawDmg = isSuper ? currentEnemy.SAatk : currentEnemy.atk;
+                    let baseDamage = rawDmg * typeMultiplier;
+                    const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
+                    const drLabel = (dmgReduction ?? 0) > 0 ? ` -${Math.round((dmgReduction ?? 0) * 100)}% DR ` : "";
+                    baseDamage *= 1 - (dmgReduction ?? 0);
+                    const reduced = Math.max(0, baseDamage - activeUnitStats.def);
+                    const variance = 0.99 + Math.random() * 0.01;
+                    const damage = Math.floor(reduced * variance);
+                
+                    const updatedTeam = [...playerTeam];
+                    updatedTeam[idx].currentHp = Math.max(0, updatedTeam[idx].currentHp - damage);
+                    setPlayerTeam(updatedTeam);
+                
+                    setLog(prev => ({
+                      ...prev,
+                      [turn]: [
+                        ...(prev[turn] ?? []),
+                        `${isSuper ? "💥 Super Attack! " : "🛡️"}${currentEnemy.name} attacked ${activeUnit.name} ` +
+                        `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${activeUnitStats.def} DEF = ${damage} damage] (after switch)`
+                      ]
+                    }));
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                  }
+                
+                  // End turn after switch
+                  endTurnCleanup();
+
+                }}                
+                
                 className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded"
                 disabled={unit.currentHp <= 0 || isTurnInProgress}
               >

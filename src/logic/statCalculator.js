@@ -1,4 +1,4 @@
-// For calculations BEFORE attack (excludes onAttack passives)
+// Start of Turn
 export function calculatePreAttackStats(unit, ctx, id = unit.id) {
   let atk = unit.baseAtk;
   let def = unit.baseDef;

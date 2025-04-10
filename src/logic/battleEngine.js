@@ -25,7 +25,7 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
     const isDisadvantaged = beats[defenderType] === attackerType;
   
     if (defenderGuards && !isDisadvantaged) {
-      return { multiplier: 0.5, label: "🛡️ Guard Activated" };
+      return { multiplier: 0.5, label: "🛡️" };
     }
   
     if (isAdvantaged) return { multiplier: 1.5, label: "⬆️" };
@@ -36,11 +36,17 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
   
 
   function hasPassive(unit, key, ctx, id) {
-    return (unit.passives ?? []).some(p =>
+    const fromPassives = (unit.passives ?? []).some(p =>
       (["startOfTurn", "onAttack"].includes(p.type)) &&
       (!p.condition || p.condition(ctx, id)) &&
       p[key] === true
     );
+  
+    const fromEffects = (ctx.superEffects?.[id] ?? []).some(e =>
+      ctx.turnNow <= (e.expiresOn ?? ctx.turnNow) && e[key] === true
+    );
+  
+    return fromPassives || fromEffects;
   }
 
   function getPassiveValue(unit, key, ctx, id) {
@@ -50,15 +56,22 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
         (!p.condition || p.condition(ctx, id)) &&
         p[key] != null
       ) {
-        total += p[key];
+        const val = typeof p[key] === "function" ? p[key](ctx, id) : p[key];
+        total += val;
+      }
+      for (const effect of ctx.superEffects?.[id] ?? []) {
+        if (ctx.turnNow <= (effect.expiresOn ?? ctx.turnNow) && typeof effect[key] === "number") {
+          total += effect[key];
+        }
       }
       return total;
     }, 0);
-  }
+  }  
 
   let crit = false;
   let extraAttackChance = false;
   let guaranteedSuper = false;
+  let superEffective = false;
 
   // Flags
   attackerPassives.forEach(p => {
@@ -67,6 +80,7 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
         if (Math.random() < (p.critChance ?? 0)) crit = true;
         if (Math.random() < (p.extraAttackChance ?? 0)) extraAttackChance = true;
         if (p.guaranteedAdditionalSuper) guaranteedSuper = true;
+        if (p.superEffective) superEffective = true;
       }
     }
   });
@@ -76,12 +90,16 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
   let baseDamage = raw;
   let typeLabel = "";
 
-if (!crit) {
-  const { multiplier, label } = getTypeAdvantageMultiplier(attacker, defender, ctx);
-  typeLabel = label;
-  baseDamage *= multiplier;
-}
-
+  if (!crit) {
+    const { multiplier, label } = getTypeAdvantageMultiplier(attacker, defender, ctx);
+    typeLabel = label;
+    if (superEffective && multiplier < 1.5) {
+      baseDamage *= 1.5;
+      typeLabel = "⬆️";
+    } else {
+      baseDamage *= multiplier;
+    }
+  }
 
   // DR
   const damageReduction = getPassiveValue(defender, "damageReduction", ctx, defender.id);
