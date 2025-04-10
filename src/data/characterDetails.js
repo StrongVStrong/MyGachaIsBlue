@@ -1,9 +1,9 @@
 const characterDetails = {
     1: {
       name: "Super Saiyan Goku",
-      baseAtk: 560,
-      baseDef: 15000,
-      baseHp: 20000,
+      baseAtk: 15600,
+      baseDef: 16500,
+      baseHp: 26655,
       passives: [
         // 🔹 Always Active: ATK & DEF +200%
         {
@@ -38,7 +38,6 @@ const characterDetails = {
           condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] >= 5,
           defBoost: 0.59,
           critChance: 0.5,
-          extraAttackChance: 0.5,
           evadeChance: 0.5,
           description: "DEF +59%, High chance to crit/additional/evade after turn 6"
         },
@@ -59,67 +58,53 @@ const characterDetails = {
           description: "Raises ATK",
           turns: 999
         },
-
-        {
-          type: "startOfTurn",
-          condition: (ctx, id) => ctx.superAttackCounts[id] > 0, // Only activate if at least 1 super performed
-          atkBoost: (ctx, id) => 0.1 * ctx.superAttackCounts[id], // 10% atk per super
-        }
       ],
     },
 
     2: {
       name: "Super Saiyan Vegeta",
-      baseAtk: 22000,
-      baseDef: 16000,
-      baseHp: 21000,
+      baseAtk: 12000,
+      baseDef: 14000,
+      baseHp: 50000,
       passives: [
         // 🔹 Always Active: ATK & DEF +200%
         {
-        type: "startOfTurn",
-        atkBoost: 3.0,
-        defBoost: 3.0,
-        description: "ATK & DEF +200%"
+          type: "startOfTurn",
+          atkBoost: 2.0,
+          defBoost: 2.0,
+          description: "ATK & DEF +200%"
         },
 
         // 🔹 Support: +10% DEF for one turn on swap-out
         {
-        type: "onSwitchOut",
-        defBoost: 9.1,
-        description: "DEF +10% on swap-out for one turn"
+          type: "onSwitchOut",
+          defBoost: 0.1,
+          description: "DEF +10% on swap-out for one turn"
         },
 
         // 🔹 First 3 turns from entry: DEF +300%, Guard
         {
-        type: "startOfTurn",
-        condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
-        defBoost: 4.0,
-        guardsAll: true,
-        description: "DEF +300%, guards all attacks for 3 turns from entry"
+          type: "startOfTurn",
+          condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
+          defBoost: 3.0,
+          guardsAll: true,
+          description: "DEF +300%, guards all attacks for 3 turns from entry"
         },
 
         // 🔹 When attacking: ATK +200%, DEF +100%, effective against all types
         {
-        type: "onAttack",
-        atkBoost: 3.0,
-        defBoost: 2.0,
-        superEffective: true,
-        extraAttackChance: 1,
-        description: "ATK +200%, DEF +100%, super effective, launches additional Super Attack"
-        },
-
-        // 🔹 On Switch-In: Guard + Great chance to launch additional super
-        {
-        type: "onSwitchIn",
-        oncePerEntry: true,
-        guardsAll: true,
-        description: "Each time this unit is switched in: Guards all, launches additional with great chance"
+          type: "onAttack",
+          atkBoost: 2.0,
+          defBoost: 1.0,
+          superEffective: true,
+          extraAttackChance: 1,
+          description: "ATK +200%, DEF +100%, super effective, launches additional Super Attack"
         },
 
         // Super Attack: Burning Stars Cannon
         {
           type: "superAttack",
-          defBoost: 1.1,
+          defBoost: 0.1,
           description: "Raises DEF",
           turns: 999
         }
@@ -128,63 +113,54 @@ const characterDetails = {
 
     3: {
       name: "FPSSJ Broly",
-      baseAtk: 24000,
-      baseDef: 14000,
-      baseHp: 25000,
+      baseAtk: 21200,
+      baseDef: 14400,
+      baseHp: 23000,
       passives: [
-          // 🔹 Always Active: ATK & DEF +400%
+          // 🔹 Always Active: ATK & DEF +222%
           {
-          type: "startOfTurn",
-          atkBoost: 5.0,
-          defBoost: 5.0,
-          description: "ATK & DEF +400%"
+            type: "startOfTurn",
+            atkBoost: 2.22,
+            defBoost: 2.22,
+            description: "ATK & DEF +400%"
           },
   
           // 🔹 First 5 turns: DEF +66%, great chance to super
-        {
-          type: "startOfTurn",
-          condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 5,
-          atkBoost: 1.66,
-          defBoost: 1.66,
-          extraAttackChance: 0.7,
-          description: "DEF +159%, Great chance to crit/additional/evade for 5 turns"
-        },
-  
-        // 🔹 From turn 6 onward: DEF +22%, high chance to super and evade
-        {
-          type: "startOfTurn",
-          condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] >= 5,
-          defBoost: 1.59,
-          critChance: 0.5,
-          extraAttackChance: 0.5,
-          evadeChance: 0.5,
-          description: "DEF +59%, High chance to crit/additional after turn 6"
-        },
-  
-          // 🔹 When attacking: ATK +200%, DEF +100%, effective against all types
           {
-          type: "onAttack",
-          atkBoost: 3.0,
-          defBoost: 2.0,
-          superEffective: true,
-          extraAttackChance: 1,
-          description: "ATK +200%, DEF +100%, super effective, launches additional Super Attack"
+            type: "startOfTurn",
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 5,
+            atkBoost: 0.66,
+            defBoost: 0.66,
+            extraAttackChance: 0.7,
+            description: "DEF +159%, Great chance to crit/additional/evade for 5 turns"
+          },
+    
+          // 🔹 From turn 6 onward: DEF +132%, high chance to super and evade
+          {
+            type: "startOfTurn",
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] >= 5,
+            defBoost: 1.32,
+            critChance: 0.5,
+            extraAttackChance: 0.5,
+            evadeChance: 0.5,
+            description: "DEF +59%, High chance to crit/additional after turn 6"
           },
   
-          // 🔹 On Switch-In: Guard + Great chance to launch additional super
+          // 🔹 When attacking: ATK +167%, DEF +277%, effective against all types
           {
-          type: "onSwitchIn",
-          oncePerEntry: true,
-          guardsAll: true,
-          extraAttackChance: 0.7,
-          description: "Each time this unit is switched in: Guards all, launches additional with great chance"
+            type: "onAttack",
+            atkBoost: 1.67,
+            defBoost: 2.77,
+            superEffective: true,
+            extraAttackChance: 1,
+            description: "ATK +200%, DEF +100%, super effective, launches additional Super Attack"
           },
 
           // Super Attack: Meteor Blaster
           {
             type: "superAttack",
-            atkBoost: 1.1,
-            defBoost: 1.1,
+            atkBoost: 0.1,
+            defBoost: 0.1,
             description: "Raises ATK and DEF for 1 turn",
             turns: 1
           }
@@ -193,9 +169,9 @@ const characterDetails = {
 
       4: {
         name: "Super Vegito",
-        baseAtk: 24500,
-        baseDef: 15000,
-        baseHp: 22000,
+        baseAtk: 12777,
+        baseDef: 16777,
+        baseHp: 20000,
         passives: [
           // 🔹 Always Active: ATK & DEF +359%, Great chance to super, Guards all attacks
           {
@@ -216,14 +192,6 @@ const characterDetails = {
           extraAttackChance: 1,
           description: "ATK +200%, DEF +200%"
           },
-  
-          // 🔹 On Switch-In: Great chance to launch additional super
-          {
-          type: "onSwitchIn",
-          oncePerEntry: true,
-          extraAttackChance: 0.7,
-          description: "Each time this unit is switched in: Launches additional with great chance"
-          },
 
           // Super Attack: Vegito Special
           {
@@ -238,11 +206,11 @@ const characterDetails = {
 
       5: {
         name: "Super Gogeta",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 16777,
+        baseDef: 12777,
+        baseHp: 20000,
         passives: [
-          // 🔹 Always Active: ATK & DEF +400%
+          // 🔹 Always Active: ATK & DEF +459%
           {
           type: "startOfTurn",
           atkBoost: 4.59,
@@ -250,16 +218,16 @@ const characterDetails = {
           critChance: 0.7,
           evadeChance: 0.7,
           extraAttackChance: 0.7,
-          damageReduction: 0.5,
+          damageReduction: 0.1,
           guardsAll: true,
           description: "ATK & DEF +400%"
           },
   
-          // 🔹 When attacking: ATK +300%, DEF +200%, launches an additional super
+          // 🔹 When attacking: ATK +159%, DEF +59%, launches an additional super
           {
           type: "onAttack",
-          atkBoost: 4.0,
-          defBoost: 3.0,
+          atkBoost: 1.59,
+          defBoost: 0.59,
           extraAttackChance: 1,
           description: "ATK +300%, DEF +200%,launches additional Super Attack"
           },
@@ -267,51 +235,42 @@ const characterDetails = {
           // Super Attack: Gogeta Special
           {
             type: "superAttack",
-            atkBoost: 1.3,
-            defBoost: 1.3,
-            description: "Greatly Raises ATK and DEF",
-            turns: 999
+            atkBoost: 0.1,
+            defBoost: 0.1,
+            description: "Raises ATK and DEF for 1 turn",
+            turns: 1
           }
         ],
       },
 
       6: {
         name: "SSJ4 Daima Goku",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 27000,
+        baseDef: 21700,
+        baseHp: 12000,
         passives: [
           // 🔹 Always Active: ATK & DEF +159%
           {
           type: "startOfTurn",
-          atkBoost: 2.59,
-          defBoost: 2.59,
+          atkBoost: 1.59,
+          defBoost: 1.59,
           description: "ATK & DEF +159%"
           },
 
-          // 🔹 When attacking: ATK +500%, DEF +300%, effective against all types
+          // 🔹 When attacking: ATK +500%, DEF +200%, effective against all types
           {
           type: "onAttack",
-          atkBoost: 6.0,
-          defBoost: 4.0,
+          atkBoost: 5.0,
+          defBoost: 2.0,
           superEffective: true,
-          extraAttackChance: 1,
+          extraAttackChance: 0.7,
           description: "ATK +500%, DEF +300%, super effective, launches additional Super Attack"
-          },
-
-          // 🔹 On Switch-In: Guard + Great chance to evade
-          {
-          type: "onSwitchIn",
-          oncePerEntry: true,
-          guardsAll: true,
-          evadeChance: 0.7,
-          description: "Each time this unit is switched in: Guards all, great chance to evade all attacks"
           },
 
           // Super Attack: Ultra Kamehameha
           {
             type: "superAttack",
-            defBoost: 1.3,
+            defBoost: 0.3,
             description: "Greatly Raises DEF",
             turns: 999
           }
@@ -320,32 +279,33 @@ const characterDetails = {
 
       7: {
         name: "Super Saiyan Goku Daima",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 17500,
+        baseDef: 12500,
+        baseHp: 22000,
         passives: [
-          // 🔹 Always Active: ATK & DEF +200%
+          // 🔹 Always Active: ATK & DEF +59%
           {
           type: "startOfTurn",
-          atkBoost: 3.0,
-          defBoost: 3.0,
-          description: "ATK & DEF +200%"
+          atkBoost: 0.59,
+          defBoost: 0.59,
+          description: "ATK & DEF +59%"
           },
   
-          // 🔹 First 5 turns: DEF +66%, great chance to super
+          // 🔹 First 3 turns: DEF +59%, great chance to super
           {
             type: "startOfTurn",
-            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 5,
-            atkBoost: 0.66,
-            defBoost: 0.66,
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
+            atkBoost: 0.59,
+            defBoost: 0.59,
+            extraAttackChance: 0.7,
             description: "DEF +66%, Great chance to crit/additional/evade for 5 turns"
           },
 
           // Super Attack: Power Pole Assault
           {
             type: "superAttack",
-            atkBoost: 2.0,
-            defBoost: 2.0,
+            atkBoost: 1,
+            defBoost: 1,
             description: "Massively Raises ATK and DEF",
             turns: 999
           }
@@ -354,9 +314,9 @@ const characterDetails = {
 
       8: {
         name: "SSJ3 Vegeta",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 18800,
+        baseDef: 17700,
+        baseHp: 26600,
         passives: [
           // 🔹 Always Active: ATK & DEF +400%
           {
@@ -372,19 +332,11 @@ const characterDetails = {
           defBoost: 4.0,
           description: "DEF +300%"
           },
-  
-          // 🔹 On Switch-In: Great chance to launch additional super
-          {
-          type: "onSwitchIn",
-          oncePerEntry: true,
-          extraAttackChance: 0.7,
-          description: "Each time this unit is switched in: Launches additional with great chance"
-          },
 
           // Super Attack: Vegeta Onslaught
           {
             type: "superAttack",
-            atkBoost: 2,
+            atkBoost: 1,
             description: "Massively Raises ATK",
             turns: 999
           }
@@ -393,16 +345,16 @@ const characterDetails = {
 
       9: {
         name: "Glorio",
-        baseAtk: 24000,
-        baseDef: 14000,
+        baseAtk: 19000,
+        baseDef: 17000,
         baseHp: 25000,
         passives: [
           // 🔹 Always Active: ATK & DEF +250%
           {
           type: "startOfTurn",
-          atkBoost: 3.5,
-          defBoost: 3.5,
-          description: "ATK & DEF +350%"
+          atkBoost: 2.5,
+          defBoost: 2.5,
+          description: "ATK & DEF +250%"
           },
   
           // 🔹 From turn 6 onward: DEF +50%, high chance to super and evade
@@ -411,15 +363,14 @@ const characterDetails = {
             condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] >= 5,
             defBoost: 0.5,
             critChance: 0.5,
-            extraAttackChance: 0.5,
             evadeChance: 0.5,
             description: "DEF +50%, High chance to crit/additional after turn 6"
           },
   
-          // 🔹 When attacking: DEF +100%, effective against all types
+          // 🔹 When attacking: ATK +555%, effective against all types
           {
           type: "onAttack",
-          defBoost: 1.0,
+          atkBoost: 5.55,
           superEffective: true,
           description: "DEF +100%, super effective"
           },
@@ -427,7 +378,7 @@ const characterDetails = {
           // Super Attack: Magic
           {
             type: "superAttack",
-            defBoost: 1.3,
+            defBoost: 0.3,
             description: "Greatly Raises DEF",
             turns: 999
           }
@@ -436,30 +387,38 @@ const characterDetails = {
 
       10: {
         name: "Goma",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 28000,
+        baseDef: 12000,
+        baseHp: 15000,
         passives: [
-          // 🔹 Always Active: ATK & DEF +500%
+          // 🔹 Always Active: ATK & DEF +666%
           {
-          type: "startOfTurn",
-          atkBoost: 6.0,
-          defBoost: 6.0,
-          description: "ATK & DEF +500%"
+            type: "startOfTurn",
+            atkBoost: 6.66,
+            defBoost: 6.66,
+            description: "ATK & DEF +500%"
           },
 
-          // 🔹 Every turn passed: ATK +30%
+          // 🔹 When attacking: ATK +66%, effective against all types
+          {
+            type: "onAttack",
+            atkBoost: 0.66,
+            superEffective: true,
+            description: "ATK +66%, super effective"
+          },
+
+          // 🔹 Every turn passed: ATK +6%
           {
             type: "startOfTurn",
             condition: (ctx, id) => true,
-            atkBoost: (ctx, id) => 0.3 * (ctx.turnNow - ctx.turnEntered[id]),
-            description: "ATK +30% per turn since entry"
+            atkBoost: (ctx, id) => 0.06 * (ctx.turnNow - ctx.turnEntered[id]),
+            description: "ATK +6% per turn since entry"
           },
 
           // Super Attack: Third Eye
           {
             type: "superAttack",
-            defBoost: 1.3,
+            defBoost: 0.3,
             description: "Greatly Raises DEF",
             turns: 999
           }
@@ -468,9 +427,9 @@ const characterDetails = {
 
       11: {
         name: "Ultra Instinct Goku",
-        baseAtk: 20,
-        baseDef: 15000,
-        baseHp: 20000,
+        baseAtk: 13000,
+        baseDef: 12000,
+        baseHp: 40000,
         passives: [
           // 🔹 Always Active: ATK & DEF +200%
           {
@@ -530,8 +489,8 @@ const characterDetails = {
   
           {
             type: "startOfTurn",
-            condition: (ctx, id) => ctx.superAttackCounts[id] > 0, // Only activate if at least 1 super performed
-            atkBoost: (ctx, id) => 0.1 * ctx.superAttackCounts[id], // 10% atk per super
+            condition: (ctx, id) => ctx.superAttackCounts[id] > 0,
+            atkBoost: (ctx, id) => 0.01 * ctx.superAttackCounts[id], // 1% atk per super
           }
         ],
       },
@@ -558,12 +517,12 @@ const characterDetails = {
           turns: 1
           },
   
-          // 🔹 When attacking: ATK +200%, DEF +100%, effective against all types
+          // 🔹 When attacking: ATK +244%, DEF +44%, effective against all types
           {
           type: "onAttack",
-          atkBoost: 3.0,
-          defBoost: 2.0,
-          superEffective: true,
+          atkBoost: 2.44,
+          defBoost: 0.44,
+          critChance: 1,
           extraAttackChance: 1,
           description: "ATK +200%, DEF +100%, super effective, launches additional Super Attack"
           },
@@ -571,9 +530,8 @@ const characterDetails = {
           // Super Attack: x10 Kamehameha
           {
             type: "superAttack",
-            atkBoost: 0.1,
             defBoost: 0.1,
-            description: "Raises ATK and DEF",
+            description: "Raises DEF",
             turns: 999
           },
   
@@ -614,17 +572,17 @@ const characterDetails = {
           {
             type: "startOfTurn",
             condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] >= 3,
-            defBoost: 1.59,
+            defBoost: 0.33,
+            atkBoost: 0.33,
             critChance: 0.5,
-            extraAttackChance: 0.5,
             description: "DEF +59%, High chance to crit/additional after turn 6"
           },
   
-          // 🔹 When attacking: ATK +200%, DEF +100%, effective against all types
+          // 🔹 When attacking: ATK +33%, DEF +33%, effective against all types
           {
           type: "onAttack",
-          atkBoost: 3.0,
-          defBoost: 2.0,
+          atkBoost: 0.33,
+          defBoost: 0.33,
           superEffective: true,
           extraAttackChance: 1,
           description: "ATK +200%, DEF +100%, super effective, launches additional Super Attack"
@@ -634,13 +592,13 @@ const characterDetails = {
           // Super Attack: Meteor Attack
           {
             type: "superAttack",
-            defBoost: 1.1,
+            defBoost: 0.1,
             description: "Raises DEF for 1 turn",
             turns: 1
           },
           {
             type: "superAttack",
-            atkBoost: 1.1,
+            atkBoost: 0.1,
             description: "Raises ATK",
             turns: 999
           },
@@ -649,9 +607,9 @@ const characterDetails = {
   
       14: {
         name: "SSGSS Goku",
-        baseAtk: 24500,
+        baseAtk: 17000,
         baseDef: 15000,
-        baseHp: 22000,
+        baseHp: 24000,
         passives: [
           // 🔹 Always Active: ATK & DEF +159%, Great chance to super, Guards all attacks
           {
@@ -662,31 +620,31 @@ const characterDetails = {
           description: "ATK & DEF +159%, Great chance to super, Guards all attacks"
           },
   
-          // 🔹 When attacking: ATK +200% & DEF +200%, effective against all types
+          // 🔹 When attacking: ATK +70% & DEF +100%, effective against all types
           {
           type: "onAttack",
-          atkBoost: 2.0,
-          defBoost: 2.0,
+          atkBoost: 0.7,
+          defBoost: 1.0,
           superEffective: true,
           damageReduction: 0.7,
           extraAttackChance: 1,
           description: "ATK +200%, DEF +200%"
           },
   
-          // 🔹 On Even turns: ATK + 77%
+          // 🔹 On Even turns: DEF + 77%
           {
           type: "startOfTurn",
           defBoost: 0.77,
           guardsAll: true,
           condition: (ctx) => ctx.turnNow % 2 === 0,
-          description: "Each time this unit is switched in: ATK +77%"
+          description: "On even turns: DEF +77%"
           },
 
           // Super Attack: Is gonna pay
           {
             type: "superAttack",
             atkBoost: 0.3,
-            description: "Greatly Raises ATK and DEF",
+            description: "Greatly Raises ATK",
             turns: 999
           }
           ],
@@ -694,59 +652,66 @@ const characterDetails = {
   
       15: {
         name: "SSGSS Kaioken Goku",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 22000,
+        baseDef: 17000,
+        baseHp: 19000,
         passives: [
-          // 🔹 Always Active: ATK & DEF +400%
+          // 🔹 Always Active: ATK & DEF +159%
           {
-          type: "startOfTurn",
-          atkBoost: 4.59,
-          defBoost: 4.59,
-          critChance: 0.7,
-          extraAttackChance: 0.7,
-          damageReduction: 0.35,
-          description: "ATK & DEF +400%"
+            type: "startOfTurn",
+            atkBoost: 1.59,
+            defBoost: 1.59,
+            critChance: 0.7,
+            extraAttackChance: 0.7,
+            damageReduction: 0.35,
+            description: "ATK & DEF +159%"
           },
   
-          // 🔹 When attacking: ATK +300% and launches an additional super
+          // 🔹 When attacking: ATK +77% and DEF +77%, launches an additional super
           {
-          type: "onAttack",
-          atkBoost: 4.0,
-          defBoost: 3.0,
-          extraAttackChance: 1,
-          description: "ATK +300%, DEF +200%,launches additional Super Attack"
+            type: "onAttack",
+            atkBoost: 0.77,
+            defBoost: 0.77,
+            extraAttackChance: 1,
+            description: "ATK +300%, DEF +200%,launches additional Super Attack"
           },
 
           // Super Attack: Kaioken Rush
           {
             type: "superAttack",
-            atkBoost: 1.3,
-            description: "Greatly Raises ATK",
+            atkBoost: 0.1,
+            description: "Raises ATK",
             turns: 999
+          },
+          {
+            type: "superAttack",
+            defBoost: 0.3,
+            description: "Greatly Raises DEF for 1 turn",
+            turns: 1
           }
         ],
       },
   
       16: {
         name: "Vegito Blue",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 19000,
+        baseDef: 17950,
+        baseHp: 16000,
         passives: [
           // 🔹 Always Active: ATK & DEF +59%
           {
           type: "startOfTurn",
           atkBoost: 0.59,
           defBoost: 0.59,
+          extraAttackChance: 1,
           description: "ATK & DEF +59%"
           },
 
-          // 🔹 When attacking: ATK +600%, DEF +500%, guaranteed crit
+          // 🔹 When attacking: ATK +700%, DEF +170%, guaranteed crit
           {
           type: "onAttack",
-          atkBoost: 6.0,
-          defBoost: 5.0,
+          atkBoost: 7.0,
+          defBoost: 1.7,
           critChance: 1,
           extraAttackChance: 1,
           description: "ATK +600%, DEF +500%, guaranteed crits, launches additional Super Attack"
@@ -755,7 +720,7 @@ const characterDetails = {
           // Super Attack: Final Kamehameha
           {
             type: "superAttack",
-            defBoost: 1.3,
+            defBoost: 0.3,
             description: "Greatly Raises DEF",
             turns: 999
           }
@@ -764,23 +729,24 @@ const characterDetails = {
 
       17: {
         name: "Gogeta Blue",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 17950,
+        baseDef: 19000,
+        baseHp: 16000,
         passives: [
-          // 🔹 Always Active: ATK & DEF +200%
+          // 🔹 Always Active: ATK & DEF +159%
           {
           type: "startOfTurn",
-          atkBoost: 2.0,
-          defBoost: 2.0,
-          description: "ATK & DEF +200%"
+          atkBoost: 1.59,
+          defBoost: 1.59,
+          extraAttackChance: 1,
+          description: "ATK & DEF +159%"
           },
   
-          // 🔹 When attacking: ATK +300%, DEF +400%, guaranteed crit
+          // 🔹 When attacking: ATK +59%, DEF +59%, guaranteed crit
           {
           type: "onAttack",
-          atkBoost: 3.0,
-          defBoost: 4.0,
+          atkBoost: 0.59,
+          defBoost: 0.59,
           critChance: 1,
           extraAttackChance: 1,
           description: "ATK +300%, DEF +400%, guaranteed crits, launches additional Super Attack"
@@ -789,8 +755,8 @@ const characterDetails = {
           // Super Attack: Meteor Combination
           {
             type: "superAttack",
-            atkBoost: 2.0,
-            defBoost: 2.0,
+            atkBoost: 1,
+            defBoost: 1,
             description: "Massively Raises ATK and DEF for 1 turn",
             turns: 1
           }
@@ -799,52 +765,53 @@ const characterDetails = {
 
       18: {
         name: "Kurapika",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 24020,
+        baseDef: 24030,
+        baseHp: 24040,
         passives: [
-          // 🔹 Always Active: ATK & DEF +450%
+          // 🔹 Always Active: ATK & DEF +250%
           {
           type: "startOfTurn",
-          atkBoost: 4.0,
-          defBoost: 4.0,
-          superEffective: true,
+          atkBoost: 2.5,
+          defBoost: 2.5,
+          guardsAll: true,
           extraAttackChance: 1,
-          description: "ATK & DEF +450%"
+          description: "ATK & DEF +250%"
           },
   
           // 🔹 When attacking: DEF +300%
           {
           type: "onAttack",
-          defBoost: 4.0,
+          defBoost: 3.0,
           description: "DEF +300%"
           },
   
           // 🔹 First 5 turns: ATK & DEF +200%, great chance to super
           {
             type: "startOfTurn",
-            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 5,
             atkBoost: 2.0,
             defBoost: 2.0,
             extraAttackChance: 0.7,
-            description: "ATK & DEF +90%, Great chance to crit/additional/evade for 5 turns"
+            superEffective: true,
+            description: "ATK & DEF +200%, Great chance to crit/additional/evade for 5 turns"
           },
 
           // Super Attack: Emperor's Time
           {
             type: "superAttack",
-            defBoost: 2,
-            description: "Massively Raises DEF",
+            atkBoost: 0.5,
+            description: "Massively Raises ATK",
             turns: 999
           }
         ],
       },
 
       19: {
-        name: "Glorio",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        name: "Killua",
+        baseAtk: 24700,
+        baseDef: 18000,
+        baseHp: 15000,
         passives: [
           // 🔹 Always Active: ATK & DEF +150%
           {
@@ -858,7 +825,7 @@ const characterDetails = {
           // 🔹 First 5 turns: ATK & DEF +100%, high chance to super
           {
             type: "startOfTurn",
-            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 5,
             atkBoost: 1.0,
             defBoost: 1.0,
             extraAttackChance: 0.5,
@@ -872,24 +839,31 @@ const characterDetails = {
           type: "onAttack",
           defBoost: 1.0,
           superEffective: true,
+          extraAttackChance: 0.5,
           description: "DEF +100%, super effective"
           },
 
           // Super Attack: Godspeed
           {
             type: "superAttack",
-            atkBoost: 1.3,
-            description: "Greatly Raises ATK",
+            atkBoost: 0.1,
+            description: "Raises ATK",
             turns: 999
+          },
+          {
+            type: "superAttack",
+            defBoost: 0.1,
+            description: "Raises DEF for 1 turn",
+            turns: 1
           }
         ],
       },
 
       20: {
         name: "Gon",
-        baseAtk: 240,
-        baseDef: 140,
-        baseHp: 25000,
+        baseAtk: 13000,
+        baseDef: 13000,
+        baseHp: 13000,
         passives: [
           // 🔹 Always Active: ATK & DEF +700%
           {
@@ -897,23 +871,22 @@ const characterDetails = {
           atkBoost: 7.0,
           defBoost: 7.0,
           damageReduction: 0.7,
-          guardsAll: true,
           critChance: 0.5,
           description: "ATK & DEF +700%"
           },
 
-          // 🔹 Every turn passed: ATK +30% up to 90%
+          // 🔹 Every turn passed: ATK +10% up to 50%
           {
             type: "startOfTurn",
             condition: (ctx, id) => true,
-            atkBoost: (ctx, id) => Math.min(0.3 * (ctx.turnNow - ctx.turnEntered[id]), 0.9),
+            atkBoost: (ctx, id) => Math.min(0.1 * (ctx.turnNow - ctx.turnEntered[id]), 0.5),
             description: "ATK +30% per turn since entry (up to 90%)"
           },
 
           // Super Attack: Final Janken
           {
             type: "superAttack",
-            atkBoost: 2,
+            atkBoost: 1,
             description: "Massively Raises ATK for 1 turn",
             turns: 1
           }
@@ -922,9 +895,9 @@ const characterDetails = {
 
       21: {
         name: "Leoreo",
-        baseAtk: 20,
-        baseDef: 15000,
-        baseHp: 20000,
+        baseAtk: 22315,
+        baseDef: 10400,
+        baseHp: 30000,
         passives: [
           // 🔹 Always Active: ATK & DEF +100% and great chance to evade
           {
@@ -935,10 +908,10 @@ const characterDetails = {
             description: "ATK & DEF +100% and great chance to evade"
           },
     
-          // 🔹 When attacking: ATK & DEF +70%
+          // 🔹 When attacking: ATK +477%, DEF +70%
           {
             type: "onAttack",
-            atkBoost: 0.7,
+            atkBoost: 4.77,
             defBoost: 0.7,
             description: "ATK & DEF +70% when attacking"
           },
@@ -973,8 +946,8 @@ const characterDetails = {
   
       22: {
         name: "Jotaro (Star Platinum)",
-        baseAtk: 22000,
-        baseDef: 16000,
+        baseAtk: 19000,
+        baseDef: 17000,
         baseHp: 21000,
         passives: [
           // 🔹 Always Active: ATK +100% & DEF +30%
@@ -983,13 +956,14 @@ const characterDetails = {
           atkBoost: 1.0,
           defBoost: 0.3,
           guardsAll: true,
-          description: "ATK +100% & DEF +30%, Guards all attacks"
+          extraAttackChance: 1,
+          description: "ATK +400% & DEF +30%, Guards all attacks"
           },
   
           // 🔹 When attacking: ATK +100%, DEF +200%, effective against all types
           {
           type: "onAttack",
-          atkBoost: 1.0,
+          atkBoost: 4.0,
           defBoost: 2.0,
           superEffective: true,
           extraAttackChance: 1,
@@ -1014,9 +988,9 @@ const characterDetails = {
   
       23: {
         name: "DIO (The World)",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 17000,
+        baseDef: 19000,
+        baseHp: 21000,
         passives: [
           // 🔹 Always Active: ATK & DEF +100%, damage reduction +30%
           {
@@ -1052,7 +1026,7 @@ const characterDetails = {
           // Super Attack: Timestop
           {
             type: "superAttack",
-            atkBoost: 0.1,
+            atkBoost: 0.05,
             description: "Raises ATK",
             turns: 999
           },
@@ -1061,9 +1035,9 @@ const characterDetails = {
   
       24: {
         name: "Golden Experience Requiem",
-        baseAtk: 24500,
-        baseDef: 15000,
-        baseHp: 22000,
+        baseAtk: 14500,
+        baseDef: 16000,
+        baseHp: 26000,
         passives: [
           // 🔹 Always Active: ATK & DEF +150%, Great chance to super, Guards all attacks
           {
@@ -1088,9 +1062,9 @@ const characterDetails = {
           // Super Attack: GER
           {
             type: "superAttack",
-            atkBoost: 1,
-            defBoost: 1,
-            description: "Massively Raises ATK and DEF for 3 turns",
+            atkBoost: 0.1,
+            defBoost: 0.1,
+            description: "Raises ATK and DEF for 3 turns",
             turns: 3
           }
           ],
@@ -1117,14 +1091,21 @@ const characterDetails = {
           type: "onAttack",
           atkBoost: 7.77,
           extraAttackChance: 1,
-          description: "ATK +300%, DEF +200%,launches additional Super Attack"
+          description: "ATK +300%, DEF +200%, launches additional Super Attack"
+          },
+
+          // 🔹 When attacking: DEF +7%
+          {
+            type: "onAttack",
+            defBoost: 0.07,
+            description: "ATK +300%, DEF +400%, guaranteed crits, launches additional Super Attack"
           },
 
           // Super Attack: Ore Wa Strika Da
           {
             type: "superAttack",
-            atkBoost: 1,
-            description: "Massively Raises ATK",
+            defBoost: 0.1,
+            description: "Massively Raises DEF",
             turns: 999
           }
         ],
@@ -1132,9 +1113,9 @@ const characterDetails = {
   
       26: {
         name: "Rafal",
-        baseAtk: 24000,
-        baseDef: 14000,
-        baseHp: 25000,
+        baseAtk: 26606,
+        baseDef: 16060,
+        baseHp: 16000,
         passives: [
           // 🔹 Always Active: ATK & DEF +20%
           {
@@ -1172,10 +1153,10 @@ const characterDetails = {
         baseDef: 14000,
         baseHp: 25000,
         passives: [
-          // 🔹 Always Active: ATK +200%, DEF +100%
+          // 🔹 Always Active: ATK +500%, DEF +100%
           {
           type: "startOfTurn",
-          atkBoost: 2.0,
+          atkBoost: 5.0,
           defBoost: 1.0,
           damageReduction: 0.25,
           description: "ATK & DEF +200%"
@@ -1205,8 +1186,8 @@ const characterDetails = {
 
       28: {
         name: "Lelouch",
-        baseAtk: 24000,
-        baseDef: 14000,
+        baseAtk: 12500,
+        baseDef: 8000,
         baseHp: 25000,
         passives: [
           // 🔹 Always Active: ATK & DEF +150%
@@ -1219,22 +1200,30 @@ const characterDetails = {
           description: "ATK & DEF +150%"
           },
   
-          // 🔹 First 5 turns: ATK & DEF +500%, great chance to super
+          // 🔹 First 3 turns: ATK & DEF +500%, great chance to super
           {
             type: "startOfTurn",
             condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
             atkBoost: 5.0,
             defBoost: 5.0,
-            extraAttackChance: 0.7,
             description: "ATK & DEF +500%, Great chance to crit/additional/evade for 5 turns"
+          },
+
+          // 🔹 When attacking: ATK +300%, great chance to additional super
+          {
+            type: "onAttack",
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] >= 3,
+            atkBoost: 1.0,
+            extraAttackChance: 0.7,
+            description: "ATK +300% and great chance to additional super when attacking"
           },
 
           // Super Attack: Emperor's Time
           {
             type: "superAttack",
-            defBoost: 1,
-            atkBoost: 1,
-            description: "Massively Raises ATK and DEF",
+            defBoost: 0.1,
+            atkBoost: 0.1,
+            description: "Raises ATK and DEF",
             turns: 999
           }
         ],
@@ -1251,14 +1240,13 @@ const characterDetails = {
           type: "startOfTurn",
           atkBoost: 1,
           defBoost: 1,
-          guardsAll: true,
           description: "ATK & DEF +100%"
           },
   
           // 🔹 First 10 turns: ATK & DEF +777%, high chance to super
           {
             type: "startOfTurn",
-            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 10,
             atkBoost: 1.0,
             defBoost: 1.0,
             extraAttackChance: 0.5,
@@ -1288,8 +1276,8 @@ const characterDetails = {
 
       30: {
         name: "Gary Oak Arceus",
-        baseAtk: 240,
-        baseDef: 140,
+        baseAtk: 14000,
+        baseDef: 17000,
         baseHp: 25000,
         passives: [
           // 🔹 Always Active: ATK & DEF +999%
@@ -1298,7 +1286,6 @@ const characterDetails = {
           atkBoost: 9.99,
           defBoost: 9.99,
           damageReduction: 0.9,
-          guardsAll: true,
           critChance: 0.9,
           description: "ATK & DEF +999%"
           },
@@ -1307,9 +1294,8 @@ const characterDetails = {
           {
             type: "superAttack",
             atkBoost: 1,
-            defBoost: 1,
-            description: "Massively Raises ATK and DEF",
-            turns: 999
+            description: "Massively Raises ATK for 1 turn",
+            turns: 1
           }
         ],
       }
