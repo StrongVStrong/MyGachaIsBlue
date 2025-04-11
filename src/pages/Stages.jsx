@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
 import { useClickSFX } from "../hooks/useClickSFX";
+import { useSyncedAudio } from "../hooks/useSyncedAudio";
 import "./Stages.css";
 
 const chapters = [
@@ -132,7 +133,10 @@ export default function BattleSelect() {
   const [selectedStage, setSelectedStage] = useState(null);
   const navigate = useNavigate();
   const playClick = useClickSFX();
-  
+  const audioRef = useRef(null);
+  const OST = `${import.meta.env.BASE_URL}assets/stages.mp3`;
+  useSyncedAudio(audioRef, OST);
+
   return (
     <div className="battle-select-bar-wrapper">
         <BackButton />
@@ -196,6 +200,10 @@ export default function BattleSelect() {
             </div>
         </div>
         )}
+
+        <audio ref={audioRef} loop autoPlay>
+          <source src={OST} type="audio/mp3" />
+        </audio>
 
     </div>
 

@@ -93,6 +93,20 @@ function UserProfile() {
             alert("⚠️ You must be logged in to change your favorite character!");
             return;
           }
+          const hasCharacters = Object.keys(characters).length > 0;
+
+          if (!hasCharacters) {
+            const failSFX = new Audio("/assets/sfx/failure.mp3");
+            failSFX.volume = 1;
+            failSFX.play();
+
+            setTimeout(() => {
+              if (window.confirm("⚠️ You have no characters. Go to summon?")) {
+                window.location.href = "/#/summon";
+              }
+            }, 100);
+            return;
+          }
           setSelectorVisible(prev => !prev);
         }}
         style={{ cursor: "pointer" }}
