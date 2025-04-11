@@ -25,6 +25,10 @@ const defaultPreferences = () => ({
   volume: 0.5,
 });
 
+const defaultData = () => ({
+  clearedStages: {}
+});
+
 export function usePlayerData() {
 
   const [gems, setGems] = useState(0);
@@ -35,6 +39,7 @@ export function usePlayerData() {
   const [displayName, setDisplayName] = useState("Player");
   const [preferences, setPreferences] = useState(defaultPreferences());
   const [loadedGuestData, setLoadedGuestData] = useState(false);
+  const [playerData, setPlayerData] = useState(defaultData());
 
 
   const isGuest = localStorage.getItem("guestMode") === "true";
@@ -50,6 +55,7 @@ export function usePlayerData() {
       setPlayerExp(guestData.exp ?? 0);
       setDisplayName(guestData.displayName ?? "Guest");
       setPreferences(guestData.preferences ?? defaultPreferences());
+      setPlayerData(guestData.data ?? defaultData());
       setLoadedGuestData(true);
       return;
     }
@@ -73,6 +79,7 @@ export function usePlayerData() {
               ...defaultPreferences(),
               ...prefs
             });
+            setPlayerData(userData.data || defaultData);
           }
         });
 
@@ -197,6 +204,21 @@ export function usePlayerData() {
     }
   }, [preferences]);
 
+  // Save player data
+  useEffect(() => {
+    if (isGuest) {
+      saveToGuest("data", playerData, loadedGuestData);
+      return;
+    }
+  
+    if (userId != null) {
+      const userRef = doc(db, "users", userId);
+      updateDoc(userRef, { data: playerData });
+      console.log("Data updated", playerData);
+    }
+  }, [playerData]);
+  
+
   const addCharacter = (id) => {
     setCharacters((prev) => {
       const existing = prev[id];
@@ -218,7 +240,9 @@ export function usePlayerData() {
   currency,
   setCurrency,
   playerExp, 
-  setPlayerExp, 
+  setPlayerExp,
+  playerData,
+  setPlayerData,
   level: levelStats.level,
   expToNextLevel: levelStats.expToNextLevel,
   expForNextLevel: levelStats.expForNextLevel,

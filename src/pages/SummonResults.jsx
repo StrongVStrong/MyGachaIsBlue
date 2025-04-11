@@ -44,14 +44,14 @@ function Results() {
             if (!char) return null; 
 
             return (
-              <div key={index} className={`results-portrait rarity-${char.rarity || "common"}`}>
+              <div key={index} className={`results-portrait rarity-${char.rarity || "Common"}`}>
                 <img
                   src={`./assets/characterPortraits/${char.id}.png`}
                   alt={char.name}
                   className={`portrait-image type-${char.type}`}
                 />
                 <p className="char-name">{char.name}</p>
-                <p className="char-power">Power: {char.power}</p>
+                <p className="char-power">{char.rarity}</p>
               </div>
             );
           })}

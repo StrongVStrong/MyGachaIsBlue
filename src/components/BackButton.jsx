@@ -10,7 +10,10 @@ function BackButton() {
   const handleBack = () => {
     if (location.pathname == "/summon") {
         navigate("/");
-    } else {
+    } else if (location.pathname === "/stages") {
+      navigate("/");
+    }
+    else {
         navigate(-1);
     }
   }

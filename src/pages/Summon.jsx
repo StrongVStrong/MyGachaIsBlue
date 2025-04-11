@@ -89,25 +89,25 @@ const banners = {
   
   const rarityRates = {
     Default: {
-      common: 0.5,
-      rare: 0.3,
-      ultra: 0.15,
-      legendary: 0.045,
-      godly: 0.005,
+      Common: 0.5,
+      Rare: 0.3,
+      Ultra: 0.15,
+      Legendary: 0.045,
+      Godly: 0.005,
     },
     Limited: {
-      common: 0.5,
-      rare: 0.3,
-      ultra: 0.15,
-      legendary: 0.045,
-      godly: 0.005,
+      Common: 0.5,
+      Rare: 0.3,
+      Ultra: 0.15,
+      Legendary: 0.045,
+      Godly: 0.005,
     },
     "2x": {
-      common: 0.4,
-      rare: 0.3,
-      ultra: 0.2,
-      legendary: 0.09,
-      godly: 0.01,
+      Common: 0.4,
+      Rare: 0.3,
+      Ultra: 0.2,
+      Legendary: 0.09,
+      Godly: 0.01,
     },
   };
 
@@ -156,7 +156,7 @@ const banners = {
       const filtered = characterList.filter((char) => ids.includes(char.id));
   
       const grouped = filtered.reduce((acc, char) => {
-        const rarity = char.rarity || "common";
+        const rarity = char.rarity || "Common";
         if (!acc[rarity]) acc[rarity] = [];
         acc[rarity].push(char);
         return acc;

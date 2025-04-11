@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import characterList from "../data/characters";
 import BackButton from "../components/BackButton";
 import { usePlayerData } from "../hooks/usePlayerData";
+import characterDetails from "../data/characterDetails"
 import "./CharacterPage.css";
 import { rerollTrait } from "../utils/RerollTraits";
 import { useClickSFX } from "../hooks/useClickSFX";
@@ -18,7 +19,8 @@ function CharacterPage() {
   const rerollBtnRef = useRef(null);
   const godlyTraits = ["Ultra Instinct", "Enlightened"];
   const audioRef = useRef(null);
-
+  const [showInfo, setShowInfo] = useState(false);
+  const [activeInfo, setActiveInfo] = useState(null);
 
   if (!character) return <div>Character not found</div>;
 
@@ -126,6 +128,16 @@ function CharacterPage() {
     }));
   };
 
+  const InfoPopup = ({ title, text, onClose }) => (
+    <div className="info-popup-overlay" onClick={onClose}>
+      <div className="info-popup" onClick={(e) => e.stopPropagation()}>
+        <button className="close-button" onClick={onClose}>✖</button>
+        <h3>{title}</h3>
+        <p>{text}</p>
+      </div>
+    </div>
+  );  
+
   return (
     <div className={`character-page bg-${character.rarity}`}>
       
@@ -143,15 +155,38 @@ function CharacterPage() {
 
       <div className="character-details">
         
+      <div className="name-row">
         <h1>{character.name}</h1>
+        <button
+          className="info-button"
+          onClick={() => {
+            playClick();
+            setShowInfo(true);
+          }}
+          title="Character Info"
+        >
+          ⓘ
+        </button>
+      </div>
+
         {isOwned ? (
             <>
-                <p>Rarity: {capitalize(character.rarity)}</p>
-                <p>Power: {character.power}</p>
-                <p>Type: {capitalize(character.type)}</p>
-                <p>⭐ Limit Break: {charData.limitBreak} / 5</p>
-                <p>🎲 Trait: {charData.trait ?? "None"}</p>
-                <p>📦 Dupes: {charData.count - 1}</p>
+                <p>
+                  <button className="emoji-btn" onClick={() => setActiveInfo("details")}>💫</button> {character.details}
+                </p>
+                <p>
+                  <button className="emoji-btn" onClick={() => setActiveInfo("super")}>☄️</button> {character.super}
+                </p>
+                <p>
+                  <button className="emoji-btn" onClick={() => setActiveInfo("limit")}>⭐</button> Limit Break: {charData.limitBreak} / 5
+                </p>
+                <p>
+                  <button className="emoji-btn" onClick={() => setActiveInfo("trait")}>🎲</button> Trait: {charData.trait ?? "None"}
+                </p>
+                <p>
+                  <button className="emoji-btn" onClick={() => setActiveInfo("dupes")}>📦</button> Dupes: {charData.count - 1}
+                </p>
+
                 <button
                 ref={rerollBtnRef}
                 onClick={() => {handleRerollTrait();}}
@@ -178,6 +213,44 @@ function CharacterPage() {
                 </div>
                 <p className="locked-msg">You don't own this character yet!</p>
             </>
+            )}
+            {showInfo && (
+              <div className="info-popup-overlay" onClick={() => setShowInfo(false)}>
+                <div className="info-popup" onClick={(e) => e.stopPropagation()}>
+                  <button className="close-button" onClick={() => setShowInfo(false)}>✖</button>
+                  <p><strong>Rarity:</strong> {capitalize(character.rarity)}</p>
+                  <p><strong>Type:</strong> {capitalize(character.type)}</p>
+                  <p><strong>HP:</strong> {characterDetails[charId]?.baseHp.toLocaleString()}</p>
+                  <p><strong>ATK:</strong> {characterDetails[charId]?.baseAtk.toLocaleString()}</p>
+                  <p><strong>DEF:</strong> {characterDetails[charId]?.baseDef.toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+            {activeInfo && (
+              <InfoPopup
+                title={
+                  activeInfo === "details" ? "Passive Skill"
+                  : activeInfo === "super" ? "Super Attack"
+                  : activeInfo === "limit" ? "Limit Break"
+                  : activeInfo === "trait" ? "Traits"
+                  : "Dupes"
+                }
+                text={
+                  activeInfo === "details"
+                    ? characterDetails[charId]?.passives
+                        ?.map(p => p.description)
+                        .filter(Boolean)
+                        .join("\n")
+                    : activeInfo === "super"
+                    ? `${character.super.split(" - ")[0]} deals damage and ${character.super.split(" - ")[1]}.`
+                    : activeInfo === "limit"
+                    ? "Limit Break increases a character's power by consuming duplicates."
+                    : activeInfo === "trait"
+                    ? "Traits grant special bonuses like evasion, critical chance, or boosts."
+                    : "Dupes are extra copies of a character. You can use them for Limit Breaks."
+                }
+                onClose={() => setActiveInfo(null)}
+              />
             )}
         </div>
     </div>

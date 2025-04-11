@@ -40,7 +40,7 @@ function Hub() {
         </div>
         <div className = "hub-bar-top">
           <div className="gems-head">
-            <h2 className="gems">💎 Gems: {gems}</h2> {/* Gems visible */}
+            <h2 className="gems">💎 Gems: {gems}</h2>
           </div>
           <button onClick = {() => {navigate("/dev"); playClick();}} className="dev-btn">Dev</button>
           <button onClick = {() => {navigate("/settings"); playClick();}} className="settings-btn">⚙️</button>
@@ -72,9 +72,6 @@ function Hub() {
             <source src={selectedAudio} type="audio/mp3" />
           </audio>
         )}
-
-        
-
 
       </div>
     </div>

@@ -176,18 +176,18 @@ const characterDetails = {
           // 🔹 Always Active: ATK & DEF +359%, Great chance to super, Guards all attacks
           {
           type: "startOfTurn",
-          atkBoost: 4.59,
-          defBoost: 4.59,
+          atkBoost: 3.59,
+          defBoost: 3.59,
           guardsAll: true,
           extraAttackChance: 0.7,
           description: "ATK & DEF +359%, Great chance to super, Guards all attacks"
           },
   
-          // 🔹 When attacking: ATK +200%, DEF +200%, effective against all types
+          // 🔹 When attacking: ATK & DEF +200%, effective against all types
           {
           type: "onAttack",
-          atkBoost: 3.0,
-          defBoost: 3.0,
+          atkBoost: 2.0,
+          defBoost: 2.0,
           superEffective: true,
           extraAttackChance: 1,
           description: "ATK +200%, DEF +200%"
@@ -196,8 +196,8 @@ const characterDetails = {
           // Super Attack: Vegito Special
           {
             type: "superAttack",
-            atkBoost: 1.3,
-            defBoost: 1.3,
+            atkBoost: 0.3,
+            defBoost: 0.3,
             description: "Greatly Raises ATK and DEF",
             turns: 999
           }
@@ -218,7 +218,7 @@ const characterDetails = {
           critChance: 0.7,
           evadeChance: 0.7,
           extraAttackChance: 0.7,
-          damageReduction: 0.1,
+          damageReduction: 0.2,
           guardsAll: true,
           description: "ATK & DEF +400%"
           },
@@ -527,11 +527,10 @@ const characterDetails = {
           description: "ATK +200%, DEF +100%, super effective, launches additional Super Attack"
           },
   
-          // Super Attack: x10 Kamehameha
+          // Super Attack: x10 Kamehameha: Greatly Raises DEF
           {
             type: "superAttack",
-            defBoost: 0.1,
-            description: "Raises DEF",
+            defBoost: 0.3,
             turns: 999
           },
   
@@ -589,17 +588,15 @@ const characterDetails = {
           },
   
 
-          // Super Attack: Meteor Attack
+          // Super Attack: Meteor Attack: Raises ATK, Raises DEF for 1 turn
           {
             type: "superAttack",
             defBoost: 0.1,
-            description: "Raises DEF for 1 turn",
             turns: 1
           },
           {
             type: "superAttack",
             atkBoost: 0.1,
-            description: "Raises ATK",
             turns: 999
           },
         ],
@@ -640,11 +637,10 @@ const characterDetails = {
           description: "On even turns: DEF +77%"
           },
 
-          // Super Attack: Is gonna pay
+          // Super Attack: Is gonna pay: Greatly Raises ATK
           {
             type: "superAttack",
             atkBoost: 0.3,
-            description: "Greatly Raises ATK",
             turns: 999
           }
           ],
@@ -673,20 +669,18 @@ const characterDetails = {
             atkBoost: 0.77,
             defBoost: 0.77,
             extraAttackChance: 1,
-            description: "ATK +300%, DEF +200%,launches additional Super Attack"
+            description: "ATK +300%, DEF +200%, launches additional Super Attack"
           },
 
-          // Super Attack: Kaioken Rush
+          // Super Attack: Kaioken Rush: Raises ATK, Greatly raises DEF for 1 turn
           {
             type: "superAttack",
             atkBoost: 0.1,
-            description: "Raises ATK",
             turns: 999
           },
           {
             type: "superAttack",
             defBoost: 0.3,
-            description: "Greatly Raises DEF for 1 turn",
             turns: 1
           }
         ],
@@ -717,11 +711,10 @@ const characterDetails = {
           description: "ATK +600%, DEF +500%, guaranteed crits, launches additional Super Attack"
           },
 
-          // Super Attack: Final Kamehameha
+          // Super Attack: Final Kamehameha: Greatly Raises DEF
           {
             type: "superAttack",
             defBoost: 0.3,
-            description: "Greatly Raises DEF",
             turns: 999
           }
         ],
@@ -752,12 +745,11 @@ const characterDetails = {
           description: "ATK +300%, DEF +400%, guaranteed crits, launches additional Super Attack"
           },
 
-          // Super Attack: Meteor Combination
+          // Super Attack: Meteor Combination: Massively Raises ATK and DEF for 1 turn
           {
             type: "superAttack",
             atkBoost: 1,
             defBoost: 1,
-            description: "Massively Raises ATK and DEF for 1 turn",
             turns: 1
           }
         ],
@@ -797,11 +789,10 @@ const characterDetails = {
             description: "ATK & DEF +200%, Great chance to crit/additional/evade for 5 turns"
           },
 
-          // Super Attack: Emperor's Time
+          // Super Attack: Emperor's Time: Massively Raises ATK
           {
             type: "superAttack",
-            atkBoost: 0.5,
-            description: "Massively Raises ATK",
+            atkBoost: 1,
             turns: 999
           }
         ],
@@ -815,11 +806,11 @@ const characterDetails = {
         passives: [
           // 🔹 Always Active: ATK & DEF +150%
           {
-          type: "startOfTurn",
-          atkBoost: 1.5,
-          defBoost: 1.5,
-          evadeChance: 0.5,
-          description: "ATK & DEF +150%"
+            type: "startOfTurn",
+            atkBoost: 1.5,
+            defBoost: 1.5,
+            evadeChance: 0.5,
+            description: "ATK & DEF +150%"
           },
   
           // 🔹 First 5 turns: ATK & DEF +100%, high chance to super
@@ -836,24 +827,22 @@ const characterDetails = {
   
           // 🔹 When attacking: DEF +100%, effective against all types
           {
-          type: "onAttack",
-          defBoost: 1.0,
-          superEffective: true,
-          extraAttackChance: 0.5,
-          description: "DEF +100%, super effective"
+            type: "onAttack",
+            defBoost: 1.0,
+            superEffective: true,
+            extraAttackChance: 0.5,
+            description: "DEF +100%, super effective"
           },
 
-          // Super Attack: Godspeed
+          // Super Attack: Godspeed: Raises ATK, Raises DEF for 1 turn
           {
             type: "superAttack",
             atkBoost: 0.1,
-            description: "Raises ATK",
             turns: 999
           },
           {
             type: "superAttack",
             defBoost: 0.1,
-            description: "Raises DEF for 1 turn",
             turns: 1
           }
         ],
@@ -880,14 +869,13 @@ const characterDetails = {
             type: "startOfTurn",
             condition: (ctx, id) => true,
             atkBoost: (ctx, id) => Math.min(0.1 * (ctx.turnNow - ctx.turnEntered[id]), 0.5),
-            description: "ATK +30% per turn since entry (up to 90%)"
+            description: "ATK +10% per turn since entry (up to 50%)"
           },
 
-          // Super Attack: Final Janken
+          // Super Attack: Final Janken: Massively raises ATK for 1 turn
           {
             type: "superAttack",
             atkBoost: 1,
-            description: "Massively Raises ATK for 1 turn",
             turns: 1
           }
         ],
@@ -933,12 +921,11 @@ const characterDetails = {
             turns: 1
           },
   
-          // Super Attack: Serious mode
+          // Super Attack: Serious mode: Raises ATK and DEF for 1 turn
           {
             type: "superAttack",
             atkBoost: 0.1,
             defBoost: 0.1,
-            description: "Raises ATK and DEF for 1 turn",
             turns: 1
           },
         ],
@@ -970,11 +957,10 @@ const characterDetails = {
           description: "ATK +100%, DEF +200%, super effective, launches additional Super Attack"
           },
   
-          // Super Attack: Ora Barrage
+          // Super Attack: Ora Barrage: Raises DEF
           {
             type: "superAttack",
             defBoost: 0.1,
-            description: "Raises DEF",
             turns: 999
           },
   
@@ -1023,11 +1009,10 @@ const characterDetails = {
           },
   
 
-          // Super Attack: Timestop
+          // Super Attack: Timestop: Raises ATK
           {
             type: "superAttack",
-            atkBoost: 0.05,
-            description: "Raises ATK",
+            atkBoost: 0.1,
             turns: 999
           },
         ],
@@ -1059,12 +1044,11 @@ const characterDetails = {
           description: "ATK +250%, DEF +150%"
           },
 
-          // Super Attack: GER
+          // Super Attack: GER: Raises ATk and DEF for 3 turns
           {
             type: "superAttack",
             atkBoost: 0.1,
             defBoost: 0.1,
-            description: "Raises ATK and DEF for 3 turns",
             turns: 3
           }
           ],
@@ -1101,11 +1085,10 @@ const characterDetails = {
             description: "ATK +300%, DEF +400%, guaranteed crits, launches additional Super Attack"
           },
 
-          // Super Attack: Ore Wa Strika Da
+          // Super Attack: Ore Wa Strika Da: Massively Raises DEF
           {
             type: "superAttack",
-            defBoost: 0.1,
-            description: "Massively Raises DEF",
+            defBoost: 1,
             turns: 999
           }
         ],
@@ -1137,12 +1120,11 @@ const characterDetails = {
           description: "ATK +600%, DEF +500%, guaranteed crits, launches additional Super Attack"
           },
 
-          // Super Attack: Science
+          // Super Attack: Science: Greatly Raises DEF
           {
             type: "superAttack",
             defBoost: 0.3,
-            description: "Greatly Raises DEF for 1 turn",
-            turns: 1
+            turns: 999
           }
         ],
       },
@@ -1153,32 +1135,31 @@ const characterDetails = {
         baseDef: 14000,
         baseHp: 95000,
         passives: [
-          // 🔹 Always Active: ATK +500%, DEF +100%
+          // 🔹 Always Active: ATK +500%, DEF +700%
           {
-          type: "startOfTurn",
-          atkBoost: 5.0,
-          defBoost: 1.0,
-          damageReduction: 0.25,
-          description: "ATK & DEF +200%"
+            type: "startOfTurn",
+            atkBoost: 5.0,
+            defBoost: 7.0,
+            damageReduction: 0.25,
+            description: "ATK & DEF +200%"
           },
   
-          // 🔹 When attacking: ATK +100%, DEF +200%, high chance to crit
+          // 🔹 When attacking: ATK +100%, DEF +50%, high chance to crit
           {
-          type: "onAttack",
-          atkBoost: 1.0,
-          defBoost: 2.0,
-          critChance: 0.5,
-          damageReduction: 0.25,
-          extraAttackChance: 1,
-          description: "ATK +300%, DEF +400%, guaranteed crits, launches additional Super Attack"
+            type: "onAttack",
+            atkBoost: 1.0,
+            defBoost: 0.5,
+            critChance: 0.5,
+            damageReduction: 0.25,
+            extraAttackChance: 1,
+            description: "ATK +100%, DEF +50%, guaranteed crits, launches additional Super Attack"
           },
 
-          // Super Attack: Aura
+          // Super Attack: Aura: Raises ATK and DEF for 1 turn
           {
             type: "superAttack",
             atkBoost: 0.1,
             defBoost: 0.1,
-            description: "Raises ATK and DEF for 1 turn",
             turns: 1
           }
         ],
@@ -1200,12 +1181,13 @@ const characterDetails = {
           description: "ATK & DEF +150%"
           },
   
-          // 🔹 First 3 turns: ATK & DEF +500%, great chance to super
+          // 🔹 First 5 turns: ATK & DEF +500%, great chance to super
           {
             type: "startOfTurn",
-            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 5,
             atkBoost: 5.0,
             defBoost: 5.0,
+            extraAttackChance: 0.7,
             description: "ATK & DEF +500%, Great chance to crit/additional/evade for 5 turns"
           },
 
@@ -1218,12 +1200,11 @@ const characterDetails = {
             description: "ATK +300% and great chance to additional super when attacking"
           },
 
-          // Super Attack: Emperor's Time
+          // Super Attack: All Hail Lelouch: Raises ATK and DEF
           {
             type: "superAttack",
             defBoost: 0.1,
             atkBoost: 0.1,
-            description: "Raises ATK and DEF",
             turns: 999
           }
         ],
@@ -1264,11 +1245,10 @@ const characterDetails = {
           description: "ATK +100%, super effective"
           },
 
-          // Super Attack: Omnipotency
+          // Super Attack: Omnipotency: Greatly Raises DEF
           {
             type: "superAttack",
             defBoost: 0.3,
-            description: "Greatly Raises DEF",
             turns: 999
           }
         ],
@@ -1290,11 +1270,10 @@ const characterDetails = {
           description: "ATK & DEF +999%"
           },
 
-          // Super Attack: Judgement
+          // Super Attack: Judgment: Massively Raises ATK for 1 turn
           {
             type: "superAttack",
             atkBoost: 1,
-            description: "Massively Raises ATK for 1 turn",
             turns: 1
           }
         ],

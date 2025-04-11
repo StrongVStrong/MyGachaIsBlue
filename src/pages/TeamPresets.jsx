@@ -6,6 +6,7 @@ import { useClickSFX } from "../hooks/useClickSFX";
 import styles from "./TeamPresets.module.css";
 import BackButton from "../components/BackButton";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
+import { useLocation } from "react-router-dom";
 
 function TeamPresets() {
     const { preferences, setPreferences, characters: ownedCharacters } = usePlayerData();
@@ -22,6 +23,11 @@ function TeamPresets() {
     const [draggedSlot, setDraggedSlot] = useState(null);
     const [draggedCharId, setDraggedCharId] = useState(null);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const returnToBattle = params.get("returnTo") === "battle";
+    const stageId = params.get("stageId");
+    const [showEmptyTeamPopup, setShowEmptyTeamPopup] = useState(false);
   
     const handleCharacterSelect = (charId) => {
         if (activeSlot === null) return;
@@ -62,11 +68,12 @@ function TeamPresets() {
     };
 
     const owned = getOwnedCharacters();
+    const failSFX = new Audio("./assets/sfx/failure.mp3");
   
     return (
       <div className={styles["team-presets-page"]}>
         <BackButton />
-        <h1 className={styles["team-presets-title"]}>🛠️ Team Presets</h1>
+        <h1 className={styles["team-presets-title"]}>🛠️ Teams</h1>
   
         <div className={styles["team-button-row"]}>
           {[1, 2, 3, 4, 5].map(num => (
@@ -75,6 +82,7 @@ function TeamPresets() {
               onClick={() => {
                 playClick();
                 setSelectedTeamId(num);
+                localStorage.setItem("selectedTeamId", num);
                 setActiveSlot(null);
               }}
               className={`${styles["team-button"]} ${selectedTeamId === num ? styles["active"] : ""}`}
@@ -201,7 +209,41 @@ function TeamPresets() {
       <audio ref={audioRef} loop autoPlay>
         <source src={OST} type="audio/mp3" />
       </audio>
-
+      {returnToBattle && (
+        <button
+          className={styles["play-button"]}
+          onClick={() => {
+            if ((teams[selectedTeamId] ?? []).filter(Boolean).length === 0) {
+              failSFX.volume = 1;
+              failSFX.play();
+              setShowEmptyTeamPopup(true);
+              return;
+            }
+            playClick();
+            localStorage.setItem("selectedTeamId", selectedTeamId);
+            navigate(`/battle/${stageId}?team=${selectedTeamId}`);
+          }}
+        >
+          ▶
+        </button>
+      )}
+      {showEmptyTeamPopup && (
+        <div className={styles["team-popup-overlay"]}>
+          <div className={styles["team-popup-box"]}>
+            <h2>⚠️ Team Empty</h2>
+            <p>Please add at least one character before continuing.</p>
+            <button
+              className={styles["team-popup-ok-button"]}
+              onClick={() => {
+                playClick();
+                setShowEmptyTeamPopup(false);
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
       </div>
     );
 }

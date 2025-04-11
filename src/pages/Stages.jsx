@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
+import { useClickSFX } from "../hooks/useClickSFX";
 import "./Stages.css";
 
 const chapters = [
@@ -26,7 +27,7 @@ const stageDescriptions = {
             description: "The warrior made of everyone's DNA, can you win?",
         },
         4: {
-            name: "Majin Threat",
+            name: "Majin Menace",
             description: "The mighty majin is undergoing some severe changes...",
         },
         5: {
@@ -36,95 +37,93 @@ const stageDescriptions = {
     },
     2: {
         1: {
-            name: "Arrival of Raditz",
-            description: "Face off against Raditz in the opening battle.",
+            name: "Soon",
+            description: "Soon",
         },
         2: {
-            name: "Team-Up",
-            description: "Goku and Piccolo join forces to continue the fight.",
+            name: "Soon",
+            description: "Soon",
         },
         3: {
-            name: "Saiyan Threat",
-            description: "The Saiyan threat grows...",
+            name: "Soon",
+            description: "Soon",
         },
         4: {
-            name: "Rampaging Nappa",
-            description: "Survive Nappa’s wrath!",
+            name: "Soon",
+            description: "Soon",
         },
         5: {
-            name: "Prince of All Saiyans",
-            description: "Vegeta awaits as the final challenge of Chapter 1.",
+            name: "Soon",
+            description: "Soon",
         },
     },
     3: {
         1: {
-            name: "Arrival of Raditz",
-            description: "Face off against Raditz in the opening battle.",
+            name: "Soon",
+            description: "Soon",
         },
         2: {
-            name: "Team-Up",
-            description: "Goku and Piccolo join forces to continue the fight.",
+            name: "Soon",
+            description: "Soon",
         },
         3: {
-            name: "Saiyan Threat",
-            description: "The Saiyan threat grows...",
+            name: "Soon",
+            description: "Soon",
         },
         4: {
-            name: "Rampaging Nappa",
-            description: "Survive Nappa’s wrath!",
+            name: "Soon",
+            description: "Soon",
         },
         5: {
-            name: "Prince of All Saiyans",
-            description: "Vegeta awaits as the final challenge of Chapter 1.",
+            name: "Soon",
+            description: "Soon",
         },
     },
     4: {
         1: {
-            name: "Arrival of Raditz",
-            description: "Face off against Raditz in the opening battle.",
+            name: "Soon",
+            description: "Soon",
         },
         2: {
-            name: "Team-Up",
-            description: "Goku and Piccolo join forces to continue the fight.",
+            name: "Soon",
+            description: "Soon",
         },
         3: {
-            name: "Saiyan Threat",
-            description: "The Saiyan threat grows...",
+            name: "Soon",
+            description: "Soon",
         },
         4: {
-            name: "Rampaging Nappa",
-            description: "Survive Nappa’s wrath!",
+            name: "Soon",
+            description: "Soon",
         },
         5: {
-            name: "Prince of All Saiyans",
-            description: "Vegeta awaits as the final challenge of Chapter 1.",
+            name: "Soon",
+            description: "Soon",
         },
     },
     5: {
         1: {
-            name: "Arrival of Raditz",
-            description: "Face off against Raditz in the opening battle.",
+            name: "Soon",
+            description: "Soon",
         },
         2: {
-            name: "Team-Up",
-            description: "Goku and Piccolo join forces to continue the fight.",
+            name: "Soon",
+            description: "Soon",
         },
         3: {
-            name: "Saiyan Threat",
-            description: "The Saiyan threat grows...",
+            name: "Soon",
+            description: "Soon",
         },
         4: {
-            name: "Rampaging Nappa",
-            description: "Survive Nappa’s wrath!",
+            name: "Soon",
+            description: "Soon",
         },
         5: {
-            name: "Prince of All Saiyans",
-            description: "Vegeta awaits as the final challenge of Chapter 1.",
+            name: "Soon",
+            description: "Soon",
         },
     },
-    
 };
-
   
 const stages = [1, 2, 3, 4, 5];
 
@@ -132,7 +131,8 @@ export default function BattleSelect() {
   const [selectedChapter, setSelectedChapter] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
   const navigate = useNavigate();
-
+  const playClick = useClickSFX();
+  
   return (
     <div className="battle-select-bar-wrapper">
         <BackButton />
@@ -145,7 +145,7 @@ export default function BattleSelect() {
             >
             <div className="chapter-image-overlay" />
             <button
-                onClick={() => setSelectedChapter(ch)}
+                onClick={() => { playClick(); setSelectedChapter(ch); }}
                 className="chapter-fullbar"
             >
                 Chapter {ch.id}
@@ -158,7 +158,7 @@ export default function BattleSelect() {
             <div
             className="chapter-selected-banner"
             style={{ backgroundImage: `url(${selectedChapter.image})` }}
-            onClick={() => setSelectedChapter(null)}
+            onClick={() => { playClick(); setSelectedChapter(null) }}
             >
             <div className="chapter-image-overlay" />
             <span className="chapter-label">Chapter {selectedChapter.id}</span>
@@ -168,7 +168,7 @@ export default function BattleSelect() {
             {stages.map((st) => (
             <div key={st} className="stage-wrapper">
                 <button
-                    onClick={() => setSelectedStage(st === selectedStage ? null : st)}
+                    onClick={() => { playClick(); setSelectedStage(st === selectedStage ? null : st); }}
                     className="stage-bar"
                 >
                     {stageDescriptions?.[selectedChapter.id]?.[st]?.name || `Stage ${st}`}
@@ -183,7 +183,7 @@ export default function BattleSelect() {
                     </div>
                     <button
                     className="stage-play-button"
-                    onClick={() => navigate(`/battle/${selectedChapter.id}-${st}`)}
+                    onClick={() => { playClick(); navigate(`/teams?returnTo=battle&stageId=${selectedChapter.id}-${st}`); }}
                     >
                     ▶
                     </button>

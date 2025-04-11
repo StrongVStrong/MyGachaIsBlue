@@ -6,6 +6,9 @@ import { performAttack } from "../logic/battleEngine";
 import styles from './battleScene.module.css';
 import { calculatePreAttackStats, calculateFinalStats } from "../logic/statCalculator";
 import { characterMap } from "../data/characters";
+import { useLocation } from "react-router-dom";
+import { useSyncedAudio } from "../hooks/useSyncedAudio";
+import { useClickSFX } from "../hooks/useClickSFX";
 import "./battleScene.css";
 
 export function hasPassive(unit, key, ctx, id) {
@@ -60,17 +63,29 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx) {
 
 
 export default function BattleScene({ stageId = "1-1" }) {
-  const { preferences } = usePlayerData();
+  const {
+    preferences,
+    setGems,
+    setPlayerExp,
+    setCurrency,
+    setPlayerData,
+    playerData
+  } = usePlayerData();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const storedTeamId = Number(localStorage.getItem("selectedTeamId"));
+  const selectedTeamId = Number(params.get("team")) || storedTeamId || 1;
   const stage = stages[stageId] || stages["1-1"];
   const leaderMultiplier = 5.4;
   const turnLogRef = useRef(null);
   const [isTurnInProgress, setIsTurnInProgress] = useState(false);
   const [superAttackCounts, setSuperAttackCounts] = useState({});
   const [hasUsedTurn, setHasUsedTurn] = useState(false);
+  const playClick = useClickSFX();
 
   // Initialize player team state
   const [playerTeam, setPlayerTeam] = useState(() => {
-    const defaultIds = [2, 1];
+    const defaultIds = [1];
     return defaultIds.map(charId => {
       const unit = characterDetails[charId];
       if (!unit) {
@@ -91,7 +106,7 @@ export default function BattleScene({ stageId = "1-1" }) {
   useEffect(() => {
     if (!preferences?.teams) return;
   
-    const ids = preferences.teams[1] || [2, 1];
+    const ids = preferences.teams[selectedTeamId] || [1];
   
     const newTeam = ids.map(charId => {
       const unit = characterDetails[charId];
@@ -110,8 +125,10 @@ export default function BattleScene({ stageId = "1-1" }) {
   
     setPlayerTeam(newTeam);
     setActiveUnitIndex(0);
-  
-  }, [preferences]);
+    console.log("Selected team ID:", selectedTeamId);
+console.log("Loaded team:", preferences?.teams?.[selectedTeamId]);
+
+  }, [preferences, selectedTeamId]);
   
   const [activeUnitIndex, setActiveUnitIndex] = useState(0);
   const [enemyPhaseIndex, setEnemyPhaseIndex] = useState(0);
@@ -121,6 +138,8 @@ export default function BattleScene({ stageId = "1-1" }) {
   const [showForfeitPrompt, setShowForfeitPrompt] = useState(false);
   const [showYouLosePopup, setShowYouLosePopup] = useState(false);
   const [showEndButtons, setShowEndButtons] = useState(false);
+  const [showVictoryPopup, setShowVictoryPopup] = useState(false);
+  const [earnedRewards, setEarnedRewards] = useState(null);
 
   useEffect(() => {
     if (turnLogRef.current) {
@@ -137,6 +156,10 @@ export default function BattleScene({ stageId = "1-1" }) {
   const [superEffects, setSuperEffects] = useState({});
 
   const [switchInTurnMap, setSwitchInTurnMap] = useState({});
+
+  const audioRef = useRef(null);
+  const bgm = currentEnemy.bgm || "/assets/OSTs/default.mp3";
+  useSyncedAudio(audioRef, bgm);
 
   function getBattleContext() {
     return {
@@ -209,7 +232,10 @@ export default function BattleScene({ stageId = "1-1" }) {
 
       const reduced = Math.max(0, baseDamage - activeUnitStats.def);
       const variance = 0.99 + Math.random() * 0.01;
-      const damage = Math.floor(reduced * variance);
+      let damage = Math.floor(reduced * variance);
+      if (damage === 0) {
+        damage = Math.floor(Math.random() * 96) + 5;
+      }
 
       const updatedTeam = [...playerTeam];
       updatedTeam[activeUnitIndex].currentHp = Math.max(0, activeUnit.currentHp - damage);
@@ -264,7 +290,7 @@ export default function BattleScene({ stageId = "1-1" }) {
         };
       });
       
-      currentEnemy.hp -= result.damage;
+      currentEnemy.hp = Math.max(0, currentEnemy.hp - result.damage);
       
       // Update activeUnitStats for post-attack defense
       activeUnitStats = calculateFinalStats(playerTeam[activeUnitIndex], getBattleContext(), playerTeam[activeUnitIndex].id);
@@ -320,7 +346,7 @@ export default function BattleScene({ stageId = "1-1" }) {
             }));
           }
       
-          currentEnemy.hp -= addResult.damage;
+          currentEnemy.hp = Math.max(0, currentEnemy.hp - result.damage);
         }
       }
       
@@ -370,7 +396,10 @@ export default function BattleScene({ stageId = "1-1" }) {
       
       const reduced = Math.max(0, baseDamage - activeUnitStats.def);
       const variance = 0.99 + Math.random() * 0.01;
-      const damage = Math.floor(reduced * variance);
+      let damage = Math.floor(reduced * variance);
+      if (damage === 0) {
+        damage = Math.floor(Math.random() * 96) + 5;
+      }
       
 
         const updatedTeam = [...playerTeam];
@@ -444,6 +473,9 @@ export default function BattleScene({ stageId = "1-1" }) {
   
     // Check for phase transition or battle end
     if (currentEnemy.hp <= 0) {
+      const stageCleared = playerData?.clearedStages?.[stageId];
+      const rewards = stageCleared ? currentStage.repeatRewards : currentStage.rewards;
+      const earned = { gems: 0, exp: 0 };
       if (enemyPhaseIndex < currentStage.phases.length - 1) {
         setLog(prev => ({
           ...prev,
@@ -455,7 +487,38 @@ export default function BattleScene({ stageId = "1-1" }) {
           ...prev,
           [turn]: [...(prev[turn] ?? []), "🎉 Battle Cleared!"]
         }));
-        onVictory?.();
+        if (rewards?.gems) {
+          setGems(prev => prev + rewards.gems);
+          earned.gems = rewards.gems;
+        }
+        if (rewards?.exp) {
+          setPlayerExp(prev => prev + rewards.exp);
+          earned.exp = rewards.exp;
+        }
+        if (rewards?.gold) {
+          setCurrency(prev => ({ ...prev, gold: (prev.gold || 0) + rewards.gold }));
+          earned.gold = rewards.gold;
+        }
+        if (rewards?.traitRerolls) {
+          setCurrency(prev => ({ ...prev, traitRerolls: (prev.traitRerolls || 0) + rewards.traitRerolls }));
+          earned.traitRerolls = rewards.traitRerolls;
+        }
+      
+        if (!stageCleared) {
+          setPlayerData(prev => ({
+            ...prev,
+            clearedStages: {
+              ...prev.clearedStages,
+              [stageId]: true
+            }
+          }));
+        }
+      
+        setEarnedRewards({
+          ...rewards,
+          type: stageCleared ? "Replay" : "First-Time"
+        });
+        setShowVictoryPopup(true);        
       }
     }
   
@@ -490,11 +553,28 @@ export default function BattleScene({ stageId = "1-1" }) {
       }
       return updated;
     });
-  }  
+  }
+
+  function handleNextStage() {
+    const [chapter, stageNum] = stageId.split("-").map(Number);
+    let nextStageId;
+  
+    if (chapter === 5 && stageNum === 5) {
+      localStorage.removeItem("selectedTeamId");
+      window.location.href = "/#/stages";
+    } else if (stageNum === 5) {
+      nextStageId = `${chapter + 1}-1`;
+    } else {
+      nextStageId = `${chapter}-${stageNum + 1}`;
+    }
+    window.location.href = `/#/battle/${nextStageId}`;
+    setTimeout(() => window.location.reload(), 100);
+  }
+  
 
   return (
     <div className="battle-container">
-      <h2 className="text-xl mb-4">{currentStage.name}</h2>
+      <h5 className="text-xl mb-4">{currentStage.name}</h5>
 
       {playerTeam.every(unit => unit.currentHp <= 0) && (
         <div className="text-red-500 text-2xl font-bold mb-4">
@@ -518,33 +598,50 @@ export default function BattleScene({ stageId = "1-1" }) {
         <div className="p-3 bg-zinc-800 rounded mb-2">
           <p className="text-xl font-semibold">{activeTypeIcon} {activeChar.name || 'Loading...'}</p>
           <p>❤️ HP: {playerTeam[activeUnitIndex]?.currentHp || 0} / {playerTeam[activeUnitIndex]?.maxHp || 0}</p>
-          <button
-            onClick={async () => {
-              setShowSwitchMenu(false);
-              await handleAttack(playerTeam[activeUnitIndex].id);
-            }}
-            className="attack-button"
-            disabled={playerTeam[activeUnitIndex]?.currentHp <= 0 || playerTeam.every(unit => unit.currentHp <= 0) || isTurnInProgress }
-          >
-            {playerTeam[activeUnitIndex]?.currentHp <= 0 ? "Unit Defeated" : isTurnInProgress ? "Processing" : "Attack"}
-          </button>
-          <button
-            className="switch-button"
-            disabled={hasUsedTurn || isTurnInProgress}
-            onClick={() => setShowSwitchMenu(prev => !prev)}
-          >
-            {showSwitchMenu ? "Switch" : "Switch"}
-          </button>
+          <h3>Actions</h3>
+          <div className="action-button-group">
+            <button
+              onClick={async () => {
+                playClick();
+                setShowSwitchMenu(false);
+                await handleAttack(playerTeam[activeUnitIndex].id);
+              }}
+              className="attack-button"
+              disabled={playerTeam[activeUnitIndex]?.currentHp <= 0 || playerTeam.every(unit => unit.currentHp <= 0) || isTurnInProgress || showVictoryPopup }
+            >
+              {playerTeam[activeUnitIndex]?.currentHp <= 0 ? "Unit Defeated" : isTurnInProgress ? "Processing" : "Attack"}
+            </button>
+            <button
+              className="switch-button"
+              disabled={hasUsedTurn || isTurnInProgress || showVictoryPopup}
+              onClick={() => {
+                if (playerTeam.length <= 1) {
+                  new Audio("./assets/sfx/failure.mp3").play();
+                  return;
+                }
+                playClick();
+                setShowSwitchMenu(prev => !prev)
+              }
+              }
+            >
+              {showSwitchMenu ? "Switch" : "Switch"}
+            </button>
 
-          <button
-            className="switch-button"
-            onClick={() => setShowForfeitPrompt(true)}
-          >
-            Forfeit
-          </button>
+            <button
+              className="switch-button"
+              disabled={hasUsedTurn || isTurnInProgress || showVictoryPopup}
+              onClick={() => {
+                playClick();
+                setShowForfeitPrompt(true)
+              }
+              }
+            >
+              Forfeit
+            </button>
+          </div>
         </div>
 
-        <h4 className="text-md font-bold mt-4">🔁 Switch Character:</h4>
+        
         {showSwitchMenu && (
         <div className="character-switch-row">
         {playerTeam.map((unit, idx) => {
@@ -557,6 +654,7 @@ export default function BattleScene({ stageId = "1-1" }) {
               <button
                 key={unit.id}
                 onClick={async () => {
+                  playClick();
                   if (hasUsedTurn || isTurnInProgress) return;
                   setShowSwitchMenu(false);
                   const outgoingUnit = playerTeam[activeUnitIndex];
@@ -637,8 +735,10 @@ export default function BattleScene({ stageId = "1-1" }) {
                     baseDamage *= 1 - (dmgReduction ?? 0);
                     const reduced = Math.max(0, baseDamage - activeUnitStats.def);
                     const variance = 0.99 + Math.random() * 0.01;
-                    const damage = Math.floor(reduced * variance);
-                
+                    let damage = Math.floor(reduced * variance);
+                    if (damage === 0) {
+                      damage = Math.floor(Math.random() * 96) + 5;
+                    }
                     const updatedTeam = [...playerTeam];
                     updatedTeam[idx].currentHp = Math.max(0, updatedTeam[idx].currentHp - damage);
                     setPlayerTeam(updatedTeam);
@@ -660,7 +760,7 @@ export default function BattleScene({ stageId = "1-1" }) {
                 }}                
                 
                 className="switch-button"
-                disabled={unit.currentHp <= 0 || isTurnInProgress}
+                disabled={unit.currentHp <= 0 || isTurnInProgress || showVictoryPopup}
               >
                 {unit.currentHp <= 0
                   ? `💀 ${name}`
@@ -675,34 +775,65 @@ export default function BattleScene({ stageId = "1-1" }) {
         )}
       </div>
       
-      <div ref={turnLogRef} className={styles["turn-log-container"]}>
-        <h3 className="text-lg font-bold mb-2">📜 Turn Log</h3>
-        {Object.entries(log).map(([turnNum, entries]) => (
-          <div key={turnNum} className={styles["turn-log-turn"]}>
-            <p className={styles["turn-log-turn-title"]}>🔄 Turn {turnNum}</p>
-            <ul>
-              {entries.map((entry, idx) => (
-                <li key={idx} className={styles["turn-log-entry"]}>{entry}</li>
-              ))}
-            </ul>
-            <hr className="my-2" />
-          </div>
-        ))}
+      {Object.keys(log).length > 0 && (
+  <div ref={turnLogRef} className={styles["turn-log-container"]}>
+    <h3 className="text-lg font-bold mb-2">📜 Turn Log</h3>
+    {Object.entries(log).map(([turnNum, entries]) => (
+      <div key={turnNum} className={styles["turn-log-turn"]}>
+        <p className={styles["turn-log-turn-title"]}>🔄 Turn {turnNum}</p>
+        <ul>
+          {entries.map((entry, idx) => (
+            <li key={idx} className={styles["turn-log-entry"]}>{entry}</li>
+          ))}
+        </ul>
+        <hr className="my-2" />
       </div>
+    ))}
+  </div>
+)}
 
-      {(showForfeitPrompt || showYouLosePopup) && <div className="backdrop-dim" />}
+
+      {showVictoryPopup && (
+        <div className="forfeit-popup">
+          <h1 className="you-lose-text">🎉 VICTORY 🎉</h1>
+          {earnedRewards && (
+            <div className="reward-summary">
+              <p>🎁 <strong>{earnedRewards.type} Rewards:</strong></p>
+              <div className="reward-lines">
+                {Object.entries(earnedRewards)
+                  .filter(([key]) => key !== "type")
+                  .map(([key, val]) => (
+                    <div key={key}>+{val} {key}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="forfeit-actions">
+            <button onClick={() => { playClick(); handleNextStage(); }}>Next Stage</button>
+            <button onClick={() => { playClick(); window.location.reload(); }}>Retry</button>
+            <button onClick={() => {
+              playClick();
+              localStorage.removeItem("selectedTeamId");
+              window.location.href = "/#/stages";
+            }}>Return</button>
+          </div>
+        </div>
+      )}
+
+      {(showForfeitPrompt || showYouLosePopup || showVictoryPopup) && <div className="backdrop-dim" />}
 
       {showForfeitPrompt && (
         <div className="forfeit-popup">
-          <h2>Are you sure you want to give up?</h2>
+          <h5>Are you sure you want to give up?</h5>
           <div className="forfeit-actions">
             <button onClick={() => {
-              new Audio("/.assets/sfx/failure.mp3").play();
+              new Audio("./assets/sfx/failure.mp3").play();
               setShowForfeitPrompt(false);
               setShowYouLosePopup(true);
               setTimeout(() => setShowEndButtons(true), 1000);
             }}>Yes</button>
-            <button onClick={() => setShowForfeitPrompt(false)}>No</button>
+            <button onClick={() => { playClick(); setShowForfeitPrompt(false); }}>No</button>
           </div>
         </div>
       )}
@@ -712,13 +843,15 @@ export default function BattleScene({ stageId = "1-1" }) {
           <h1 className="you-lose-text">☠️ YOU LOSE ☠️</h1>
           {showEndButtons && (
             <div className="forfeit-actions">
-              <button onClick={() => window.location.href = "/#/stages"}>Return</button>
-              <button onClick={() => window.location.reload()}>Retry</button>
+              <button onClick={() => { playClick(); window.location.href = "/#/stages"; }}>Return</button>
+              <button onClick={() => { playClick(); window.location.reload(); }}>Retry</button>
             </div>
           )}
         </div>
       )}
-
+      <audio ref={audioRef} className={showYouLosePopup ? "muffled-audio" : ""} loop autoPlay>
+        <source src={bgm} type="audio/mpeg" />
+      </audio>
     </div>
   );
 }
