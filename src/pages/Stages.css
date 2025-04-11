@@ -1,0 +1,233 @@
+.battle-select-bar-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: #18181b;
+    color: white;
+  }
+  
+  .chapter-fullbar {
+    flex: 1;
+    height: 100%;
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #515151;
+    border: none;
+    outline: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .chapter-fullbar:hover {
+    background-color: #343434;
+  }
+  
+  .chapter-fullbar.selected {
+    background-color: #dbdbdb;
+  }
+  
+  .stage-right-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    background-color: #585858;
+    width: 100%;
+  }
+  
+  .stage-bar {
+    width: 100%;
+    height: 64px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    background-color: #15803d;
+    color: white;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .stage-bar:hover {
+    background-color: #08e400c7;
+  }
+  
+  
+  .chapter-back-button {
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #52525b;
+    color: white;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .chapter-back-button:hover {
+    background-color: #4a4a4a;
+  }
+  
+  .chapter-selected-panel {
+    width: 30%;
+    background-color: #4c4c4c;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .chapter-selected-panel:hover {
+    background-color: #525252;
+  }
+  
+  .stage-right-panel {
+    width: 70%;
+    background-color: #222222;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+  }
+  
+  .selected-layout {
+    display: flex;
+    width: 100vw;
+  }
+  
+  .chapter-fullbar-wrapper {
+    position: relative;
+    height: 100%;
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 0 1px;
+    overflow: hidden;
+  }
+  
+  .chapter-image-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 0;
+  }
+  
+  .chapter-fullbar {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: white;
+    background: transparent;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .chapter-fullbar:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .chapter-selected-banner {
+  width: 30%;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-right: 2px solid #333;
+}
+
+.chapter-label {
+  position: relative;
+  z-index: 2;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.chapter-selected-banner .chapter-image-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1;
+    transition: background-color 0.3s ease;
+  }
+  
+  .chapter-selected-banner:hover .chapter-image-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  
+  .chapter-label {
+    position: relative;
+    z-index: 2;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+  }
+
+  .stage-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .stage-dropdown {
+    display: flex;
+    align-items: center;
+    background-color: #2d2d2d;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
+    animation: dropdownFade 0.2s ease-in-out;
+  }
+  
+  .stage-description {
+    flex: 1 1 85%;
+    color: #e5e7eb;
+    padding-right: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .stage-play-button {
+    flex: 0 0 15%;
+    padding: 0.5rem 0.75rem;
+    background-color: #15803d;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .stage-play-button:hover {
+    background-color: #08e400e1;
+  }
+  
+  @keyframes dropdownFade {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  

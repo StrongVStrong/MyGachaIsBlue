@@ -6,6 +6,7 @@ import { performAttack } from "../logic/battleEngine";
 import styles from './battleScene.module.css';
 import { calculatePreAttackStats, calculateFinalStats } from "../logic/statCalculator";
 import { characterMap } from "../data/characters";
+import "./battleScene.css";
 
 export function hasPassive(unit, key, ctx, id) {
   return (unit.passives ?? []).some(p =>
@@ -58,9 +59,9 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx) {
 }
 
 
-export default function BattleScene() {
+export default function BattleScene({ stageId = "1-1" }) {
   const { preferences } = usePlayerData();
-  const stage = stages["1-1"];
+  const stage = stages[stageId] || stages["1-1"];
   const leaderMultiplier = 5.4;
   const turnLogRef = useRef(null);
   const [isTurnInProgress, setIsTurnInProgress] = useState(false);
@@ -112,11 +113,14 @@ export default function BattleScene() {
   
   }, [preferences]);
   
-
   const [activeUnitIndex, setActiveUnitIndex] = useState(0);
   const [enemyPhaseIndex, setEnemyPhaseIndex] = useState(0);
   const [log, setLog] = useState({});
   const [turn, setTurn] = useState(1);
+  const [showSwitchMenu, setShowSwitchMenu] = useState(false);
+  const [showForfeitPrompt, setShowForfeitPrompt] = useState(false);
+  const [showYouLosePopup, setShowYouLosePopup] = useState(false);
+  const [showEndButtons, setShowEndButtons] = useState(false);
 
   useEffect(() => {
     if (turnLogRef.current) {
@@ -124,7 +128,11 @@ export default function BattleScene() {
     }
   }, [log]);
 
-  const currentEnemy = stage.phases[enemyPhaseIndex];
+  const [currentStage, setCurrentStage] = useState(() => {
+    return structuredClone(stages[stageId] || stages["1-1"]);
+  });
+
+  const currentEnemy = currentStage.phases[enemyPhaseIndex];
 
   const [superEffects, setSuperEffects] = useState({});
 
@@ -142,7 +150,7 @@ export default function BattleScene() {
       team: playerTeam,
       superAttackCounts
     };
-  }  
+  }
 
   const handleAttack = async (attackerId) => {
     if (hasUsedTurn || isTurnInProgress) return;
@@ -428,15 +436,18 @@ export default function BattleScene() {
             "☠️ All units defeated! You lose!"
           ]
         }));
+        new Audio("/assets/sfx/failure.mp3").play();
+        setShowYouLosePopup(true);
+        setTimeout(() => setShowEndButtons(true), 1000);
       }
     }
   
     // Check for phase transition or battle end
     if (currentEnemy.hp <= 0) {
-      if (enemyPhaseIndex < stage.phases.length - 1) {
+      if (enemyPhaseIndex < currentStage.phases.length - 1) {
         setLog(prev => ({
           ...prev,
-          [turn]: [...(prev[turn] ?? []), `⚔️ Phase changed to ${stage.phases[enemyPhaseIndex + 1].name}`]
+          [turn]: [...(prev[turn] ?? []), `⚔️ Phase changed to ${currentStage.phases[enemyPhaseIndex + 1].name}`]
         }));
         setEnemyPhaseIndex(prev => prev + 1);
       } else {
@@ -444,6 +455,7 @@ export default function BattleScene() {
           ...prev,
           [turn]: [...(prev[turn] ?? []), "🎉 Battle Cleared!"]
         }));
+        onVictory?.();
       }
     }
   
@@ -481,12 +493,12 @@ export default function BattleScene() {
   }  
 
   return (
-    <div className="p-6 bg-zinc-900 text-white rounded-xl">
-      <h2 className="text-xl mb-4">{stage.name}</h2>
+    <div className="battle-container">
+      <h2 className="text-xl mb-4">{currentStage.name}</h2>
 
       {playerTeam.every(unit => unit.currentHp <= 0) && (
         <div className="text-red-500 text-2xl font-bold mb-4">
-          ☠️ GAME OVER - All units defeated!
+          ☠️ Game Over - All units defeated!
         </div>
       )}
 
@@ -502,21 +514,39 @@ export default function BattleScene() {
       </h3>
 
       <div className="mb-6">
-        <h3 className="text-lg font-bold">🧍 Active Unit:</h3>
+        <h3 className="text-lg font-bold">Active Unit:</h3>
         <div className="p-3 bg-zinc-800 rounded mb-2">
           <p className="text-xl font-semibold">{activeTypeIcon} {activeChar.name || 'Loading...'}</p>
           <p>❤️ HP: {playerTeam[activeUnitIndex]?.currentHp || 0} / {playerTeam[activeUnitIndex]?.maxHp || 0}</p>
           <button
-            onClick={async () => await handleAttack(playerTeam[activeUnitIndex].id)}
-            className="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded"
+            onClick={async () => {
+              setShowSwitchMenu(false);
+              await handleAttack(playerTeam[activeUnitIndex].id);
+            }}
+            className="attack-button"
             disabled={playerTeam[activeUnitIndex]?.currentHp <= 0 || playerTeam.every(unit => unit.currentHp <= 0) || isTurnInProgress }
           >
             {playerTeam[activeUnitIndex]?.currentHp <= 0 ? "Unit Defeated" : isTurnInProgress ? "Processing" : "Attack"}
           </button>
+          <button
+            className="switch-button"
+            disabled={hasUsedTurn || isTurnInProgress}
+            onClick={() => setShowSwitchMenu(prev => !prev)}
+          >
+            {showSwitchMenu ? "Switch" : "Switch"}
+          </button>
+
+          <button
+            className="switch-button"
+            onClick={() => setShowForfeitPrompt(true)}
+          >
+            Forfeit
+          </button>
         </div>
 
         <h4 className="text-md font-bold mt-4">🔁 Switch Character:</h4>
-        <div className="flex flex-wrap gap-2 mt-2">
+        {showSwitchMenu && (
+        <div className="character-switch-row">
         {playerTeam.map((unit, idx) => {
           const charData = characterMap[unit.id] || {};
           const typeIcon = typeEmojis[charData.type] || "❓";
@@ -528,7 +558,7 @@ export default function BattleScene() {
                 key={unit.id}
                 onClick={async () => {
                   if (hasUsedTurn || isTurnInProgress) return;
-                
+                  setShowSwitchMenu(false);
                   const outgoingUnit = playerTeam[activeUnitIndex];
                   const incomingUnit = playerTeam[idx];
                   const swapBuffs = outgoingUnit.passives?.filter(p => p.type === "onSwitchOut") ?? [];
@@ -576,8 +606,8 @@ export default function BattleScene() {
                     [turn]: [...(prev[turn] ?? []), ...logMessages]
                   }));
                 
-                  // 🧠 simulate enemy phase after switch
-                  const currentEnemy = stage.phases[enemyPhaseIndex];
+                  // simulate enemy phase after switch
+                  const currentEnemy = currentStage.phases[enemyPhaseIndex];
                   const activeUnit = incomingUnit;
                   const attacksThisTurn = currentEnemy.attacks || 1;
                 
@@ -629,7 +659,7 @@ export default function BattleScene() {
 
                 }}                
                 
-                className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded"
+                className="switch-button"
                 disabled={unit.currentHp <= 0 || isTurnInProgress}
               >
                 {unit.currentHp <= 0
@@ -642,6 +672,7 @@ export default function BattleScene() {
           );
         })}
         </div>
+        )}
       </div>
       
       <div ref={turnLogRef} className={styles["turn-log-container"]}>
@@ -658,6 +689,36 @@ export default function BattleScene() {
           </div>
         ))}
       </div>
+
+      {(showForfeitPrompt || showYouLosePopup) && <div className="backdrop-dim" />}
+
+      {showForfeitPrompt && (
+        <div className="forfeit-popup">
+          <h2>Are you sure you want to give up?</h2>
+          <div className="forfeit-actions">
+            <button onClick={() => {
+              new Audio("/.assets/sfx/failure.mp3").play();
+              setShowForfeitPrompt(false);
+              setShowYouLosePopup(true);
+              setTimeout(() => setShowEndButtons(true), 1000);
+            }}>Yes</button>
+            <button onClick={() => setShowForfeitPrompt(false)}>No</button>
+          </div>
+        </div>
+      )}
+
+      {showYouLosePopup && (
+        <div className="forfeit-popup">
+          <h1 className="you-lose-text">☠️ YOU LOSE ☠️</h1>
+          {showEndButtons && (
+            <div className="forfeit-actions">
+              <button onClick={() => window.location.href = "/#/stages"}>Return</button>
+              <button onClick={() => window.location.reload()}>Retry</button>
+            </div>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }

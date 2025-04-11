@@ -3,7 +3,7 @@ const characterDetails = {
       name: "Super Saiyan Goku",
       baseAtk: 15600,
       baseDef: 16500,
-      baseHp: 26655,
+      baseHp: 96655,
       passives: [
         // 🔹 Always Active: ATK & DEF +200%
         {
@@ -65,7 +65,7 @@ const characterDetails = {
       name: "Super Saiyan Vegeta",
       baseAtk: 12000,
       baseDef: 14000,
-      baseHp: 50000,
+      baseHp: 120000,
       passives: [
         // 🔹 Always Active: ATK & DEF +200%
         {
@@ -115,7 +115,7 @@ const characterDetails = {
       name: "FPSSJ Broly",
       baseAtk: 21200,
       baseDef: 14400,
-      baseHp: 23000,
+      baseHp: 93000,
       passives: [
           // 🔹 Always Active: ATK & DEF +222%
           {
@@ -171,7 +171,7 @@ const characterDetails = {
         name: "Super Vegito",
         baseAtk: 12777,
         baseDef: 16777,
-        baseHp: 20000,
+        baseHp: 90000,
         passives: [
           // 🔹 Always Active: ATK & DEF +359%, Great chance to super, Guards all attacks
           {
@@ -208,7 +208,7 @@ const characterDetails = {
         name: "Super Gogeta",
         baseAtk: 16777,
         baseDef: 12777,
-        baseHp: 20000,
+        baseHp: 90000,
         passives: [
           // 🔹 Always Active: ATK & DEF +459%
           {
@@ -247,7 +247,7 @@ const characterDetails = {
         name: "SSJ4 Daima Goku",
         baseAtk: 27000,
         baseDef: 21700,
-        baseHp: 12000,
+        baseHp: 62000,
         passives: [
           // 🔹 Always Active: ATK & DEF +159%
           {
@@ -281,7 +281,7 @@ const characterDetails = {
         name: "Super Saiyan Goku Daima",
         baseAtk: 17500,
         baseDef: 12500,
-        baseHp: 22000,
+        baseHp: 92000,
         passives: [
           // 🔹 Always Active: ATK & DEF +59%
           {
@@ -316,7 +316,7 @@ const characterDetails = {
         name: "SSJ3 Vegeta",
         baseAtk: 18800,
         baseDef: 17700,
-        baseHp: 26600,
+        baseHp: 96600,
         passives: [
           // 🔹 Always Active: ATK & DEF +400%
           {
@@ -347,7 +347,7 @@ const characterDetails = {
         name: "Glorio",
         baseAtk: 19000,
         baseDef: 17000,
-        baseHp: 25000,
+        baseHp: 95000,
         passives: [
           // 🔹 Always Active: ATK & DEF +250%
           {
@@ -389,7 +389,7 @@ const characterDetails = {
         name: "Goma",
         baseAtk: 28000,
         baseDef: 12000,
-        baseHp: 15000,
+        baseHp: 85000,
         passives: [
           // 🔹 Always Active: ATK & DEF +666%
           {
@@ -429,7 +429,7 @@ const characterDetails = {
         name: "Ultra Instinct Goku",
         baseAtk: 13000,
         baseDef: 12000,
-        baseHp: 40000,
+        baseHp: 110000,
         passives: [
           // 🔹 Always Active: ATK & DEF +200%
           {
@@ -499,7 +499,7 @@ const characterDetails = {
         name: "Super Saiyan 4 Goku",
         baseAtk: 22000,
         baseDef: 16000,
-        baseHp: 21000,
+        baseHp: 91000,
         passives: [
           // 🔹 Always Active: ATK & DEF +200%
           {
@@ -547,7 +547,7 @@ const characterDetails = {
         name: "Super Saiyan 3 Goku",
         baseAtk: 24000,
         baseDef: 14000,
-        baseHp: 25000,
+        baseHp: 95000,
         passives: [
           // 🔹 Always Active: ATK & DEF +300%, damage reduction +30%
           {
@@ -609,7 +609,7 @@ const characterDetails = {
         name: "SSGSS Goku",
         baseAtk: 17000,
         baseDef: 15000,
-        baseHp: 24000,
+        baseHp: 94000,
         passives: [
           // 🔹 Always Active: ATK & DEF +159%, Great chance to super, Guards all attacks
           {
@@ -654,7 +654,7 @@ const characterDetails = {
         name: "SSGSS Kaioken Goku",
         baseAtk: 22000,
         baseDef: 17000,
-        baseHp: 19000,
+        baseHp: 89000,
         passives: [
           // 🔹 Always Active: ATK & DEF +159%
           {
@@ -696,7 +696,7 @@ const characterDetails = {
         name: "Vegito Blue",
         baseAtk: 19000,
         baseDef: 17950,
-        baseHp: 16000,
+        baseHp: 86000,
         passives: [
           // 🔹 Always Active: ATK & DEF +59%
           {
@@ -731,7 +731,7 @@ const characterDetails = {
         name: "Gogeta Blue",
         baseAtk: 17950,
         baseDef: 19000,
-        baseHp: 16000,
+        baseHp: 86000,
         passives: [
           // 🔹 Always Active: ATK & DEF +159%
           {
@@ -767,7 +767,7 @@ const characterDetails = {
         name: "Kurapika",
         baseAtk: 24020,
         baseDef: 24030,
-        baseHp: 24040,
+        baseHp: 94040,
         passives: [
           // 🔹 Always Active: ATK & DEF +250%
           {
@@ -811,7 +811,7 @@ const characterDetails = {
         name: "Killua",
         baseAtk: 24700,
         baseDef: 18000,
-        baseHp: 15000,
+        baseHp: 85000,
         passives: [
           // 🔹 Always Active: ATK & DEF +150%
           {
@@ -863,7 +863,7 @@ const characterDetails = {
         name: "Gon",
         baseAtk: 13000,
         baseDef: 13000,
-        baseHp: 13000,
+        baseHp: 83000,
         passives: [
           // 🔹 Always Active: ATK & DEF +700%
           {
@@ -897,7 +897,7 @@ const characterDetails = {
         name: "Leoreo",
         baseAtk: 22315,
         baseDef: 10400,
-        baseHp: 30000,
+        baseHp: 100000,
         passives: [
           // 🔹 Always Active: ATK & DEF +100% and great chance to evade
           {
@@ -948,7 +948,7 @@ const characterDetails = {
         name: "Jotaro (Star Platinum)",
         baseAtk: 19000,
         baseDef: 17000,
-        baseHp: 21000,
+        baseHp: 91000,
         passives: [
           // 🔹 Always Active: ATK +100% & DEF +30%
           {
@@ -990,7 +990,7 @@ const characterDetails = {
         name: "DIO (The World)",
         baseAtk: 17000,
         baseDef: 19000,
-        baseHp: 21000,
+        baseHp: 91000,
         passives: [
           // 🔹 Always Active: ATK & DEF +100%, damage reduction +30%
           {
@@ -1037,7 +1037,7 @@ const characterDetails = {
         name: "Golden Experience Requiem",
         baseAtk: 14500,
         baseDef: 16000,
-        baseHp: 26000,
+        baseHp: 96000,
         passives: [
           // 🔹 Always Active: ATK & DEF +150%, Great chance to super, Guards all attacks
           {
@@ -1074,7 +1074,7 @@ const characterDetails = {
         name: "Isagi",
         baseAtk: 24000,
         baseDef: 14000,
-        baseHp: 25000,
+        baseHp: 95000,
         passives: [
           // 🔹 Always Active: ATK +50%, DEF +400%
           {
@@ -1115,7 +1115,7 @@ const characterDetails = {
         name: "Rafal",
         baseAtk: 26606,
         baseDef: 16060,
-        baseHp: 16000,
+        baseHp: 86000,
         passives: [
           // 🔹 Always Active: ATK & DEF +20%
           {
@@ -1151,7 +1151,7 @@ const characterDetails = {
         name: "Sung Jin Woo",
         baseAtk: 24000,
         baseDef: 14000,
-        baseHp: 25000,
+        baseHp: 95000,
         passives: [
           // 🔹 Always Active: ATK +500%, DEF +100%
           {
@@ -1188,7 +1188,7 @@ const characterDetails = {
         name: "Lelouch",
         baseAtk: 12500,
         baseDef: 8000,
-        baseHp: 25000,
+        baseHp: 95000,
         passives: [
           // 🔹 Always Active: ATK & DEF +150%
           {
@@ -1233,7 +1233,7 @@ const characterDetails = {
         name: "Ash Ketchum",
         baseAtk: 24000,
         baseDef: 14000,
-        baseHp: 25000,
+        baseHp: 99000,
         passives: [
           // 🔹 Always Active: ATK & DEF +100%
           {
@@ -1278,7 +1278,7 @@ const characterDetails = {
         name: "Gary Oak Arceus",
         baseAtk: 14000,
         baseDef: 17000,
-        baseHp: 25000,
+        baseHp: 99000,
         passives: [
           // 🔹 Always Active: ATK & DEF +999%
           {

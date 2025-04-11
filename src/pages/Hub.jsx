@@ -33,7 +33,7 @@ function Hub() {
         <div className = "hub-bar-bottom">
           <div className = "hub-btns">
             <button onClick = {() => {navigate("/summon"); playClick();}} className="summon-btn">✨ Summon</button>
-            <button onClick = {() => {navigate("/battle"); playClick();}} className="battle-btn">⚔️ Battle</button>
+            <button onClick = {() => {navigate("/stages"); playClick();}} className="battle-btn">⚔️ Play</button>
             <button onClick = {() => {navigate("/inventory"); playClick();}} className="inventory-btn">🧙 Characters</button>
             <button onClick={() => {navigate("/teams"); playClick();}} className="team-btn">📁 Teams</button>
           </div>

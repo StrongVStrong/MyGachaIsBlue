@@ -3,7 +3,8 @@ import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import Layout from "./components/Layout";
 import Hub from "./pages/Hub"; 
 import Summon from "./pages/Summon"; 
-import Battle from "./pages/Battle"; 
+import Battle from "./pages/Battle";
+import Stages from "./pages/Stages";
 import Inventory from "./pages/Inventory";
 import Dev from "./pages/Dev";
 import Results from "./pages/SummonResults";
@@ -38,7 +39,8 @@ function App() {
           <Route path="/" element={<PrivateRoute><Hub /></PrivateRoute>} />
           <Route path="/character/:id" element={<PrivateRoute><CharacterPage /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
-          <Route path="/battle" element={<PrivateRoute><Battle /></PrivateRoute>} />
+          <Route path="/stages" element={<PrivateRoute><Stages /></PrivateRoute>} />
+          <Route path="/battle/:stageId" element={<PrivateRoute><Battle /></PrivateRoute>} />
           <Route path="/dev" element={<PrivateRoute><Dev /></PrivateRoute>} />
           <Route path="/teams" element={<PrivateRoute><TeamPresets /></PrivateRoute>} />
 
