@@ -778,10 +778,10 @@ const characterDetails = {
           description: "DEF +300%"
           },
   
-          // 🔹 First 5 turns: ATK & DEF +200%, great chance to super
+          // 🔹 First 3 turns: ATK & DEF +200%, great chance to super
           {
             type: "startOfTurn",
-            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 5,
+            condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 3,
             atkBoost: 2.0,
             defBoost: 2.0,
             extraAttackChance: 0.7,
@@ -789,7 +789,7 @@ const characterDetails = {
             description: "ATK & DEF +200%, Great chance to crit/additional/evade for 5 turns"
           },
 
-          // Super Attack: Emperor's Time: Massively Raises ATK
+          // Super Attack: Emperor's Time: Massively Raises ATK for 1 turn
           {
             type: "superAttack",
             atkBoost: 1,

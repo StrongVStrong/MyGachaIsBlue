@@ -49,7 +49,7 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx, characters, 
   const attackerType = characterMap[attacker.id]?.type ?? attacker.type;
   const defenderType = characterMap[defender.id]?.type ?? defender.type;
   const guardsStart = hasPassive(defender, "guardsAll", ctx, defender.id, ["startOfTurn"]);
-  const guardsAttack = hasPassive(defender, "guardsAll", ctx, defender.id, ["onAttack"]);
+  const guardsAttack = hasPassive(defender, "guardsAll", ctx, defender.id, ["onAttack", "startOfTurn"]);
 
   const beats = {
     fire: "grass",
@@ -203,6 +203,30 @@ export default function BattleScene({ stageId = "1-1" }) {
     };
   }
 
+  function getUpdatedContextWithSuperBuffs(unit, superPassives, turn, superEffects) {
+    const newBuffs = superPassives.map(p => ({
+      atkBoost: p.atkBoost ?? 0,
+      defBoost: p.defBoost ?? 0,
+      expiresOn: turn + (p.turns ?? 1) - 1
+    }));
+  
+    const updatedEffects = {
+      ...superEffects,
+      [unit.id]: [
+        ...(superEffects[unit.id] ?? []),
+        ...newBuffs
+      ]
+    };
+  
+    const ctx = {
+      ...getBattleContext(),
+      superEffects: updatedEffects
+    };
+  
+    return { updatedEffects, ctx };
+  }
+  
+
   const handleAttack = async (attackerId) => {
     if (hasUsedTurn || isTurnInProgress) return;
     setIsTurnInProgress(true);
@@ -312,19 +336,8 @@ export default function BattleScene({ stageId = "1-1" }) {
         [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
       }));
       const superPassives = activeUnit.passives.filter(p => p.type === "superAttack");
-    
-      setSuperEffects(prev => {
-        const existing = prev[activeUnit.id] ?? [];
-        const newBuffs = superPassives.map(p => ({
-          atkBoost: p.atkBoost ?? 0,
-          defBoost: p.defBoost ?? 0,
-          expiresOn: turn + (p.turns ?? 1)
-        }));
-        return {
-          ...prev,
-          [activeUnit.id]: [...existing, ...newBuffs]
-        };
-      });
+      const { updatedEffects, ctx } = getUpdatedContextWithSuperBuffs(activeUnit, superPassives, turn, superEffects);
+      setSuperEffects(updatedEffects);
 
       const updatedCtx = {
         ...getBattleContext(),
@@ -335,7 +348,7 @@ export default function BattleScene({ stageId = "1-1" }) {
             ...superPassives.map(p => ({
               atkBoost: p.atkBoost ?? 0,
               defBoost: p.defBoost ?? 0,
-              expiresOn: turn + (p.turns ?? 1)
+              expiresOn: turn + (p.turns ?? 1) - 1
             }))
           ]
         }
@@ -358,50 +371,56 @@ export default function BattleScene({ stageId = "1-1" }) {
         p => ["startOfTurn", "onAttack"].includes(p.type) && p.extraAttackChance !== undefined
       );
       
-      for (const p of extraAttackPassives) {
-        if (!p.condition || p.condition(getBattleContext(), activeUnit.id)) {
-          const superChance = p.extraAttackChance;
-          const isSuper = Math.random() < superChance;
-      
-          const addResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, isSuper, characters, traitEffects);
-      
-          if (isSuper) {
-            setSuperAttackCounts(prev => ({
-              ...prev,
-              [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
-            }));
-      
-            const superPassives = activeUnit.passives.filter(p => p.type === "superAttack");
-            setSuperEffects(prev => {
-              const existing = prev[activeUnit.id] ?? [];
-              const newBuffs = superPassives.map(p => ({
-                atkBoost: p.atkBoost ?? 0,
-                defBoost: p.defBoost ?? 0,
-                expiresOn: turn + (p.turns ?? 1)
-              }));
-              return {
-                ...prev,
-                [activeUnit.id]: [...existing, ...newBuffs]
-              };
-            });
-      
-            setLog(prev => ({
-              ...prev,
-              [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}`]
-            }));
-          } else {
-            addResult.damage = Math.floor(addResult.damage / 10);
-            addResult.description = `${attacker.name} did a normal additional for ${addResult.damage} damage`;
-      
-            setLog(prev => ({
-              ...prev,
-              [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${addResult.description}`]
-            }));
-          }
-      
-          currentEnemy.hp = Math.max(0, currentEnemy.hp - result.damage);
-        }
-      }
+      let chainedSuperEffects = { ...superEffects }; // Start from current state
+
+for (const p of extraAttackPassives) {
+  if (!p.condition || p.condition(getBattleContext(), activeUnit.id)) {
+    const superChance = p.extraAttackChance;
+    const isSuper = Math.random() < superChance;
+
+    if (isSuper) {
+      const superPassives = activeUnit.passives.filter(p => p.type === "superAttack");
+
+      // Stack onto latest effects
+      const { updatedEffects, ctx } = getUpdatedContextWithSuperBuffs(activeUnit, superPassives, turn, chainedSuperEffects);
+      chainedSuperEffects = updatedEffects;
+      setSuperEffects(updatedEffects);
+
+      setSuperAttackCounts(prev => ({
+        ...prev,
+        [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
+      }));
+
+      const updatedStats = calculateFinalStats(activeUnit, ctx, activeUnit.id);
+      const attackerWithBuffs = {
+        ...attacker,
+        baseAtk: updatedStats.atk,
+        baseDef: updatedStats.def
+      };
+
+      const addResult = performAttack(attackerWithBuffs, enemyWithType, ctx, attackerId, true, characters, traitEffects);
+
+      setLog(prev => ({
+        ...prev,
+        [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}`]
+      }));
+
+      currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
+    } else {
+      const normalResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, false, characters, traitEffects);
+      normalResult.damage = Math.floor(normalResult.damage / 10);
+      normalResult.description = `${attacker.name} did a normal additional for ${normalResult.damage} damage`;
+
+      setLog(prev => ({
+        ...prev,
+        [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${normalResult.description}`]
+      }));
+
+      currentEnemy.hp = Math.max(0, currentEnemy.hp - normalResult.damage);
+    }
+  }
+}
+
       
       const traitExtraChance = getValueFromTrait(activeUnit.id, "extraAttackChance", characters);
       if (Math.random() < traitExtraChance) {
@@ -428,30 +447,30 @@ export default function BattleScene({ stageId = "1-1" }) {
       for (let i = 0; i < postAttackCount; i++) {
         const isSuper = !superAttackUsed && Math.random() < (currentEnemy.SA ?? 0) / 100;
         // Evasion logic
-      const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
-        if (
-          p.type === "onAttack" &&
-          (!p.condition || p.condition(getBattleContext(), activeUnit.id))
-        ) {
-          return total + (p.evadeChance ?? 0);
+        const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
+          if (
+            (p.type === "onAttack" || p.type === "startOfTurn") &&
+            (!p.condition || p.condition(getBattleContext(), activeUnit.id))
+          ) {
+            return total + (p.evadeChance ?? 0);
+          }
+          return total;
+        }, 0);
+
+        let evaded = Math.random() < evadeChance;
+
+        if (!evaded) {
+          evaded = Math.random() < getValueFromTrait(activeUnit.id, "evadeChance", characters);
         }
-        return total;
-      }, 0);
 
-      let evaded = Math.random() < evadeChance;
-
-      if (!evaded) {
-        evaded = Math.random() < getValueFromTrait(activeUnit.id, "evadeChance", characters);
-      }
-
-      if (evaded) {
-        setLog(prev => ({
-          ...prev,
-          [turn]: [
-            ...(prev[turn] ?? []),
-            `💨 ${activeUnit.name} dodged ${currentEnemy.name}'s ${isSuper ? "Super Attack" : "attack"}!`
-          ]
-        }));
+        if (evaded) {
+          setLog(prev => ({
+            ...prev,
+            [turn]: [
+              ...(prev[turn] ?? []),
+              `💨 ${activeUnit.name} dodged ${currentEnemy.name}'s ${isSuper ? "Super Attack" : "attack"}!`
+            ]
+          }));
 
         getBattleContext().evaded[activeUnit.id] = true;
 
