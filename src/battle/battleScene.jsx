@@ -9,20 +9,21 @@ import { characterMap } from "../data/characters";
 import { useLocation } from "react-router-dom";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
 import { useClickSFX } from "../hooks/useClickSFX";
+import { traitEffects } from "../utils/RerollTraits";
 import "./battleScene.css";
 
-export function hasPassive(unit, key, ctx, id) {
+export function hasPassive(unit, key, ctx, id, allowedTypes = ["startOfTurn", "onAttack"]) {
   return (unit.passives ?? []).some(p =>
-    (["startOfTurn", "onAttack"].includes(p.type)) &&
+    allowedTypes.includes(p.type) &&
     (!p.condition || p.condition(ctx, id)) &&
     p[key] === true
   );
 }
 
-export function getPassiveValue(unit, key, ctx, id) {
+export function getPassiveValue(unit, key, ctx, id, allowedTypes = ["startOfTurn", "onAttack"]) {
   return (unit.passives ?? []).reduce((total, p) => {
     if (
-      ["startOfTurn", "onAttack"].includes(p.type) &&
+      allowedTypes.includes(p.type) &&
       (!p.condition || p.condition(ctx, id)) &&
       p[key] != null
     ) {
@@ -32,16 +33,23 @@ export function getPassiveValue(unit, key, ctx, id) {
   }, 0);
 }
 
+
+function getValueFromTrait(unitId, key, characters) {
+  const traitName = characters?.[unitId]?.trait;
+  return traitName && traitEffects[traitName]?.[key] || 0;
+}
+
 const typeEmojis = {
   fire: "🔥",
   water: "💧",
   grass: "🌿"
 };
 
-export function getTypeAdvantageMultiplier(attacker, defender, ctx) {
+export function getTypeAdvantageMultiplier(attacker, defender, ctx, characters, timing = "both") {
   const attackerType = characterMap[attacker.id]?.type ?? attacker.type;
   const defenderType = characterMap[defender.id]?.type ?? defender.type;
-  const defenderGuards = hasPassive(defender, "guardsAll", ctx, defender.id);
+  const guardsStart = hasPassive(defender, "guardsAll", ctx, defender.id, ["startOfTurn"]);
+  const guardsAttack = hasPassive(defender, "guardsAll", ctx, defender.id, ["onAttack"]);
 
   const beats = {
     fire: "grass",
@@ -52,7 +60,16 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx) {
   const isAdvantaged = beats[attackerType] === defenderType;
   const isDisadvantaged = beats[defenderType] === attackerType;
 
-  if (defenderGuards && !isDisadvantaged) {
+  let guardActive = false;
+  if (timing === "startOfTurn") guardActive = guardsStart;
+  else if (timing === "onAttack") guardActive = guardsAttack;
+  else guardActive = guardsStart || guardsAttack;
+
+  const traitGuardChance = getValueFromTrait(defender.id, "guardsAll", characters);
+  const traitGuards = typeof traitGuardChance === "number" && Math.random() < traitGuardChance;
+  guardActive ||= traitGuards;
+
+  if (guardActive && !isDisadvantaged) {
     return { multiplier: 0.5, label: "🛡️" };
   }
 
@@ -207,7 +224,7 @@ export default function BattleScene({ stageId = "1-1" }) {
       // Evasion logic
       const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
         if (
-          (p.type === "startOfTurn" || p.type === "onAttack") &&
+          p.type === "startOfTurn" &&
           (!p.condition || p.condition(getBattleContext(), activeUnit.id))
         ) {
           return total + (p.evadeChance ?? 0);
@@ -215,7 +232,11 @@ export default function BattleScene({ stageId = "1-1" }) {
         return total;
       }, 0);
 
-      const evaded = Math.random() < evadeChance;
+      let evaded = Math.random() < evadeChance;
+
+      if (!evaded) {
+        evaded = Math.random() < getValueFromTrait(activeUnit.id, "evadeChance", characters);
+      }
 
       if (evaded) {
         setLog(prev => ({
@@ -232,16 +253,20 @@ export default function BattleScene({ stageId = "1-1" }) {
       }
 
       const enemyWithId = { ...currentEnemy, id: -1 };
-      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, getBattleContext());
+      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, getBattleContext(), characters, "startOfTurn");
 
       const rawDmg = isSuper ? currentEnemy.SAatk : currentEnemy.atk;
       let baseDamage = rawDmg * typeMultiplier;
 
-      const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
-      const drLabel = (dmgReduction ?? 0) > 0 ? ` -${Math.round((dmgReduction ?? 0) * 100)}% DR ` : "";
-      baseDamage *= 1 - (dmgReduction ?? 0);
+      let drBefore = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id, ["startOfTurn"]);
+      const traitDR = getValueFromTrait(activeUnit.id, "damageReduction", characters);
+      drBefore += traitDR;
+      const drLabel = (drBefore ?? 0) > 0 ? ` -${Math.round((drBefore ?? 0) * 100)}% DR ` : "";
+      baseDamage *= 1 - (drBefore ?? 0);
 
-      const reduced = Math.max(0, baseDamage - activeUnitStats.def);
+      const traitDefBoost = getValueFromTrait(activeUnit.id, "defBoost", characters);
+      const boostedDef = activeUnitStats.def * (1 + traitDefBoost);
+      const reduced = Math.max(0, baseDamage - boostedDef);
       const variance = 0.99 + Math.random() * 0.01;
       let damage = Math.floor(reduced * variance);
       if (damage === 0) {
@@ -259,7 +284,7 @@ export default function BattleScene({ stageId = "1-1" }) {
         [turn]: [
           ...(prev[turn] ?? []),
           `${isSuper ? "💥 Super Attack! " : "🛡️"}${currentEnemy.name} attacked ${activeUnit.name} ` +
-          `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${activeUnitStats.def} DEF = ${damage} damage] ` +
+          `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${Math.floor(boostedDef)} DEF = ${damage} damage] ` +
           `(before your action)`
         ]
       }));
@@ -281,7 +306,7 @@ export default function BattleScene({ stageId = "1-1" }) {
       };
 
       const enemyWithType = { ...currentEnemy, id: -1 };
-      const result = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, true);
+      const result = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, true, characters, traitEffects);
       setSuperAttackCounts(prev => ({
         ...prev,
         [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
@@ -305,10 +330,12 @@ export default function BattleScene({ stageId = "1-1" }) {
       
       // Update activeUnitStats for post-attack defense
       activeUnitStats = calculateFinalStats(playerTeam[activeUnitIndex], getBattleContext(), playerTeam[activeUnitIndex].id);
-      
+
+      let extraMsg = "";
+      if (result.traitCrit) extraMsg = " 💠 (Trait Activated)";
       setLog(prev => ({
         ...prev,
-        [turn]: [...(prev[turn] ?? []), `🔹 ${result.description}`]
+        [turn]: [...(prev[turn] ?? []), `🔹 ${result.description}${extraMsg}`]
       }));
 
       // Additional attack check
@@ -321,7 +348,7 @@ export default function BattleScene({ stageId = "1-1" }) {
           const superChance = p.extraAttackChance;
           const isSuper = Math.random() < superChance;
       
-          const addResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, isSuper);
+          const addResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, isSuper, characters, traitEffects);
       
           if (isSuper) {
             setSuperAttackCounts(prev => ({
@@ -361,6 +388,22 @@ export default function BattleScene({ stageId = "1-1" }) {
         }
       }
       
+      const traitExtraChance = getValueFromTrait(activeUnit.id, "extraAttackChance", characters);
+      if (Math.random() < traitExtraChance) {
+        const addResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, true, characters, traitEffects);
+
+        setSuperAttackCounts(prev => ({
+          ...prev,
+          [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
+        }));
+
+        setLog(prev => ({
+          ...prev,
+          [turn]: [...(prev[turn] ?? []), `💠 Trait Extra Super: ${addResult.description}`]
+        }));
+
+        currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
+      }
 
     }
   
@@ -372,7 +415,7 @@ export default function BattleScene({ stageId = "1-1" }) {
         // Evasion logic
       const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
         if (
-          (p.type === "startOfTurn" || p.type === "onAttack") &&
+          p.type === "onAttack" &&
           (!p.condition || p.condition(getBattleContext(), activeUnit.id))
         ) {
           return total + (p.evadeChance ?? 0);
@@ -380,7 +423,11 @@ export default function BattleScene({ stageId = "1-1" }) {
         return total;
       }, 0);
 
-      const evaded = Math.random() < evadeChance;
+      let evaded = Math.random() < evadeChance;
+
+      if (!evaded) {
+        evaded = Math.random() < getValueFromTrait(activeUnit.id, "evadeChance", characters);
+      }
 
       if (evaded) {
         setLog(prev => ({
@@ -396,16 +443,20 @@ export default function BattleScene({ stageId = "1-1" }) {
         continue;
       }
       const enemyWithId = { ...currentEnemy, id: -1 };
-      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, getBattleContext());
+      const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(enemyWithId, activeUnit, getBattleContext(), characters, "onAttack");
       
       const rawDmg = isSuper ? currentEnemy.SAatk : currentEnemy.atk;
       let baseDamage = rawDmg * typeMultiplier;
       
-      const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
+      let dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
+      const traitDR = getValueFromTrait(activeUnit.id, "damageReduction", characters);
+      dmgReduction += traitDR;
       const drLabel = (dmgReduction ?? 0) > 0 ? ` -${Math.round((dmgReduction ?? 0) * 100)}% DR ` : "";
       baseDamage *= 1 - (dmgReduction ?? 0);
       
-      const reduced = Math.max(0, baseDamage - activeUnitStats.def);
+      const traitDefBoost = getValueFromTrait(activeUnit.id, "defBoost", characters);
+      const boostedDef = activeUnitStats.def * (1 + traitDefBoost);
+      const reduced = Math.max(0, baseDamage - boostedDef);
       const variance = 0.99 + Math.random() * 0.01;
       let damage = Math.floor(reduced * variance);
       if (damage === 0) {
@@ -424,7 +475,7 @@ export default function BattleScene({ stageId = "1-1" }) {
           [turn]: [
             ...(prev[turn] ?? []),
             `${isSuper ? "💥 Super Attack! " : "🛡️"}${currentEnemy.name} attacked ${activeUnit.name} ` +
-            `${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${activeUnitStats.def} DEF = ${damage} dmg] (after your action)`
+            `${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${Math.floor(boostedDef)} DEF = ${damage} dmg] (after your action)`
           ]
         }));
         
@@ -723,13 +774,16 @@ export default function BattleScene({ stageId = "1-1" }) {
                   for (let i = 0; i < attacksThisTurn; i++) {
                     const isSuper = Math.random() < (currentEnemy.SA ?? 0) / 100;
                     const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
-                      if ((p.type === "startOfTurn" || p.type === "onAttack") && (!p.condition || p.condition(getBattleContext(), activeUnit.id))) {
+                      if ((p.type === "startOfTurn") && (!p.condition || p.condition(getBattleContext(), activeUnit.id))) {
                         return total + (p.evadeChance ?? 0);
                       }
                       return total;
                     }, 0);
                 
-                    const evaded = Math.random() < evadeChance;
+                    let evaded = Math.random() < evadeChance;
+                    if (!evaded) {
+                      evaded = Math.random() < getValueFromTrait(activeUnit.id, "evadeChance", characters);
+                    }
                     if (evaded) {
                       setLog(prev => ({
                         ...prev,
@@ -738,13 +792,15 @@ export default function BattleScene({ stageId = "1-1" }) {
                       continue;
                     }
                 
-                    const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(currentEnemy, activeUnit, getBattleContext());
+                    const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(currentEnemy, activeUnit, getBattleContext(), characters, "startOfTurn");
                     const rawDmg = isSuper ? currentEnemy.SAatk : currentEnemy.atk;
                     let baseDamage = rawDmg * typeMultiplier;
                     const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
                     const drLabel = (dmgReduction ?? 0) > 0 ? ` -${Math.round((dmgReduction ?? 0) * 100)}% DR ` : "";
                     baseDamage *= 1 - (dmgReduction ?? 0);
-                    const reduced = Math.max(0, baseDamage - activeUnitStats.def);
+                    const traitDefBoost = getValueFromTrait(activeUnit.id, "defBoost", characters);
+                    const boostedDef = activeUnitStats.def * (1 + traitDefBoost);
+                    const reduced = Math.max(0, baseDamage - boostedDef);
                     const variance = 0.99 + Math.random() * 0.01;
                     let damage = Math.floor(reduced * variance);
                     if (damage === 0) {
@@ -759,7 +815,7 @@ export default function BattleScene({ stageId = "1-1" }) {
                       [turn]: [
                         ...(prev[turn] ?? []),
                         `${isSuper ? "💥 Super Attack! " : "🛡️"}${currentEnemy.name} attacked ${activeUnit.name} ` +
-                        `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${activeUnitStats.def} DEF = ${damage} damage] (after switch)`
+                        `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${Math.floor(boostedDef)} DEF = ${damage} damage] (after switch)`
                       ]
                     }));
                     await new Promise(resolve => setTimeout(resolve, 500));
@@ -787,22 +843,21 @@ export default function BattleScene({ stageId = "1-1" }) {
       </div>
       
       {Object.keys(log).length > 0 && (
-  <div ref={turnLogRef} className={styles["turn-log-container"]}>
-    <h3 className="text-lg font-bold mb-2">📜 Turn Log</h3>
-    {Object.entries(log).map(([turnNum, entries]) => (
-      <div key={turnNum} className={styles["turn-log-turn"]}>
-        <p className={styles["turn-log-turn-title"]}>🔄 Turn {turnNum}</p>
-        <ul>
-          {entries.map((entry, idx) => (
-            <li key={idx} className={styles["turn-log-entry"]}>{entry}</li>
+        <div ref={turnLogRef} className={styles["turn-log-container"]}>
+          <h3 className="text-lg font-bold mb-2">📜 Turn Log</h3>
+          {Object.entries(log).map(([turnNum, entries]) => (
+            <div key={turnNum} className={styles["turn-log-turn"]}>
+              <p className={styles["turn-log-turn-title"]}>🔄 Turn {turnNum}</p>
+              <ul>
+                {entries.map((entry, idx) => (
+                  <li key={idx} className={styles["turn-log-entry"]}>{entry}</li>
+                ))}
+              </ul>
+              <hr className="my-2" />
+            </div>
           ))}
-        </ul>
-        <hr className="my-2" />
-      </div>
-    ))}
-  </div>
-)}
-
+        </div>
+      )}
 
       {showVictoryPopup && (
         <div className="forfeit-popup">

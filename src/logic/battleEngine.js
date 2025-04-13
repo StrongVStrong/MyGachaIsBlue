@@ -1,7 +1,7 @@
 import { calculateFinalStats } from "./statCalculator";
 import { characterMap } from "../data/characters";
 
-export function performAttack(attacker, defender, ctx, id, isSuper = false) {
+export function performAttack(attacker, defender, ctx, id, isSuper = false, characters = {}, traitEffects = {}) {
   const attackerStats = calculateFinalStats(attacker, ctx, id);
   const dr = defender.dr ?? 0;
   const def = defender.def ?? 0;
@@ -89,6 +89,16 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
 
   let baseDamage = raw;
   let typeLabel = "";
+  let traitCrit = false;
+
+  if (!crit) {
+    const trait = characters?.[id]?.trait;
+    const traitCritChance = trait && traitEffects?.[trait]?.critChance;
+    if (Math.random() < (traitCritChance ?? 0)) {
+      crit = true;
+      traitCrit = true;
+    }
+  }
 
   if (!crit) {
     const { multiplier, label } = getTypeAdvantageMultiplier(attacker, defender, ctx);
@@ -118,6 +128,11 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
     finalDamage = Math.floor(reduced * variance);
   }
 
+  const traitName = characters?.[id]?.trait;
+  const traitAtkBoost = (traitName && traitEffects?.[traitName]?.atkBoost) ?? 0;
+  const trueDamage = Math.floor(finalDamage * traitAtkBoost);
+  finalDamage += trueDamage;
+
   return {
     damage: finalDamage,
     evaded: false,
@@ -126,6 +141,8 @@ export function performAttack(attacker, defender, ctx, id, isSuper = false) {
     description: `${attacker.name} dealt ${finalDamage} damage to ${defender.name}${crit ? " (CRIT!)" : ""}${!crit ? ` (${typeLabel})` : ""}`,
     extraAttackChance,
     guaranteedSuper,
-    updatedStats: calculateFinalStats(attacker, ctx, id)
+    updatedStats: calculateFinalStats(attacker, ctx, id),
+    traitCrit,
+    trueDamage,
   };
 }

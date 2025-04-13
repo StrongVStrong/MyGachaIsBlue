@@ -179,6 +179,48 @@
   .bg-Ultra      { background-color: rgba(255, 217, 0, 0.253); }     /* 🟡 gold now */
   .bg-Godly      { background-color: rgba(0, 208, 255, 0.397); }     /* 💠 stronger blue */
 
+  /* Common */
+  .common-glow {
+    animation: glowCommon 0.5s ease-in-out;
+  }
+  @keyframes glowCommon {
+    0%, 100% { box-shadow: 0 0 0px #3498db; background-color: #333; }
+    50%     { box-shadow: 0 0 10px #3498db; background-color: #1f3d5a; }
+  }
+  
+  /* Rare */
+  .rare-glow {
+    animation: glowRare 0.5s ease-in-out;
+  }
+  @keyframes glowRare {
+    0%, 100% { box-shadow: 0 0 0px #9b59b6; background-color: #333; }
+    50%     { box-shadow: 0 0 15px #9b59b6; background-color: #3e255e; }
+  }
+  
+  /* Legendary */
+  .legendary-glow {
+    animation: glowLegendary 0.5s ease-in-out;
+  }
+  @keyframes glowLegendary {
+    0%, 100% { box-shadow: 0 0 0px gold; background-color: #333; }
+    50%     { box-shadow: 0 0 50px gold; background-color: #665500; }
+  }
+  
+  /* Godly */
+  .godly-glow {
+    animation: glowRed 0.5s ease-in-out;
+  }
+  @keyframes glowRed {
+    0%, 100% { box-shadow: 0 0 0px red; background-color: #333; }
+    50%     { box-shadow: 0 0 100px red; background-color: #880000; }
+  }
+
+  /* Rarity background tints — stronger but subtle */
+  .bg-common     { background-color: rgba(52, 152, 219, 0.195); }
+  .bg-rare       { background-color: rgba(156, 89, 182, 0.305); }
+  .bg-legendary  { background-color: rgba(255, 0, 0, 0.233); }       /* 🔴 red now */
+  .bg-ultra      { background-color: rgba(255, 217, 0, 0.253); }     /* 🟡 gold now */
+  .bg-godly      { background-color: rgba(0, 208, 255, 0.397); }     /* 💠 stronger blue */
 
   /* Type-based border for character portrait */
   .border-fire  { border: 8px solid #ff4d4d; }

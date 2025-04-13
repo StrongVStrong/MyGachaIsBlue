@@ -1,10 +1,12 @@
 export const traitPool = {
-    common: ["Strong", "Sharp", "Quick"],
+    common: ["Strong", "Stronger", "Sharp", "Sharper", "Quick", "Quicker"],
     rare: ["Master", "Serious", "Hasty"],
     legendary: ["Powerful", "Perceptive", "Godspeed"],
     godly: [
-      { name: "Ultra Instinct", rate: 0.2 },
+      { name: "Ultra Instinct", rate: 0.25 },
       { name: "Enlightened", rate: null }, // evenly split remaining %
+      { name: "Beast", rate: 0.25 },
+      { name: "Divine", rate: 0.01 },
     ],
   };
   
@@ -61,18 +63,59 @@ export const traitPool = {
   }
   
 export const traitEffects = {
-    "Ultra Instinct": {
-      evadeChance: 0.3,
-      description: "30% chance to dodge (Hidden Potential)"
+    "Strong": {
+      atkBoost: 0.1,
+      description: "10% attack"
     },
-    "Enlightened": {
-      extraSuperChance: 0.2,
-      description: "20% chance to perform an extra super attack (Hidden Potential)"
+    "Stronger": {
+      atkBoost: 0.2,
+      description: "20% attack"
     },
     "Sharp": {
-      critChance: 0.3,
-      description: "30% crit chance (Hidden Potential)"
+      damageReduction: 0.1,
+      description: "10% defense"
     },
-    // Add more as needed
+    "Sharper": {
+      guardsAll: 0.5,
+      description: "20% defense"
+    },
+    "Quick": {
+      extraAttackChance: 0.1,
+      description: "10% chance to additional super"
+    },
+    "Quicker": {
+      defBoost: 0.2,
+      description: "20% chance to additional super"
+    },
+    "Master": {
+      evadeChance: 0.05,
+      description: "5% chance to dodge"
+    },
+    "Serious": {
+      critChance: 0.3,
+      description: "20% chance to crit"
+    },
+    "Hasty": {
+      extraAttackChance: 0.5,
+      description: "50% chance to additional super"
+    },
+    "Ultra Instinct": {
+      evadeChance: 0.3,
+      defBoost: 0.1,
+      description: "30% chance to dodge, 10% def"
+    },
+    "Enlightened": {
+      extraAttackChance: 0.5,
+      description: "50% chance to additional super"
+    },
+    "Beast": {
+      critChance: 0.5,
+      description: "50% chance to crit"
+    },
+    "Divine": {
+      critChance: 0.3,
+      atkBoost: 0.1,
+      description: "30% chance to crit, 10% atk"
+    },
   };
   

@@ -1115,6 +1115,7 @@ const characterDetails = {
           atkBoost: 6.66,
           defBoost: 6.66,
           critChance: 1,
+          damageReduction: 0.2,
           extraAttackChance: 1,
           guardsAll: true,
           description: "ATK +600%, DEF +500%, guaranteed crits, launches additional Super Attack"
