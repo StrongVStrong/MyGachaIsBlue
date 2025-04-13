@@ -325,11 +325,26 @@ export default function BattleScene({ stageId = "1-1" }) {
           [activeUnit.id]: [...existing, ...newBuffs]
         };
       });
+
+      const updatedCtx = {
+        ...getBattleContext(),
+        superEffects: {
+          ...superEffects,
+          [activeUnit.id]: [
+            ...(superEffects[activeUnit.id] ?? []),
+            ...superPassives.map(p => ({
+              atkBoost: p.atkBoost ?? 0,
+              defBoost: p.defBoost ?? 0,
+              expiresOn: turn + (p.turns ?? 1)
+            }))
+          ]
+        }
+      };
       
       currentEnemy.hp = Math.max(0, currentEnemy.hp - result.damage);
       
       // Update activeUnitStats for post-attack defense
-      activeUnitStats = calculateFinalStats(playerTeam[activeUnitIndex], getBattleContext(), playerTeam[activeUnitIndex].id);
+      activeUnitStats = calculateFinalStats(playerTeam[activeUnitIndex], updatedCtx, playerTeam[activeUnitIndex].id);
 
       let extraMsg = "";
       if (result.traitCrit) extraMsg = " 💠 (Trait Activated)";
