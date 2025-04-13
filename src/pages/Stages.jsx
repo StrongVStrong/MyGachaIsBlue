@@ -38,68 +38,68 @@ const stageDescriptions = {
     },
     2: {
         1: {
-            name: "Soon",
-            description: "Soon",
+            name: "Daima",
+            description: "Enter the World of Daima",
         },
         2: {
-            name: "Soon",
-            description: "Soon",
+            name: "Number 3",
+            description: "Fight the protector of the Dragon Balls",
         },
         3: {
-            name: "Soon",
-            description: "Soon",
+            name: "Kuu",
+            description: "This Majin seems to be quite an annoying trickster...",
         },
         4: {
-            name: "Soon",
-            description: "Soon",
+            name: "Duu",
+            description: "This Majin seems to be quite a tanky trickster...",
         },
         5: {
-            name: "Soon",
-            description: "Soon",
+            name: "Goma",
+            description: "The Third Eye has been awakened... Put an end to it",
         },
     },
     3: {
         1: {
-            name: "Soon",
-            description: "Soon",
+            name: "Exam",
+            description: "Get your license!",
         },
         2: {
-            name: "Soon",
-            description: "Soon",
+            name: "Arena",
+            description: "They say reaching the top is akin to Heaven...",
         },
         3: {
-            name: "Soon",
-            description: "Soon",
+            name: "Island",
+            description: "What a greedy game...",
         },
         4: {
-            name: "Soon",
-            description: "Soon",
+            name: "Troupe",
+            description: "They shall plague this world no longer.",
         },
         5: {
-            name: "Soon",
-            description: "Soon",
+            name: "Ants",
+            description: "Filthy things... Wipe them out.",
         },
     },
     4: {
         1: {
-            name: "Soon",
-            description: "Soon",
+            name: "Aces",
+            description: "Beat Ash's best.",
         },
         2: {
-            name: "Soon",
-            description: "Soon",
+            name: "Weather",
+            description: "Oh my god that's a dragon",
         },
         3: {
-            name: "Soon",
-            description: "Soon",
+            name: "Experiment",
+            description: "We dreamed of creating the world's strongest...and we succeeded.",
         },
         4: {
-            name: "Soon",
-            description: "Soon",
+            name: "Light that burns the sky",
+            description: "Is that an alien too?",
         },
         5: {
-            name: "Soon",
-            description: "Soon",
+            name: "Gods",
+            description: "Tremble.",
         },
     },
     5: {

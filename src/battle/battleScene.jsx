@@ -65,6 +65,7 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx) {
 export default function BattleScene({ stageId = "1-1" }) {
   const {
     preferences,
+    characters,
     setGems,
     setPlayerExp,
     setCurrency,
@@ -92,12 +93,18 @@ export default function BattleScene({ stageId = "1-1" }) {
         console.error(`Character ${charId} not found`);
         return null;
       }
-      const maxHp = Math.floor(unit.baseHp * leaderMultiplier);
+      const limitBreakLevel = characters?.[charId]?.limitBreak || 0;
+      // Calculate stats with limit break bonuses
+      const maxHp = Math.floor((unit.baseHp + (limitBreakLevel * 500)) * leaderMultiplier);
+      const baseAtk = unit.baseAtk + (limitBreakLevel * 500);
+      const baseDef = unit.baseDef + (limitBreakLevel * 500);
       return {
         id: charId,
         ...unit,
         maxHp,
-        currentHp: maxHp
+        currentHp: maxHp,
+        baseAtk,
+        baseDef
       };
     }).filter(Boolean);
   });
@@ -114,21 +121,25 @@ export default function BattleScene({ stageId = "1-1" }) {
         console.error(`Character ${charId} not found`);
         return null;
       }
-      const maxHp = Math.floor(unit.baseHp * leaderMultiplier);
+      const limitBreakLevel = characters?.[charId]?.limitBreak || 0;
+      // Calculate stats with limit break bonuses
+      const maxHp = Math.floor((unit.baseHp + (limitBreakLevel * 500)) * leaderMultiplier);
+      const baseAtk = unit.baseAtk + (limitBreakLevel * 500);
+      const baseDef = unit.baseDef + (limitBreakLevel * 500);
       return {
         id: charId,
         ...unit,
         maxHp,
-        currentHp: maxHp
+        currentHp: maxHp,
+        baseAtk,
+        baseDef
       };
     }).filter(Boolean);
   
     setPlayerTeam(newTeam);
     setActiveUnitIndex(0);
-    console.log("Selected team ID:", selectedTeamId);
-console.log("Loaded team:", preferences?.teams?.[selectedTeamId]);
 
-  }, [preferences, selectedTeamId]);
+  }, [preferences, selectedTeamId, characters]);
   
   const [activeUnitIndex, setActiveUnitIndex] = useState(0);
   const [enemyPhaseIndex, setEnemyPhaseIndex] = useState(0);
@@ -184,7 +195,7 @@ console.log("Loaded team:", preferences?.teams?.[selectedTeamId]);
     const activeUnit = playerTeam[activeUnitIndex];
     
     // Calculate initial defense
-    let activeUnitStats = calculatePreAttackStats(activeUnit, getBattleContext(), activeUnit.id);
+    let activeUnitStats = calculatePreAttackStats(activeUnit, getBattleContext(), activeUnit.id, characters);
     
     const attacksThisTurn = currentEnemy.attacks || 1;
     let superAttackUsed = false;

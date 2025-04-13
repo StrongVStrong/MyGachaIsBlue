@@ -204,12 +204,21 @@ function CharacterPage() {
             ) : (
             <>
                 <div className="unowned-text">
-                <p>Rarity: {capitalize(character.rarity)}</p>
-                <p>Power: {character.power}</p>
-                <p>Type: {capitalize(character.type)}</p>
-                <p>⭐ Limit Break: 0 / 5</p>
-                <p>🎲 Trait: None </p>
-                <p>📦 Dupes: 0 </p>
+                  <p>
+                    <button className="emoji-btn" onClick={() => setActiveInfo("details")}>💫</button> {character.details}
+                  </p>
+                  <p>
+                    <button className="emoji-btn" onClick={() => setActiveInfo("super")}>☄️</button> {character.super}
+                  </p>
+                  <p>
+                    <button className="emoji-btn" onClick={() => setActiveInfo("limit")}>⭐</button> Limit Break: 0 / 5
+                  </p>
+                  <p>
+                    <button className="emoji-btn" onClick={() => setActiveInfo("trait")}>🎲</button> Trait: None
+                  </p>
+                  <p>
+                    <button className="emoji-btn" onClick={() => setActiveInfo("dupes")}>📦</button> Dupes: 0
+                  </p>
                 </div>
                 <p className="locked-msg">You don't own this character yet!</p>
             </>
@@ -220,9 +229,44 @@ function CharacterPage() {
                   <button className="close-button" onClick={() => setShowInfo(false)}>✖</button>
                   <p><strong>Rarity:</strong> {capitalize(character.rarity)}</p>
                   <p><strong>Type:</strong> {capitalize(character.type)}</p>
-                  <p><strong>HP:</strong> {characterDetails[charId]?.baseHp.toLocaleString()}</p>
-                  <p><strong>ATK:</strong> {characterDetails[charId]?.baseAtk.toLocaleString()}</p>
-                  <p><strong>DEF:</strong> {characterDetails[charId]?.baseDef.toLocaleString()}</p>
+                  {isOwned ? (
+                    <>
+                      <p>
+                        <strong>HP:</strong>{" "}
+                        {(characterDetails[charId]?.baseHp + charData.limitBreak * 500).toLocaleString()}{" "}
+                        {charData.limitBreak > 0 && (
+                          <span style={{ color: "limegreen" }}>
+                            (+{(charData.limitBreak * 500).toLocaleString()})
+                          </span>
+                        )}
+                      </p>
+                      <p>
+                        <strong>ATK:</strong>{" "}
+                        {(characterDetails[charId]?.baseAtk + charData.limitBreak * 500).toLocaleString()}{" "}
+                        {charData.limitBreak > 0 && (
+                          <span style={{ color: "limegreen" }}>
+                            (+{(charData.limitBreak * 500).toLocaleString()})
+                          </span>
+                        )}
+                      </p>
+                      <p>
+                        <strong>DEF:</strong>{" "}
+                        {(characterDetails[charId]?.baseDef + charData.limitBreak * 500).toLocaleString()}{" "}
+                        {charData.limitBreak > 0 && (
+                          <span style={{ color: "limegreen" }}>
+                            (+{(charData.limitBreak * 500).toLocaleString()})
+                          </span>
+                        )}
+                      </p>
+                    </>
+                  ) : (
+                    // Unowned characters
+                    <>
+                      <p><strong>HP:</strong> {characterDetails[charId]?.baseHp.toLocaleString()}</p>
+                      <p><strong>ATK:</strong> {characterDetails[charId]?.baseAtk.toLocaleString()}</p>
+                      <p><strong>DEF:</strong> {characterDetails[charId]?.baseDef.toLocaleString()}</p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -244,7 +288,7 @@ function CharacterPage() {
                     : activeInfo === "super"
                     ? `${character.super.split(" - ")[0]} deals damage and ${character.super.split(" - ")[1]}.`
                     : activeInfo === "limit"
-                    ? "Limit Break increases a character's power by consuming duplicates."
+                    ? "Limit Break increases stats by consuming duplicates (500 per dupe)."
                     : activeInfo === "trait"
                     ? "Traits grant special bonuses like evasion, critical chance, or boosts."
                     : "Dupes are extra copies of a character. You can use them for Limit Breaks."

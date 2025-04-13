@@ -1,7 +1,7 @@
 export const traitPool = {
     common: ["Strong", "Sharp", "Quick"],
-    rare: ["Master", "Cocky", "Serious"],
-    legendary: ["Divine", "Powerful"],
+    rare: ["Master", "Serious", "Hasty"],
+    legendary: ["Powerful", "Perceptive", "Godspeed"],
     godly: [
       { name: "Ultra Instinct", rate: 0.2 },
       { name: "Enlightened", rate: null }, // evenly split remaining %
@@ -59,4 +59,20 @@ export const traitPool = {
     const name = filtered[Math.floor(Math.random() * filtered.length)];
     return { name, rarity: selectedRarity };
   }
+  
+export const traitEffects = {
+    "Ultra Instinct": {
+      evadeChance: 0.3,
+      description: "30% chance to dodge (Hidden Potential)"
+    },
+    "Enlightened": {
+      extraSuperChance: 0.2,
+      description: "20% chance to perform an extra super attack (Hidden Potential)"
+    },
+    "Sharp": {
+      critChance: 0.3,
+      description: "30% crit chance (Hidden Potential)"
+    },
+    // Add more as needed
+  };
   
