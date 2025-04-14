@@ -262,3 +262,125 @@
     justify-content: center;
   }
 }
+
+.corner-info-button {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.corner-info-button:hover {
+  background: #666;
+}
+
+.summon-info-popup {
+  max-height: 80vh;
+  overflow-y: auto;
+  width: 90%;
+  max-width: 700px;
+  padding: 2rem;
+}
+
+.rarity-section {
+  margin-bottom: 2rem;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.char-entry {
+  display: flex;
+  align-items: center;
+  background: #2e2e2e;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  gap: 2rem 1rem;
+}
+
+.char-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.char-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+}
+
+.char-info strong {
+  font-size: 1rem;
+}
+
+.char-info span {
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+.info-popup h4 {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+
+.info-popup h4.common {
+  color: #3498db;
+}
+
+.info-popup h4.rare {
+  color: #9b59b6;
+}
+
+.info-popup h4.ultra {
+  color: gold;
+}
+
+.info-popup h4.legendary {
+  color: rgb(196, 0, 0);
+}
+
+.info-popup h4.godly {
+  color: rgb(0, 204, 255);
+  animation: glowPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  50% {
+    text-shadow:
+      0 0 1px #00e5ff,
+      0 0 2px #00e5ff,
+      0 0 2.5px #00e5ff,
+      0 0 3px #00e5ff;
+  }
+}
+
+.banner-divider {
+  margin: 1rem auto 2rem;
+  height: 2px;
+  width: 100%;
+  max-width: 400px;
+  background: #b7ff00;
+  border: none;
+}

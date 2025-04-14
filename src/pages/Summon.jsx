@@ -116,6 +116,63 @@ const banners = {
       <span key={i}>{char}</span>
   ));
 
+  const BannerInfoPopup = ({ banner, onClose }) => {
+    const rates = rarityRates[banner.type || "Default"];
+    const characters = banners[banner.name].characters.map(({ id }) =>
+      characterList.find(c => c.id === id)
+    );
+  
+    // Group characters by rarity
+    const grouped = characters.reduce((acc, char) => {
+      const rarity = char.rarity || "Common";
+      if (!acc[rarity]) acc[rarity] = [];
+      acc[rarity].push(char);
+      return acc;
+    }, {});
+  
+    const rarityOrder = ["Common", "Rare", "Ultra", "Legendary", "Godly"];
+  
+    return (
+      <div className="info-popup-overlay" onClick={onClose}>
+        <div className="info-popup summon-info-popup" onClick={(e) => e.stopPropagation()}>
+          <button className="close-button" onClick={onClose}>✖</button>
+          <h3>{banner.name} Rate-Ups</h3>
+          <hr className="banner-divider" />
+          {rarityOrder.map((rarity) => {
+            const chars = grouped[rarity];
+            const rate = rates[rarity];
+            if (!chars || chars.length === 0 || rate == null) return null;
+  
+            const perCharRate = (rate / chars.length * 100).toFixed(2);
+            return (
+              <div key={rarity} className="rarity-section">
+                <h4 className={rarity.toLowerCase()}>
+                  {rarity} – {(rate * 100).toFixed(2)}% Total
+                </h4>
+                <div className="character-grid">
+                  {chars.map((char) => (
+                    <div key={char.id} className="char-entry">
+                      <img
+                        src={`./assets/characterPortraits/${char.id}.png`}
+                        alt={char.name}
+                        className="char-icon"
+                      />
+                      <div className="char-info">
+                        <strong>{char.name}</strong>
+                        <span>{perCharRate}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <hr />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+  
   
 
   function Summon() {
@@ -127,6 +184,8 @@ const banners = {
     const OST = `${import.meta.env.BASE_URL}assets/summon.mp3`;
     useSyncedAudio(audioRef, OST);
     const failSFX = new Audio("./assets/sfx/failure.mp3");
+    const [showBannerInfo, setShowBannerInfo] = useState(false);
+
 
     const startingBanner = location.state?.selectedBanner;
     const defaultIndex = startingBanner && bannerNames.includes(startingBanner)
@@ -236,6 +295,15 @@ const banners = {
             disabled = {bannerIndex === 0 }
             > ← </button>
 
+            <button
+              className="corner-info-button"
+              onClick={() => setShowBannerInfo(true)}
+              title="View Summon Info"
+            >
+              ℹ️
+            </button>
+
+
             <img
             src={bannerImages[selectedBanner]}
             alt = {selectedBanner}
@@ -287,9 +355,19 @@ const banners = {
           <source src={OST} type="audio/mp3" />
         </audio>
         
+        {showBannerInfo && (
+          <BannerInfoPopup
+            banner={{ name: selectedBanner, ...banners[selectedBanner] }}
+            onClose={() => setShowBannerInfo(false)}
+          />
+        )}
+
         
       </div>
+      
     );
+
+    
   }
   
   export default Summon;

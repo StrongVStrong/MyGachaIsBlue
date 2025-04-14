@@ -5,9 +5,75 @@ import BackButton from "../components/BackButton";
 import { usePlayerData } from "../hooks/usePlayerData";
 import characterDetails from "../data/characterDetails"
 import "./CharacterPage.css";
-import { rerollTrait } from "../utils/RerollTraits";
+import { rerollTrait, traitPool, traitEffects } from "../utils/RerollTraits";
 import { useClickSFX } from "../hooks/useClickSFX";
 
+const TraitsPopup = ({ onClose }) => {
+  
+  const allTraits = Object.entries(traitPool).flatMap(([rarity, traits]) => {
+
+    if (rarity === 'godly') {
+      return traits.map(traitObj => ({
+        name: traitObj.name,
+        rarity,
+        ...traitEffects[traitObj.name]
+      }));
+    }
+
+    return traits.map(traitName => ({
+      name: traitName,
+      rarity,
+      ...traitEffects[traitName]
+    }));
+  });
+
+  return (
+    <div className="info-popup-overlay" onClick={onClose}>
+      <div className="info-popup" onClick={(e) => e.stopPropagation()}>
+        <button className="close-button" onClick={onClose}>✖</button>
+        <h3>All Traits</h3>
+        <div className="trait-grid">
+          {allTraits.map((trait, index) => (
+            <div key={index} className={`trait-box ${trait.rarity}`}>
+              <strong>{trait.name}</strong>
+              <p>{trait.description}</p>
+              <div className="trait-stats">
+                <span>
+                  {(() => {
+                    const rarityPercent = {
+                      common: 50,
+                      rare: 40,
+                      legendary: 9,
+                      godly: 1,
+                    };
+
+                    if (trait.rarity !== "godly") {
+                      const count = traitPool[trait.rarity]?.length ?? 1;
+                      return (rarityPercent[trait.rarity] / count).toFixed(2) + "%";
+                    }
+
+                    const godlyTrait = traitPool.godly.find(t => t.name === trait.name);
+                    if (godlyTrait?.rate != null) {
+                      return (godlyTrait.rate * rarityPercent.godly).toFixed(2) + "%";
+                    }
+
+                    const dynamicCount = traitPool.godly.filter(t => t.rate === null).length;
+                    const fixedSum = traitPool.godly
+                      .filter(t => t.rate !== null)
+                      .reduce((sum, t) => sum + t.rate, 0);
+                    const leftover = 1 - fixedSum;
+                    const dynamicRate = leftover / dynamicCount;
+                    return (dynamicRate * rarityPercent.godly).toFixed(2) + "%";
+                  })()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 function CharacterPage() {
   const playClick = useClickSFX();
   const { id } = useParams();
@@ -17,7 +83,7 @@ function CharacterPage() {
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
   const [glowRarity, setGlowRarity] = useState(null);
   const rerollBtnRef = useRef(null);
-  const godlyTraits = ["Ultra Instinct", "Enlightened"];
+  const godlyTraits = ["Ultra Instinct", "Enlightened", "Beast", "Divine"];
   const audioRef = useRef(null);
   const [showInfo, setShowInfo] = useState(false);
   const [activeInfo, setActiveInfo] = useState(null);
@@ -128,15 +194,37 @@ function CharacterPage() {
     }));
   };
 
-  const InfoPopup = ({ title, text, onClose }) => (
-    <div className="info-popup-overlay" onClick={onClose}>
-      <div className="info-popup" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onClose}>✖</button>
-        <h3>{title}</h3>
-        <p>{text}</p>
-      </div>
-    </div>
-  );  
+  const InfoPopup = ({ title, text, onClose }) => {
+    const [showTraits, setShowTraits] = useState(false);
+    const playClick = useClickSFX();
+  
+    return (
+      <>
+        <div className="info-popup-overlay" onClick={onClose}>
+          <div className="info-popup" onClick={(e) => e.stopPropagation()}>
+            <button className="close-button" onClick={onClose}>✖</button>
+            {title === "Trait" && (
+              <button 
+                className="info-button left" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playClick();
+                  setShowTraits(true);
+                }}
+                title="View All Traits"
+              >
+                ℹ️
+              </button>
+            )}
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </div>
+        </div>
+        
+        {showTraits && <TraitsPopup onClose={() => setShowTraits(false)} />}
+      </>
+    );
+  };
 
   return (
     <div className={`character-page bg-${character.rarity}`}>
@@ -165,7 +253,7 @@ function CharacterPage() {
           }}
           title="Character Info"
         >
-          ⓘ
+          ℹ️
         </button>
       </div>
 
@@ -276,7 +364,7 @@ function CharacterPage() {
                   activeInfo === "details" ? "Passive Skill"
                   : activeInfo === "super" ? "Super Attack"
                   : activeInfo === "limit" ? "Limit Break"
-                  : activeInfo === "trait" ? "Traits"
+                  : activeInfo === "trait" ? "Trait"
                   : "Dupes"
                 }
                 text={
@@ -290,7 +378,9 @@ function CharacterPage() {
                     : activeInfo === "limit"
                     ? "Limit Break increases stats by consuming duplicates (500 per dupe)."
                     : activeInfo === "trait"
-                    ? "Traits grant special bonuses like evasion, critical chance, or boosts."
+                    ? charData?.trait
+                    ? traitEffects[charData.trait]?.description || "No description available for this trait."
+                    : "Traits can massively power up your units through attack, crit, evade, and other buffs!"
                     : "Dupes are extra copies of a character. You can use them for Limit Breaks."
                 }
                 onClose={() => setActiveInfo(null)}

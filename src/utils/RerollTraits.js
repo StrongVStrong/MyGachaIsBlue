@@ -65,11 +65,11 @@ export const traitPool = {
 export const traitEffects = {
     "Strong": {
       atkBoost: 0.1,
-      description: "10% attack"
+      description: "+10% damage dealt"
     },
     "Stronger": {
       atkBoost: 0.2,
-      description: "20% attack"
+      description: "20% damage dealt"
     },
     "Sharp": {
       damageReduction: 0.1,
@@ -89,15 +89,30 @@ export const traitEffects = {
     },
     "Master": {
       evadeChance: 0.05,
-      description: "5% chance to dodge"
+      guardsAll: 0.3,
+      description: "5% chance to dodge, 30% chance to guard"
     },
     "Serious": {
-      critChance: 0.3,
-      description: "20% chance to crit"
+      damageReduction: 0.05,
+      critChance: 0.2,
+      description: "5% damage reduction, 20% chance to crit"
     },
     "Hasty": {
-      extraAttackChance: 0.5,
-      description: "50% chance to additional super"
+      extraAttackChance: 0.3,
+      description: "30% chance to additional super"
+    },
+    "Powerful": {
+      evadeChance: 0.05,
+      guardsAll: 0.3,
+      description: "5% chance to dodge, 30% chance to guard"
+    },
+    "Perceptive": {
+      critChance: 0.4,
+      description: "40% chance to crit"
+    },
+    "Godspeed": {
+      extraAttackChance: 0.7,
+      description: "70% chance to additional super"
     },
     "Ultra Instinct": {
       evadeChance: 0.3,
@@ -106,11 +121,13 @@ export const traitEffects = {
     },
     "Enlightened": {
       extraAttackChance: 0.5,
-      description: "50% chance to additional super"
+      guardsAll: 0.5,
+      description: "50% chance to additional super, 50% chance to guard incoming attacks"
     },
     "Beast": {
       critChance: 0.5,
-      description: "50% chance to crit"
+      damageReduction: 0.07,
+      description: "7% damage reduction, 50% chance to crit"
     },
     "Divine": {
       critChance: 0.3,

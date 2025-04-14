@@ -172,12 +172,12 @@
     50%     { box-shadow: 0 0 100px red; background-color: #880000; }
   }
 
-  /* Rarity background tints — stronger but subtle */
+  /* Rarity background tints*/
   .bg-Common     { background-color: rgba(52, 152, 219, 0.195); }
   .bg-Rare       { background-color: rgba(156, 89, 182, 0.305); }
-  .bg-Legendary  { background-color: rgba(255, 0, 0, 0.233); }       /* 🔴 red now */
-  .bg-Ultra      { background-color: rgba(255, 217, 0, 0.253); }     /* 🟡 gold now */
-  .bg-Godly      { background-color: rgba(0, 208, 255, 0.397); }     /* 💠 stronger blue */
+  .bg-Legendary  { background-color: rgba(255, 0, 0, 0.233); }
+  .bg-Ultra      { background-color: rgba(255, 217, 0, 0.253); }
+  .bg-Godly      { background-color: rgba(0, 208, 255, 0.397); }
 
   /* Common */
   .common-glow {
@@ -270,17 +270,6 @@
     white-space: pre-line;
   }
   
-  .close-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: transparent;
-    color: white;
-    font-size: 1.5rem;
-    border: none;
-    cursor: pointer;
-  }
-  
   @keyframes popup-fade {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
@@ -310,7 +299,28 @@
     transform: scale(1.2);
   }
 
-/* Responsive adjustments for smaller screens */
+  .close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #444;
+    color: white;
+    font-size: 1.25rem;
+    border: none;
+    border-radius: 50%;
+    width: auto;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .close-button:hover {
+    background: #666;
+  }
+
 @media (max-width: 600px) {
   .character-details button,
   .character-details .info-button,
@@ -338,31 +348,126 @@
     text-align: left;
     z-index: 1001;
   }
-  
-  .close-button {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background: #444;
-    color: white;
-    font-size: 1.25rem;
-    border: none;
-    border-radius: 50%;
-    width: 20%;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  .close-button:hover {
-    background: #666;
-  }
+}
+.popup-header {
+  position: relative;
+  height: 48px;
+  margin-bottom: 0.5rem;
+}
 
-  .close-button {
-    top: 1rem;
-    right: 1rem;
+.corner-button {
+  position: absolute;
+  top: 1rem;
+  background: #444;
+  color: white;
+  font-size: 1.25rem;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 10;
+}
+
+.corner-button:hover {
+  background: #666;
+}
+
+.corner-button.left {
+  left: 1rem;
+}
+
+.corner-button.right {
+  right: 1rem;
+}
+
+.trait-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.trait-box {
+  padding: 0.75rem;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.trait-box p {
+  color: white;
+}
+
+.trait-box.common {
+  background-color: #3498db33;
+  border: 2px solid #3498db;
+}
+
+.trait-box.rare {
+  background-color: #9b59b633;
+  border: 2px solid #9b59b6;
+}
+
+.trait-box.legendary {
+  background-color: #f1c40f33;
+  border: 2px solid #f1c40f;
+}
+
+.trait-box.godly {
+  background-color: #de160033;
+  border: 2px solid #d51500;
+  animation: glowGodly 1s infinite ease-in-out;
+}
+
+@keyframes glowGodly {
+  0%, 100% {
+    box-shadow: 0 0 0px #ad1100;
+  }
+  50% {
+    box-shadow: 0 0 10px 3px #a41000;
   }
 }
+
+.info-button.left {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.trait-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+
+@media (max-width: 768px) {
+  .trait-grid {
+    grid-template-columns: 1fr;
+  }
+  .popup-header {
+    height: 36px;
+  }
+  .info-button.left {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
+
