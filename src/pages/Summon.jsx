@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import characterList from "../data/characters";
 import { useSyncedAudio } from "../hooks/useSyncedAudio";
 import { useClickSFX } from "../hooks/useClickSFX";
+import SummonAnimation from "../components/SummonAnimation";
 import "./Summon.css";
 
 const banners = {
@@ -185,7 +186,9 @@ const banners = {
     useSyncedAudio(audioRef, OST);
     const failSFX = new Audio("./assets/sfx/failure.mp3");
     const [showBannerInfo, setShowBannerInfo] = useState(false);
-
+    const [isSummoning, setIsSummoning] = useState(false);
+    const [animationData, setAnimationData] = useState(null);
+    const [pendingResults, setPendingResults] = useState(null);
 
     const startingBanner = location.state?.selectedBanner;
     const defaultIndex = startingBanner && bannerNames.includes(startingBanner)
@@ -258,10 +261,22 @@ const banners = {
       }
   
       // Add new characters to inventory
-      newCharacters.forEach((char) => addCharacter(char.id));
-      navigate("/results", {
-        state: { amountSummoned: amount, summonedCharacters: newCharacters.map((char) => char.id), selectedBanner },
+      setPendingResults({
+        newCharacters,
+        selectedBanner,
+        amount,
       });
+
+      const pulledRarities = newCharacters.map(c => c.rarity || "Common");
+
+      // Determine highest rarity
+      const rarityOrder = ["Common", "Rare", "Ultra", "Legendary", "Godly"];
+      const highestRarity = rarityOrder.reduce((prev, curr) =>
+        pulledRarities.includes(curr) ? curr : prev
+      );
+
+      setAnimationData({ highestRarity });
+      setIsSummoning(true);
 
       
       
@@ -271,11 +286,15 @@ const banners = {
       if (resummon && resummonAmount && gems >= (resummonAmount === 1 ? 100 : 1000)) {
         const timeout = setTimeout(() => {
           handleSummon(resummonAmount);
-        }, 1);
+    
+          // 🚫 Remove resummon flag so it doesn’t re-trigger
+          navigate("/summon", { state: { selectedBanner } }); 
+        }, 10); // Short delay is fine
     
         return () => clearTimeout(timeout);
       }
-    }, [resummon, resummonAmount, gems]);
+    }, [resummon, resummonAmount, gems, selectedBanner, navigate]);
+    
     
   
     return (
@@ -362,7 +381,27 @@ const banners = {
           />
         )}
 
-        
+        {isSummoning && animationData && pendingResults && (
+          <SummonAnimation
+            highestRarity={animationData.highestRarity}
+            pulledRarities={pendingResults.newCharacters.map(c => c.rarity || "Common")}
+            audioRef={audioRef}
+            onComplete={() => {
+              pendingResults.newCharacters.forEach((char) => addCharacter(char.id));
+              setIsSummoning(false);
+              setAnimationData(null);
+              setPendingResults(null);  
+              navigate("/results", {
+                state: {
+                  amountSummoned: pendingResults.amount,
+                  summonedCharacters: pendingResults.newCharacters.map((char) => char.id),
+                  selectedBanner: pendingResults.selectedBanner,
+                },
+              });
+            }}
+          />
+        )}
+
       </div>
       
     );

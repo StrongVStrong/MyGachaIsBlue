@@ -384,3 +384,20 @@
   background: #b7ff00;
   border: none;
 }
+
+.summon-blackout {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  z-index: 9999;
+  opacity: 1;
+  animation: fadeOutSummon 1s ease-out forwards;
+}
+
+@keyframes fadeOutSummon {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}

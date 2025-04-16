@@ -72,11 +72,11 @@ export const traitEffects = {
       description: "20% damage dealt"
     },
     "Sharp": {
-      damageReduction: 0.1,
+      defBoost: 0.1,
       description: "10% defense"
     },
     "Sharper": {
-      guardsAll: 0.5,
+      defBoost: 0.2,
       description: "20% defense"
     },
     "Quick": {
@@ -84,7 +84,7 @@ export const traitEffects = {
       description: "10% chance to additional super"
     },
     "Quicker": {
-      defBoost: 0.2,
+      extraAttackChance: 0.2,
       description: "20% chance to additional super"
     },
     "Master": {
@@ -94,30 +94,35 @@ export const traitEffects = {
     },
     "Serious": {
       damageReduction: 0.05,
-      critChance: 0.2,
-      description: "5% damage reduction, 20% chance to crit"
+      critChance: 0.3,
+      description: "5% damage reduction, 30% chance to crit"
     },
     "Hasty": {
       extraAttackChance: 0.3,
-      description: "30% chance to additional super"
+      evadeChance: 0.03,
+      description: "3% chance to dodge, 30% chance to additional super"
     },
     "Powerful": {
-      evadeChance: 0.05,
-      guardsAll: 0.3,
-      description: "5% chance to dodge, 30% chance to guard"
+      guardsAll: 0.5,
+      atkBoost: 0.1,
+      defBoost: 0.1,
+      description: "+10% damage and defense, 50% chance to guard"
     },
     "Perceptive": {
-      critChance: 0.4,
-      description: "40% chance to crit"
+      critChance: 0.5,
+      atkBoost: 0.1,
+      description: "+10% damage, 50% chance to crit"
     },
     "Godspeed": {
       extraAttackChance: 0.7,
-      description: "70% chance to additional super"
+      evadeChance: 0.1,
+      description: "10% chance to dodge, 70% chance to additional super"
     },
     "Ultra Instinct": {
       evadeChance: 0.3,
       defBoost: 0.1,
-      description: "30% chance to dodge, 10% def"
+      atkBoost: 0.1,
+      description: "30% chance to dodge, 10% damage and defense"
     },
     "Enlightened": {
       extraAttackChance: 0.5,
@@ -125,14 +130,15 @@ export const traitEffects = {
       description: "50% chance to additional super, 50% chance to guard incoming attacks"
     },
     "Beast": {
-      critChance: 0.5,
+      critChance: 0.7,
       damageReduction: 0.07,
-      description: "7% damage reduction, 50% chance to crit"
+      description: "7% damage reduction, 70% chance to crit"
     },
     "Divine": {
       critChance: 0.3,
-      atkBoost: 0.1,
-      description: "30% chance to crit, 10% atk"
+      atkBoost: 0.2,
+      defBoost: 0.2,
+      description: "30% chance to crit, 20% attack and defense"
     },
   };
   

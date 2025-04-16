@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import "./SummonResults.css";
 import characterList from "../data/characters";
 import { usePlayerData } from "../hooks/usePlayerData";
@@ -44,15 +44,17 @@ function Results() {
             if (!char) return null; 
 
             return (
-              <div key={index} className={`results-portrait rarity-${char.rarity || "Common"}`}>
-                <img
-                  src={`./assets/characterPortraits/${char.id}.png`}
-                  alt={char.name}
-                  className={`portrait-image type-${char.type}`}
-                />
-                <p className="char-name">{char.name}</p>
-                <p className="char-power">{char.rarity}</p>
-              </div>
+              <Link to={`/character/${char.id}`} key={index} className="link-wrapper">
+                <div className={`results-portrait rarity-${char.rarity || "Common"}`}>
+                  <img
+                    src={`./assets/characterPortraits/${char.id}.png`}
+                    alt={char.name}
+                    className={`portrait-image type-${char.type}`}
+                  />
+                  <p className="char-name">{char.name}</p>
+                  <p className="char-power">{char.rarity}</p>
+                </div>
+              </Link>
             );
           })}
         </div>

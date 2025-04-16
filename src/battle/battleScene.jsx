@@ -400,9 +400,11 @@ for (const p of extraAttackPassives) {
 
       const addResult = performAttack(attackerWithBuffs, enemyWithType, ctx, attackerId, true, characters, traitEffects);
 
+      let extraMsg = "";
+      if (addResult.traitCrit) extraMsg = " 💠 (Trait Activated)";
       setLog(prev => ({
         ...prev,
-        [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}`]
+        [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}${extraMsg}`]
       }));
 
       currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
@@ -431,9 +433,11 @@ for (const p of extraAttackPassives) {
           [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
         }));
 
+        let extraMsg = "";
+        if (addResult.traitCrit) extraMsg = " 💠 (Trait Activated)";
         setLog(prev => ({
           ...prev,
-          [turn]: [...(prev[turn] ?? []), `💠 Trait Extra Super: ${addResult.description}`]
+          [turn]: [...(prev[turn] ?? []), `💠 Trait Extra Super: ${addResult.description}${extraMsg}`]
         }));
 
         currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);

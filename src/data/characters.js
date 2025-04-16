@@ -1,9 +1,9 @@
 const characters = [
-    { "id": 1, "name": "Super Saiyan Goku", "power": 9000, "rarity": "Rare", "type": "grass", music: "./assets/OSTs/1.mp3", details: "Strong Start (5 turns), Dodge", super: "Warp Kamehameha - Raise ATK" },
-    { "id": 2, "name": "Super Vegeta", "power": 8500, "rarity": "Common", "type": "water", details: "Strong Start (3 turns), Swap-out Support", super: "Burning Stars Cannon - Raise DEF" },
-    { "id": 3, "name": "Full Power SSJ Broly", "power": 9500, "rarity": "Ultra", "type": "grass", details: "Slow Start (Turn 6+), Dodge", super: "Blastor Meteor - Raise ATK & DEF for 1 turn" },
+    { "id": 1, "name": "Super Saiyan Goku", "power": 9000, "rarity": "Rare", "type": "grass", music: "./assets/OSTs/1.mp3", details: "Strong Start (5 turns), Dodge", super: "Warp Kamehameha - Raises ATK" },
+    { "id": 2, "name": "Super Vegeta", "power": 8500, "rarity": "Common", "type": "water", details: "Strong Start (3 turns), Swap-out Support", super: "Burning Stars Cannon - Raises DEF" },
+    { "id": 3, "name": "Full Power SSJ Broly", "power": 9500, "rarity": "Ultra", "type": "grass", details: "Slow Start (Turn 6+), Dodge", super: "Blastor Meteor - Raises ATK & DEF for 1 turn" },
     { "id": 4, "name": "Super Vegito", "power": 10500, "rarity": "Legendary", "type": "grass", details: "Slow Start (Stacker), Guard", super: "Vegito Special - Greatly raises ATK & DEF" },
-    { "id": 5, "name": "Super Gogeta", "power": 10500, "rarity": "Legendary", "type": "fire", passive: "Attack +100%", details: "Strong Start, Dodge, Guard", super: "Gogeta Special - Raise ATK and DEF for 1 turn" },
+    { "id": 5, "name": "Super Gogeta", "power": 10500, "rarity": "Legendary", "type": "fire", passive: "Attack +100%", details: "Strong Start, Dodge, Guard", super: "Gogeta Special - Raises ATK and DEF for 1 turn" },
     { "id": 6, "name": "Super Saiyan 4 Goku (Daima)", "power": 11000, "rarity": "Legendary", "type": "fire", details: "Slow Start (Stacker)", super: "Ultra Kamehameha - Greatly Raises DEF" },
     { "id": 7, "name": "Super Saiyan Goku (Daima)", "power": 8500, "rarity": "Common", "type": "grass", details: "Slow Start (Stacker)", super: "Power Pole Assault - Massively Raises ATK & DEF" },
     { "id": 8, "name": "Super Saiyan 3 Vegeta (Daima)", "power": 9000, "rarity": "Rare", "type": "fire", details: "Burst Attacker (Stacker)", super: "Vegeta Onslaught - Massively Raises ATK" },

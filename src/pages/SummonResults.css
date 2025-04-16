@@ -177,3 +177,13 @@
       font-size: 0.7rem;
     }
   }
+
+  .link-wrapper {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .link-wrapper:hover {
+    text-decoration: none;
+    color: inherit;
+  }
