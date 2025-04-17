@@ -3,7 +3,16 @@
 
  Play now: [mygachaisblue.vercel.app](https://mygachaisblue.vercel.app)
 
- ---
+---
+
+## 🖼️ Screenshots
+
+<p align="center">
+  <img src="public/assets/screenshots/hub.png" alt="Home Screen" width="600"/>
+  <br><em>🔹 The main hub where you can summon, battle, and more.</em>
+</p>
+
+---
 
 🎮 **Features**:
 
