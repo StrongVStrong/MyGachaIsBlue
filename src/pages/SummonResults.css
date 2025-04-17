@@ -160,12 +160,12 @@
   
   @media (max-width: 768px) {
     .portrait-image {
-      width: 60px;
-      height: 60px;
+      width: 30px;
+      height: 30px;
     }
   
     .results-portrait {
-      padding: 0.5rem;
+      padding: 0.1rem;
       border-radius: 0.5rem;
     }
   

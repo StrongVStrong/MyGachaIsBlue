@@ -195,7 +195,7 @@ export default function BattleScene({ stageId = "1-1" }) {
   const [switchInTurnMap, setSwitchInTurnMap] = useState({});
 
   const audioRef = useRef(null);
-  const bgm = currentEnemy.bgm || "/assets/OSTs/default.mp3";
+  const bgm = currentEnemy.bgm || "./assets/OSTs/default.mp3";
   useSyncedAudio(audioRef, bgm);
 
   function getBarColor(index, total) {
@@ -693,7 +693,7 @@ const getEnemyHealthBars = () => {
             "☠️ All units defeated! You lose!"
           ]
         }));
-        new Audio("/assets/sfx/failure.mp3").play();
+        new Audio("./assets/sfx/failure.mp3").play();
         setShowYouLosePopup(true);
         setTimeout(() => setShowEndButtons(true), 1000);
       }
@@ -838,22 +838,20 @@ const getEnemyHealthBars = () => {
           ))}
         </div>
           <img
-            src={currentEnemy.portrait || "/assets/characterPortraits/1.png"}
+            src={currentEnemy.portrait || "./assets/characterPortraits/1.png"}
             alt={currentEnemy.name}
             className={`portrait-img ${currentEnemy.hp <= 0 ? "dimmed-portrait" : ""}`}
           />
         </div>
-        <h7>‎ </h7>
-        <h7>‎ </h7>
         <div className="active-unit-wrapper">
         <div className="active-unit-portrait">
           <img
-            src={`/assets/characterPortraits/${playerTeam[activeUnitIndex]?.id}.png`}
+            src={`./assets/characterPortraits/${playerTeam[activeUnitIndex]?.id}.png`}
             alt={activeChar.name || "Character"}
             className={`portrait-img ${playerTeam[activeUnitIndex]?.currentHp <= 0 ? "dimmed-portrait" : ""}`}
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = "/assets/fallback.png";
+              e.target.src = "./assets/fallback.png";
             }}
           />
         </div>
@@ -885,7 +883,7 @@ const getEnemyHealthBars = () => {
               className="attack-button"
               disabled={playerTeam[activeUnitIndex]?.currentHp <= 0 || playerTeam.every(unit => unit.currentHp <= 0) || isTurnInProgress || showVictoryPopup }
             >
-              {playerTeam[activeUnitIndex]?.currentHp <= 0 ? "Unit Defeated" : isTurnInProgress ? "Processing" : "Attack"}
+              {playerTeam[activeUnitIndex]?.currentHp <= 0 ? "Unit Defeated" : isTurnInProgress ? "Attacking" : "Attack"}
             </button>
             <button
               className="switch-button"
@@ -1055,11 +1053,11 @@ const getEnemyHealthBars = () => {
               >
                 <div className="portrait-wrapper">
                   <img
-                    src={`/assets/characterPortraits/${unit.id}.png`}
+                    src={`./assets/characterPortraits/${unit.id}.png`}
                     alt={name}
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = "/assets/fallback.png";
+                      e.target.src = "./assets/fallback.png";
                     }}
                   />
                   <span className="status-icon">
@@ -1129,7 +1127,7 @@ const getEnemyHealthBars = () => {
 
       {showForfeitPrompt && (
         <div className="forfeit-popup">
-          <h5>Are you sure you want to give up?</h5>
+          <h6>Are you sure you want to give up?</h6>
           <div className="forfeit-actions">
             <button onClick={() => {
               new Audio("./assets/sfx/failure.mp3").play();

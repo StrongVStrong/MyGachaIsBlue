@@ -18,10 +18,17 @@ h5, h3 {
 }
 
 h5 {
-  font-size: 2rem;
   border-bottom: 2px solid #3f3f46;
   padding-bottom: 0.25rem;
   margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+h6 {
+  border-bottom: 2px solid #3f3f46;
+  padding-bottom: 0.25rem;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
 }
 
 .enemy-stats {
@@ -264,6 +271,7 @@ h5, h3, h4, .turn-title {
   justify-content: center;
   gap: 12vw;
   margin-top: 10px;
+  padding-bottom: 10px;
   flex-wrap: wrap;
 }
 
@@ -318,13 +326,6 @@ h5, h3, h4, .turn-title {
   margin-bottom: 10px;
 }
 
-.enemy-portrait {
-  width: 40px;
-  height: 40px;
-  background-color: #333;
-  margin-right: 10px;
-}
-
 .health-bars {
   flex-grow: 1;
   height: 20px;
@@ -351,14 +352,6 @@ h5, h3, h4, .turn-title {
   align-items: center;
   margin: 10px 0;
   width: 100%;
-}
-
-.enemy-portrait {
-  width: 40px;
-  height: 40px;
-  background-color: #333;
-  margin-right: 10px;
-  border-radius: 5px;
 }
 
 .health-bars-wrapper {
@@ -457,7 +450,7 @@ h5, h3, h4, .turn-title {
 .portrait-combo-wrapper {
   background: 
     linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url('./assets/banners/back.jpg');
+    url('/assets/banners/back.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -532,9 +525,9 @@ h5, h3, h4, .turn-title {
 
 .status-icon {
   position: absolute;
-  top: 4px;
-  left: 6px;
-  font-size: 1.1rem;
+  top: 1%;
+  left: 1%;
+  font-size: 1.5rem;
   padding: 2px 6px;
   border-radius: 6px;
   pointer-events: none;
@@ -564,8 +557,8 @@ h5, h3, h4, .turn-title {
 
 @media (max-width: 800px) {
   .portrait-img {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
   .enemy-portrait-wrapper {
     width: 96px;
@@ -574,6 +567,12 @@ h5, h3, h4, .turn-title {
   .character-switch-row button {
     width: 96px;
     height: 96px;
+  }
+  .status-icon {
+    top: 0.01%;
+    left: 1px;
+    font-size: 1.2rem;
+    padding: 0px;
   }
 }
 

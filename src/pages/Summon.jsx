@@ -355,7 +355,7 @@ const banners = {
             handleSummon(1);
           }}
         >
-          Single Summon (100 Gems)
+          💎 Single Summon (100 Gems)
         </button>
 
         <button
@@ -366,7 +366,7 @@ const banners = {
             handleSummon(10);
           }}
         >
-          Multi Summon (1000 Gems)
+          💎 Multi Summon (1000 Gems)
         </button>
 
 
