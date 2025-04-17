@@ -21,9 +21,28 @@
   <br><em>🔹 Characters</em>
 </p>
 
+<p align="center">
+  <img src="public/assets/screenshots/banners.png" alt="Banners" width="600"/>
+  <br><em>🔹 Banners</em>
+</p>
+
+<p align="center">
+  <img src="public/assets/screenshots/stages.png" alt="Stages" width="600"/>
+  <br><em>🔹 Stages</em>
+</p>
+
+<p align="center">
+  <img src="public/assets/screenshots/battle.png" alt="Battle" width="600"/>
+</p>
+
+<p align="center">
+  <img src="public/assets/screenshots/win.png" alt="win" width="600"/>
+  <br><em>🔹 Battle</em>
+</p>
+
 ---
 
-🎮 **Features**:
+## 🎮 **Features**:
 
 ☁️ **Cloud Storage**
 - Link your Google account to store data forever across devices!
