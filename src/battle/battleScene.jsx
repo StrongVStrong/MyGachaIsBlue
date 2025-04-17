@@ -154,7 +154,11 @@ export default function BattleScene({ stageId = "1-1" }) {
     }).filter(Boolean);
   
     setPlayerTeam(newTeam);
-    setActiveUnitIndex(0);
+    setActiveUnitIndex((prevIndex) => {
+      const prevUnitId = playerTeam[prevIndex]?.id;
+      const newIndex = newTeam.findIndex((u) => u.id === prevUnitId);
+      return newIndex !== -1 ? newIndex : 0;
+    });
 
   }, [preferences, selectedTeamId, characters]);
   
@@ -176,8 +180,13 @@ export default function BattleScene({ stageId = "1-1" }) {
   }, [log]);
 
   const [currentStage, setCurrentStage] = useState(() => {
-    return structuredClone(stages[stageId] || stages["1-1"]);
+    const cloned = structuredClone(stages[stageId] || stages["1-1"]);
+    cloned.phases.forEach(p => {
+      if (!p.maxHp) p.maxHp = p.hp;
+    });
+    return cloned;
   });
+  
 
   const currentEnemy = currentStage.phases[enemyPhaseIndex];
 
@@ -188,6 +197,67 @@ export default function BattleScene({ stageId = "1-1" }) {
   const audioRef = useRef(null);
   const bgm = currentEnemy.bgm || "/assets/OSTs/default.mp3";
   useSyncedAudio(audioRef, bgm);
+
+  function getBarColor(index, total) {
+    const colors = [
+      '#FF0000',
+      '#FFA500',
+      '#FFFF00',
+      '#00FF00',
+      '#0000FF',
+      '#800080'
+    ];
+    return colors[index % colors.length];
+  }
+
+  function HealthBar({ bars }) {
+    return (
+      <div className="enemy-health-container">
+        <div className="health-bars-wrapper">
+          {bars.map((bar, index) => (
+            <div
+              key={index}
+              className={`health-bar ${bar.active ? 'active' : ''}`}
+              style={{
+                backgroundColor: bar.color,
+                width: `${(bar.hp / bar.maxHp) * 100}%`,
+                display: bar.hp > 0 ? 'block' : 'none',
+                opacity: bar.active ? 1 : 0.7
+              }}
+            >
+              <div className="health-bar-fill" style={{ width: '100%' }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  const totalBars = 5;
+
+const getEnemyHealthBars = () => {
+  const maxHp = currentEnemy.maxHp;
+  const currentHp = currentEnemy.hp;
+  const barHp = Math.floor(maxHp / totalBars);
+  const bars = [];
+
+  for (let i = 0; i < totalBars; i++) {
+    const start = i * barHp;
+    const end = start + barHp;
+    const barMax = (i === totalBars - 1) ? maxHp - (barHp * (totalBars - 1)) : barHp;
+
+    const remainingInBar = Math.max(0, Math.min(barHp, currentHp - start));
+    bars.push({
+      hp: remainingInBar,
+      maxHp: barMax,
+      color: getBarColor(i, totalBars),
+      active: currentHp >= start && currentHp < end
+    });
+  }
+
+  return bars;
+};
+
 
   function getBattleContext() {
     return {
@@ -226,11 +296,35 @@ export default function BattleScene({ stageId = "1-1" }) {
     return { updatedEffects, ctx };
   }
   
+  function formatAndColorDamage(text) {
+    const isCrit = /CRIT!?/i.test(text);
+    const isDisadvantage = /⬇️/.test(text);
+    const isNeutral = /⬆️|➖/.test(text);
+  
+    return text.split(/(\d{3,})/g).map((part, idx) => {
+      if (/^\d{3,}$/.test(part)) {
+        const className = isCrit
+          ? "crit-damage"
+          : isDisadvantage
+          ? "damage-disadvantage"
+          : isNeutral
+          ? "damage-neutral"
+          : "damage-regular";
+        return (
+          <strong key={idx} className={className}>
+            {Number(part).toLocaleString()}
+          </strong>
+        );
+      }
+      return part;
+    });
+  }  
 
   const handleAttack = async (attackerId) => {
     if (hasUsedTurn || isTurnInProgress) return;
     setIsTurnInProgress(true);
     setHasUsedTurn(true);
+    const isEnemyDefeated = () => currentEnemy.hp <= 0;
     try {
       const attacker = playerTeam[activeUnitIndex];
     const activeUnit = playerTeam[activeUnitIndex];
@@ -244,6 +338,7 @@ export default function BattleScene({ stageId = "1-1" }) {
     // Process pre-attacks using pre-attack stats
     const preAttackCount = Math.floor(attacksThisTurn / 2);
     for (let i = 0; i < preAttackCount; i++) {
+      if (isEnemyDefeated()) break;
       const isSuper = !superAttackUsed && Math.random() < (currentEnemy.SA ?? 0) / 100;
       // Evasion logic
       const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
@@ -319,7 +414,7 @@ export default function BattleScene({ stageId = "1-1" }) {
     }
   
     // Player attack
-    if (playerTeam[activeUnitIndex].currentHp > 0) {
+    if (!isEnemyDefeated() && playerTeam[activeUnitIndex].currentHp > 0) {
       // OnAttack boosts for the attack
       const attackStats = calculateFinalStats(activeUnit, getBattleContext(), activeUnit.id);
       const attackerWithStats = {
@@ -353,9 +448,14 @@ export default function BattleScene({ stageId = "1-1" }) {
           ]
         }
       };
-      
+
       currentEnemy.hp = Math.max(0, currentEnemy.hp - result.damage);
-      
+      setCurrentStage(prev => {
+        const updated = structuredClone(prev);
+        updated.phases[enemyPhaseIndex].hp = currentEnemy.hp;
+        return updated;
+      });
+
       // Update activeUnitStats for post-attack defense
       activeUnitStats = calculateFinalStats(playerTeam[activeUnitIndex], updatedCtx, playerTeam[activeUnitIndex].id);
 
@@ -366,6 +466,13 @@ export default function BattleScene({ stageId = "1-1" }) {
         [turn]: [...(prev[turn] ?? []), `🔹 ${result.description}${extraMsg}`]
       }));
 
+      if (isEnemyDefeated()) {
+        // Handle phase transition immediately
+        handlePhaseTransition();
+        endTurnCleanup();
+        return;
+      }
+
       // Additional attack check
       const extraAttackPassives = activeUnit.passives.filter(
         p => ["startOfTurn", "onAttack"].includes(p.type) && p.extraAttackChance !== undefined
@@ -373,59 +480,72 @@ export default function BattleScene({ stageId = "1-1" }) {
       
       let chainedSuperEffects = { ...superEffects }; // Start from current state
 
-for (const p of extraAttackPassives) {
-  if (!p.condition || p.condition(getBattleContext(), activeUnit.id)) {
-    const superChance = p.extraAttackChance;
-    const isSuper = Math.random() < superChance;
+      for (const p of extraAttackPassives) {
+        if (isEnemyDefeated()) break;
+        if (!p.condition || p.condition(getBattleContext(), activeUnit.id)) {
+          const superChance = p.extraAttackChance;
+          const isSuper = Math.random() < superChance;
 
-    if (isSuper) {
-      const superPassives = activeUnit.passives.filter(p => p.type === "superAttack");
+          if (isSuper) {
+            const superPassives = activeUnit.passives.filter(p => p.type === "superAttack");
 
-      // Stack onto latest effects
-      const { updatedEffects, ctx } = getUpdatedContextWithSuperBuffs(activeUnit, superPassives, turn, chainedSuperEffects);
-      chainedSuperEffects = updatedEffects;
-      setSuperEffects(updatedEffects);
+            // Stack onto latest effects
+            const { updatedEffects, ctx } = getUpdatedContextWithSuperBuffs(activeUnit, superPassives, turn, chainedSuperEffects);
+            chainedSuperEffects = updatedEffects;
+            setSuperEffects(updatedEffects);
 
-      setSuperAttackCounts(prev => ({
-        ...prev,
-        [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
-      }));
+            setSuperAttackCounts(prev => ({
+              ...prev,
+              [activeUnit.id]: (prev[activeUnit.id] ?? 0) + 1
+            }));
 
-      const updatedStats = calculateFinalStats(activeUnit, ctx, activeUnit.id);
-      const attackerWithBuffs = {
-        ...attacker,
-        baseAtk: updatedStats.atk,
-        baseDef: updatedStats.def
-      };
+            const updatedStats = calculateFinalStats(activeUnit, ctx, activeUnit.id);
+            const attackerWithBuffs = {
+              ...attacker,
+              baseAtk: updatedStats.atk,
+              baseDef: updatedStats.def
+            };
 
-      const addResult = performAttack(attackerWithBuffs, enemyWithType, ctx, attackerId, true, characters, traitEffects);
+            const addResult = performAttack(attackerWithBuffs, enemyWithType, ctx, attackerId, true, characters, traitEffects);
 
-      let extraMsg = "";
-      if (addResult.traitCrit) extraMsg = " 💠 (Trait Activated)";
-      setLog(prev => ({
-        ...prev,
-        [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}${extraMsg}`]
-      }));
+            let extraMsg = "";
+            if (addResult.traitCrit) extraMsg = " 💠 (Trait Activated)";
+            setLog(prev => ({
+              ...prev,
+              [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}${extraMsg}`]
+            }));
 
-      currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
-    } else {
-      const normalResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, false, characters, traitEffects);
-      normalResult.damage = Math.floor(normalResult.damage / 10);
-      normalResult.description = `${attacker.name} did a normal additional for ${normalResult.damage} damage`;
+            currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
+            if (currentEnemy.hp <= 0) {
+              handlePhaseTransition();
+              endTurnCleanup();
+              return;
+            }
+            
+          } else {
+            const normalResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, false, characters, traitEffects);
+            normalResult.damage = Math.floor(normalResult.damage / 10);
+            normalResult.description = `${attacker.name} did a normal additional for ${normalResult.damage} damage`;
 
-      setLog(prev => ({
-        ...prev,
-        [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${normalResult.description}`]
-      }));
+            setLog(prev => ({
+              ...prev,
+              [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${normalResult.description}`]
+            }));
 
-      currentEnemy.hp = Math.max(0, currentEnemy.hp - normalResult.damage);
-    }
-  }
-}
+            currentEnemy.hp = Math.max(0, currentEnemy.hp - normalResult.damage);
+            if (currentEnemy.hp <= 0) {
+              handlePhaseTransition();
+              endTurnCleanup();
+              return;
+            }
+            
+          }
+        }
+      }
 
       
       const traitExtraChance = getValueFromTrait(activeUnit.id, "extraAttackChance", characters);
-      if (Math.random() < traitExtraChance) {
+      if (!isEnemyDefeated() && Math.random() < traitExtraChance) {
         const addResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, true, characters, traitEffects);
 
         setSuperAttackCounts(prev => ({
@@ -441,14 +561,20 @@ for (const p of extraAttackPassives) {
         }));
 
         currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
+        if (currentEnemy.hp <= 0) {
+          handlePhaseTransition();
+          endTurnCleanup();
+          return;
+        }
       }
 
     }
   
     // Process post-attack enemy attacks post super
-    if (playerTeam[activeUnitIndex].currentHp > 0) {
+    if (!isEnemyDefeated() && playerTeam[activeUnitIndex].currentHp > 0) {
       const postAttackCount = attacksThisTurn - preAttackCount;
       for (let i = 0; i < postAttackCount; i++) {
+        if (isEnemyDefeated()) break;
         const isSuper = !superAttackUsed && Math.random() < (currentEnemy.SA ?? 0) / 100;
         // Evasion logic
         const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
@@ -516,7 +642,10 @@ for (const p of extraAttackPassives) {
             `${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${Math.floor(boostedDef)} DEF = ${damage} dmg] (after your action)`
           ]
         }));
-        
+
+        if (isEnemyDefeated()) {
+          handlePhaseTransition();
+        }
 
         if (updatedTeam[activeUnitIndex].currentHp <= 0) break;
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -571,55 +700,9 @@ for (const p of extraAttackPassives) {
       }
     }
   
-    // Check for phase transition or battle end
-    if (currentEnemy.hp <= 0) {
-      const stageCleared = playerData?.clearedStages?.[stageId];
-      const rewards = stageCleared ? currentStage.repeatRewards : currentStage.rewards;
-      const earned = { gems: 0, exp: 0 };
-      if (enemyPhaseIndex < currentStage.phases.length - 1) {
-        setLog(prev => ({
-          ...prev,
-          [turn]: [...(prev[turn] ?? []), `⚔️ Phase changed to ${currentStage.phases[enemyPhaseIndex + 1].name}`]
-        }));
-        setEnemyPhaseIndex(prev => prev + 1);
-      } else {
-        setLog(prev => ({
-          ...prev,
-          [turn]: [...(prev[turn] ?? []), "🎉 Battle Cleared!"]
-        }));
-        if (rewards?.gems) {
-          setGems(prev => prev + rewards.gems);
-          earned.gems = rewards.gems;
-        }
-        if (rewards?.exp) {
-          setPlayerExp(prev => prev + rewards.exp);
-          earned.exp = rewards.exp;
-        }
-        if (rewards?.gold) {
-          setCurrency(prev => ({ ...prev, gold: (prev.gold || 0) + rewards.gold }));
-          earned.gold = rewards.gold;
-        }
-        if (rewards?.traitRerolls) {
-          setCurrency(prev => ({ ...prev, traitRerolls: (prev.traitRerolls || 0) + rewards.traitRerolls }));
-          earned.traitRerolls = rewards.traitRerolls;
-        }
-      
-        if (!stageCleared) {
-          setPlayerData(prev => ({
-            ...prev,
-            clearedStages: {
-              ...prev.clearedStages,
-              [stageId]: true
-            }
-          }));
-        }
-      
-        setEarnedRewards({
-          ...rewards,
-          type: stageCleared ? "Replay" : "First-Time"
-        });
-        setShowVictoryPopup(true);        
-      }
+    // Phase transition or battle end
+    if (isEnemyDefeated()) {
+      handlePhaseTransition();
     }
   
     endTurnCleanup();
@@ -636,6 +719,58 @@ for (const p of extraAttackPassives) {
     });
     
     
+  };
+
+  const handlePhaseTransition = () => {
+    const stageCleared = playerData?.clearedStages?.[stageId];
+    const rewards = stageCleared ? currentStage.repeatRewards : currentStage.rewards;
+    const earned = { gems: 0, exp: 0 };
+    
+    if (enemyPhaseIndex < currentStage.phases.length - 1) {
+      setLog(prev => ({
+        ...prev,
+        [turn]: [...(prev[turn] ?? []), `⚔️ Phase changed to ${currentStage.phases[enemyPhaseIndex + 1].name}`]
+      }));
+      setEnemyPhaseIndex(prev => prev + 1);
+    } else {
+      setLog(prev => ({
+        ...prev,
+        [turn]: [...(prev[turn] ?? []), "🎉 Battle Cleared!"]
+      }));
+      
+      if (rewards?.gems) {
+        setGems(prev => prev + rewards.gems);
+        earned.gems = rewards.gems;
+      }
+      if (rewards?.exp) {
+        setPlayerExp(prev => prev + rewards.exp);
+        earned.exp = rewards.exp;
+      }
+      if (rewards?.gold) {
+        setCurrency(prev => ({ ...prev, gold: (prev.gold || 0) + rewards.gold }));
+        earned.gold = rewards.gold;
+      }
+      if (rewards?.traitRerolls) {
+        setCurrency(prev => ({ ...prev, traitRerolls: (prev.traitRerolls || 0) + rewards.traitRerolls }));
+        earned.traitRerolls = rewards.traitRerolls;
+      }
+    
+      if (!stageCleared) {
+        setPlayerData(prev => ({
+          ...prev,
+          clearedStages: {
+            ...prev.clearedStages,
+            [stageId]: true
+          }
+        }));
+      }
+    
+      setEarnedRewards({
+        ...rewards,
+        type: stageCleared ? "Replay" : "First-Time"
+      });
+      setShowVictoryPopup(true);
+    }
   };
 
   const activeChar = characterMap[playerTeam[activeUnitIndex]?.id] || {};
@@ -683,22 +818,64 @@ for (const p of extraAttackPassives) {
       )}
 
       <div className="mb-4">
-        <h3>{typeEmojis[currentEnemy.type] || "❓"}{" "} Enemy: {currentEnemy.name}</h3>
-        <p>HP: {currentEnemy.hp}</p>
-        <p>ATK: {currentEnemy.atk}</p>
-        <p>DEF: {currentEnemy.def}</p>
+      <h3>
+        {typeEmojis[currentEnemy.type] || "❓"} Enemy: {currentEnemy.name} (HP: {currentEnemy.hp.toLocaleString()})
+      </h3>
+        <HealthBar bars={getEnemyHealthBars()} />
       </div>
 
-      <h3 className="text-lg font-bold text-green-400 animate-pulse">
-        🔄 Turn: {turn}
-      </h3>
+      <div className="portrait-combo-wrapper">
+        <div className="enemy-portrait-wrapper">
+        <div className="portrait-health-overlay">
+          {getEnemyHealthBars().map((bar, idx) => (
+            <div
+              key={idx}
+              className="portrait-health-segment"
+              style={{
+                backgroundColor: bar.hp > 0 ? bar.color : "transparent",
+                opacity: bar.hp > 0 ? 1 : 0.3
+              }}
+            />
+          ))}
+        </div>
+          <img
+            src={currentEnemy.portrait || "/assets/characterPortraits/1.png"}
+            alt={currentEnemy.name}
+            className={`portrait-img ${currentEnemy.hp <= 0 ? "dimmed-portrait" : ""}`}
+          />
+        </div>
+        <h7>‎ </h7>
+        <h7>‎ </h7>
+        <div className="active-unit-wrapper">
+        <div className="active-unit-portrait">
+          <img
+            src={`/assets/characterPortraits/${playerTeam[activeUnitIndex]?.id}.png`}
+            alt={activeChar.name || "Character"}
+            className={`portrait-img ${playerTeam[activeUnitIndex]?.currentHp <= 0 ? "dimmed-portrait" : ""}`}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/assets/fallback.png";
+            }}
+          />
+        </div>
+        <div className="player-health-bar">
+          <div
+            className="player-health-fill"
+            style={{
+              width: `${Math.max(
+                0,
+                (playerTeam[activeUnitIndex]?.currentHp / playerTeam[activeUnitIndex]?.maxHp) * 100
+              )}%`,
+            }}
+          ></div>
+        </div>
+      </div>
+
+      </div>
 
       <div className="mb-6">
-        <h3 className="text-lg font-bold">Active Unit:</h3>
         <div className="p-3 bg-zinc-800 rounded mb-2">
-          <p className="text-xl font-semibold">{activeTypeIcon} {activeChar.name || 'Loading...'}</p>
-          <p>❤️ HP: {playerTeam[activeUnitIndex]?.currentHp || 0} / {playerTeam[activeUnitIndex]?.maxHp || 0}</p>
-          <h3>Actions</h3>
+          <p>❤️ HP: {playerTeam[activeUnitIndex]?.currentHp.toLocaleString() || 0} / {playerTeam[activeUnitIndex]?.maxHp.toLocaleString() || 0}</p>
           <div className="action-button-group">
             <button
               onClick={async () => {
@@ -833,7 +1010,7 @@ for (const p of extraAttackPassives) {
                     const { multiplier: typeMultiplier, label: typeLabel } = getTypeAdvantageMultiplier(currentEnemy, activeUnit, getBattleContext(), characters, "startOfTurn");
                     const rawDmg = isSuper ? currentEnemy.SAatk : currentEnemy.atk;
                     let baseDamage = rawDmg * typeMultiplier;
-                    const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id);
+                    const dmgReduction = getPassiveValue(activeUnit, "damageReduction", getBattleContext(), activeUnit.id, ["startOfTurn"]);
                     const drLabel = (dmgReduction ?? 0) > 0 ? ` -${Math.round((dmgReduction ?? 0) * 100)}% DR ` : "";
                     baseDamage *= 1 - (dmgReduction ?? 0);
                     const traitDefBoost = getValueFromTrait(activeUnit.id, "defBoost", characters);
@@ -856,6 +1033,16 @@ for (const p of extraAttackPassives) {
                         `[${rawDmg} ATK x ${typeMultiplier} ${typeLabel}${drLabel ? " " + drLabel : ""} - ${Math.floor(boostedDef)} DEF = ${damage} damage] (after switch)`
                       ]
                     }));
+                    if (updatedTeam[idx].currentHp <= 0) {
+                      setLog(prev => ({
+                        ...prev,
+                        [turn]: [
+                          ...(prev[turn] ?? []),
+                          `💀 ${activeUnit.name} died.`
+                        ]
+                      }));
+                      break;
+                    }
                     await new Promise(resolve => setTimeout(resolve, 500));
                   }
                 
@@ -867,11 +1054,23 @@ for (const p of extraAttackPassives) {
                 className="switch-button"
                 disabled={unit.currentHp <= 0 || isTurnInProgress || showVictoryPopup}
               >
-                {unit.currentHp <= 0
-                  ? `💀 ${name}`
-                  : isTurnInProgress
-                  ? "Wait for turn"
-                  : `${typeIcon} ${name}`}
+                <div className="portrait-wrapper">
+                  <img
+                    src={`/assets/characterPortraits/${unit.id}.png`}
+                    alt={name}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/assets/fallback.png";
+                    }}
+                  />
+                  <span className="status-icon">
+                    {unit.currentHp <= 0
+                      ? "💀"
+                      : isTurnInProgress
+                      ? "⌛"
+                      : typeIcon}
+                  </span>
+                </div>
               </button>
             )
           );
@@ -887,9 +1086,11 @@ for (const p of extraAttackPassives) {
             <div key={turnNum} className={styles["turn-log-turn"]}>
               <p className={styles["turn-log-turn-title"]}>🔄 Turn {turnNum}</p>
               <ul>
-                {entries.map((entry, idx) => (
-                  <li key={idx} className={styles["turn-log-entry"]}>{entry}</li>
-                ))}
+              {entries.map((entry, idx) => (
+                <li key={idx} className={styles["turn-log-entry"]}>
+                  {formatAndColorDamage(entry)}
+                </li>
+              ))}
               </ul>
               <hr className="my-2" />
             </div>
@@ -953,7 +1154,7 @@ for (const p of extraAttackPassives) {
           )}
         </div>
       )}
-      <audio ref={audioRef} className={showYouLosePopup ? "muffled-audio" : ""} loop autoPlay>
+      <audio ref={audioRef} src={bgm} className={showYouLosePopup ? "muffled-audio" : ""} loop autoPlay>
         <source src={bgm} type="audio/mpeg" />
       </audio>
     </div>
