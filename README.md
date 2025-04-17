@@ -9,7 +9,16 @@
 
 <p align="center">
   <img src="public/assets/screenshots/hub.png" alt="Home Screen" width="600"/>
-  <br><em>🔹 The main hub where you can summon, battle, and more.</em>
+  <br><em>🔹 Home Page</em>
+</p>
+
+<p align="center">
+  <img src="public/assets/screenshots/chars.png" alt="Characters" width="600"/>
+</p>
+
+<p align="center">
+  <img src="public/assets/screenshots/chardetails.png" alt="Char dets" width="600"/>
+  <br><em>🔹 Characters</em>
 </p>
 
 ---
