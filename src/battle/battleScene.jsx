@@ -200,13 +200,12 @@ export default function BattleScene({ stageId = "1-1" }) {
 
   function getBarColor(index, total) {
     const colors = [
-      '#FF0000',
-      '#FFA500',
-      '#FFFF00',
-      '#00FF00',
-      '#0000FF',
-      '#800080'
-    ];
+      '#b30000',
+      '#cc5200',
+      '#ffcc00',
+      '#66cc66',
+      '#007f00'
+    ];    
     return colors[index % colors.length];
   }
 
