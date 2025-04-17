@@ -215,17 +215,17 @@
     50%     { box-shadow: 0 0 100px red; background-color: #880000; }
   }
 
-  /* Rarity background tints — stronger but subtle */
+  /* Rarity background */
   .bg-common     { background-color: rgba(52, 152, 219, 0.195); }
   .bg-rare       { background-color: rgba(156, 89, 182, 0.305); }
-  .bg-legendary  { background-color: rgba(255, 0, 0, 0.233); }       /* 🔴 red now */
-  .bg-ultra      { background-color: rgba(255, 217, 0, 0.253); }     /* 🟡 gold now */
-  .bg-godly      { background-color: rgba(0, 208, 255, 0.397); }     /* 💠 stronger blue */
+  .bg-legendary  { background-color: rgba(255, 0, 0, 0.233); }
+  .bg-ultra      { background-color: rgba(255, 217, 0, 0.253); }
+  .bg-godly      { background-color: rgba(0, 208, 255, 0.397); }
 
   /* Type-based border for character portrait */
-  .border-fire  { border: 8px solid #ff4d4d; }
-  .border-water { border: 8px solid #4da6ff; }
-  .border-grass { border: 8px solid #66ff66; }
+  .border-fire  { border: 8px solid #ff0000a1; }
+  .border-water { border: 8px solid #0800f3; }
+  .border-grass { border: 8px solid #009000ae }
 
   .name-row {
     display: flex;

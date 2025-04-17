@@ -156,7 +156,7 @@ const banners = {
                       <img
                         src={`./assets/characterPortraits/${char.id}.png`}
                         alt={char.name}
-                        className="char-icon"
+                        className={`char-icon border-type-${char.type}`}
                       />
                       <div className="char-info">
                         <strong>{char.name}</strong>

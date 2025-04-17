@@ -27,12 +27,12 @@ export function getPassiveValue(unit, key, ctx, id, allowedTypes = ["startOfTurn
       (!p.condition || p.condition(ctx, id)) &&
       p[key] != null
     ) {
-      total += p[key];
+      const value = typeof p[key] === "function" ? p[key](ctx, id) : p[key];
+      total += value;
     }
     return total;
   }, 0);
 }
-
 
 function getValueFromTrait(unitId, key, characters) {
   const traitName = characters?.[unitId]?.trait;
@@ -103,7 +103,7 @@ export default function BattleScene({ stageId = "1-1" }) {
 
   // Initialize player team state
   const [playerTeam, setPlayerTeam] = useState(() => {
-    const defaultIds = [1];
+    const defaultIds = preferences?.teams?.[selectedTeamId] || [1];
     return defaultIds.map(charId => {
       const unit = characterDetails[charId];
       if (!unit) {
@@ -154,11 +154,25 @@ export default function BattleScene({ stageId = "1-1" }) {
     }).filter(Boolean);
   
     setPlayerTeam(newTeam);
-    setActiveUnitIndex((prevIndex) => {
-      const prevUnitId = playerTeam[prevIndex]?.id;
-      const newIndex = newTeam.findIndex((u) => u.id === prevUnitId);
-      return newIndex !== -1 ? newIndex : 0;
+    setSwitchInTurnMap(prev => {
+      const updated = { ...prev };
+      newTeam.forEach(unit => {
+        if (updated[unit.id] == null) {
+          updated[unit.id] = turn;
+        }
+      });
+      return updated;
     });
+    switchInTurnRef.current = {
+      ...switchInTurnRef.current,
+      ...newTeam.reduce((acc, unit) => {
+        if (switchInTurnRef.current[unit.id] == null) {
+          acc[unit.id] = turn;
+        }
+        return acc;
+      }, {})
+    };
+    setActiveUnitIndex(0);
 
   }, [preferences, selectedTeamId, characters]);
   
@@ -193,6 +207,8 @@ export default function BattleScene({ stageId = "1-1" }) {
   const [superEffects, setSuperEffects] = useState({});
 
   const [switchInTurnMap, setSwitchInTurnMap] = useState({});
+  const switchInTurnRef = useRef({});
+
 
   const audioRef = useRef(null);
   const bgm = currentEnemy.bgm || "./assets/OSTs/default.mp3";
@@ -234,35 +250,40 @@ export default function BattleScene({ stageId = "1-1" }) {
   
   const totalBars = 5;
 
-const getEnemyHealthBars = () => {
-  const maxHp = currentEnemy.maxHp;
-  const currentHp = currentEnemy.hp;
-  const barHp = Math.floor(maxHp / totalBars);
-  const bars = [];
+  const getEnemyHealthBars = () => {
+    const maxHp = currentEnemy.maxHp;
+    const currentHp = currentEnemy.hp;
+    const barHp = Math.floor(maxHp / totalBars);
+    const bars = [];
 
-  for (let i = 0; i < totalBars; i++) {
-    const start = i * barHp;
-    const end = start + barHp;
-    const barMax = (i === totalBars - 1) ? maxHp - (barHp * (totalBars - 1)) : barHp;
+    for (let i = 0; i < totalBars; i++) {
+      const start = i * barHp;
+      const end = start + barHp;
+      const barMax = (i === totalBars - 1) ? maxHp - (barHp * (totalBars - 1)) : barHp;
 
-    const remainingInBar = Math.max(0, Math.min(barHp, currentHp - start));
-    bars.push({
-      hp: remainingInBar,
-      maxHp: barMax,
-      color: getBarColor(i, totalBars),
-      active: currentHp >= start && currentHp < end
-    });
-  }
+      const remainingInBar = Math.max(0, Math.min(barHp, currentHp - start));
+      bars.push({
+        hp: remainingInBar,
+        maxHp: barMax,
+        color: getBarColor(i, totalBars),
+        active: currentHp >= start && currentHp < end
+      });
+    }
 
-  return bars;
-};
+    return bars;
+  };
 
 
   function getBattleContext() {
     return {
       turnNow: turn,
-      switchInTurn: switchInTurnMap,
-      turnEntered: Object.fromEntries(playerTeam.map(unit => [unit.id, 1])),
+      switchInTurn: switchInTurnRef.current,
+      turnEntered: {
+        ...playerTeam.reduce((acc, unit) => {
+          acc[unit.id] = switchInTurnRef.current[unit.id] ?? 1;
+          return acc;
+        }, {})
+      },
       evaded: Object.fromEntries(playerTeam.map(unit => [unit.id, false])),
       leaderAtkMultiplier: leaderMultiplier,
       leaderDefMultiplier: leaderMultiplier,
@@ -271,6 +292,7 @@ const getEnemyHealthBars = () => {
       superAttackCounts
     };
   }
+
 
   function getUpdatedContextWithSuperBuffs(unit, superPassives, turn, superEffects) {
     const newBuffs = superPassives.map(p => ({
@@ -678,6 +700,12 @@ const getEnemyHealthBars = () => {
         });
 
         setActiveUnitIndex(nextAliveIndex);
+        const newTurnMap = {
+          ...switchInTurnRef.current,
+          [incomingUnit.id]: turn
+        };
+        switchInTurnRef.current = newTurnMap;
+        setSwitchInTurnMap(newTurnMap);        
         setLog(prev => ({
           ...prev,
           [turn]: [
@@ -962,10 +990,12 @@ const getEnemyHealthBars = () => {
               
                   setActiveUnitIndex(idx);
 
-                  setSwitchInTurnMap(prev => ({
-                    ...prev,
+                  const newTurnMap = {
+                    ...switchInTurnRef.current,
                     [incomingUnit.id]: turn
-                  }));
+                  };
+                  switchInTurnRef.current = newTurnMap;
+                  setSwitchInTurnMap(newTurnMap);
                 
                   const logMessages = [`🔁 Switched to ${incomingUnit.name}`];
                   if (swapBuffs.length > 0) {

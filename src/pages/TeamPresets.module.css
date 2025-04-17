@@ -11,10 +11,6 @@
   overflow: hidden;
 }
 
-html, body {
-  overflow-x: hidden;
-}
-
 .team-presets-title {
   font-size: 2rem;
   font-weight: bold;
@@ -275,6 +271,7 @@ html, body {
 
 .play-button {
   background-color: #16a34a;
+  width: 100%;
 }
 
 .play-button:hover {

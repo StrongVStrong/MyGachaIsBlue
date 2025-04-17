@@ -592,3 +592,7 @@ h5, h3, h4, .turn-title {
   border-radius: 2px;
   transition: background-color 0.3s, opacity 0.3s;
 }
+
+body {
+  overflow-x: hidden;
+}

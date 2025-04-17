@@ -313,12 +313,15 @@
   gap: 2rem 1rem;
 }
 
+.border-type-fire  { border: 4px solid #ff0000a1; }
+.border-type-water { border: 4px solid #0800f3; }
+.border-type-grass { border: 4px solid #009000a5; }
+
 .char-icon {
   width: 64px;
   height: 64px;
   border-radius: 0.5rem;
   object-fit: cover;
-  border: 2px solid white;
 }
 
 .char-info {
