@@ -1,8 +1,4 @@
-<p align="center">
-  <h1><strong>My Gacha is Blue</strong></h1>
-  <a href="https://mygachaisblue.vercel.app/#/">▶️</a>
-</p>
-
+# My Gacha is Blue
  A fast, fun, lightweight gacha experience!
 
  Play now: [mygachaisblue.vercel.app](https://mygachaisblue.vercel.app)
