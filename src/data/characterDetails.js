@@ -752,8 +752,7 @@ const characterDetails = {
           atkBoost: 1.59,
           defBoost: 1.59,
           critChance: 1,
-          extraAttackChance: 1,
-          description: "ATK & DEF +159%, guaranteed crits, launches an additional Super Attack"
+          description: "ATK & DEF +159%, guaranteed crits"
           },
 
           // Super Attack: Meteor Combination: Massively Raises ATK and DEF for 1 turn
@@ -1260,11 +1259,11 @@ const characterDetails = {
             condition: (ctx, id) => ctx.turnNow - ctx.turnEntered[id] < 10,
             atkBoost: 9.99,
             defBoost: 9.99,
-            extraAttackChance: 0.5,
+            extraAttackChance: 0.1,
             evadeChance: 0.5,
             damageReduction: 1,
             critChance: 1,
-            description: "\nATK & DEF +999%, 50% chance to additional/evade, 100% damage reduction, performs a critical hit for 10 turns from entry"
+            description: "\nATK & DEF +999%, 10% chance to additional, 50% chance to evade, 100% damage reduction, performs a critical hit for 10 turns from entry"
           },
   
           // 🔹 When attacking: Effective against all types

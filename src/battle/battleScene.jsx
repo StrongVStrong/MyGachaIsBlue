@@ -78,6 +78,35 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx, characters, 
   return { multiplier: 1.0, label: "➖" };
 }
 
+function shouldEnemySuper({ currentEnemy, isPrePhase, superUsed, attackIndex }) {
+  const totalAttacks = currentEnemy.attacks || 1;
+  const saChance = (currentEnemy.SA ?? 0) / 100;
+  const saCount = currentEnemy.saCount ?? Infinity;
+  const guaranteedFallback = currentEnemy.guaranteedSuper !== false;
+  const isPre = currentEnemy.preSuper === true;
+  const isPost = currentEnemy.postSuper === true;
+
+  const validTiming =
+    (!isPre && !isPost) ||
+    (isPre && isPrePhase) ||
+    (isPost && !isPrePhase);
+
+  if (!validTiming) return false;
+  if (superUsed >= saCount) return false;
+
+  const preCount = Math.floor(totalAttacks / 2);
+  const postCount = totalAttacks - preCount;
+
+  const isLastAttack = isPrePhase
+    ? attackIndex === preCount - 1
+    : attackIndex === postCount - 1;
+
+  const shouldSA = Math.random() < saChance;
+  if (shouldSA) return true;
+  if (isLastAttack && guaranteedFallback && superUsed === 0) return true;
+
+  return false;
+}
 
 export default function BattleScene({ stageId = "1-1" }) {
   const {
@@ -157,7 +186,7 @@ export default function BattleScene({ stageId = "1-1" }) {
     setSwitchInTurnMap(prev => {
       const updated = { ...prev };
       newTeam.forEach(unit => {
-        if (updated[unit.id] == null) {
+        if (!(unit.id in updated)) {
           updated[unit.id] = turn;
         }
       });
@@ -166,7 +195,7 @@ export default function BattleScene({ stageId = "1-1" }) {
     switchInTurnRef.current = {
       ...switchInTurnRef.current,
       ...newTeam.reduce((acc, unit) => {
-        if (switchInTurnRef.current[unit.id] == null) {
+        if (!(unit.id in switchInTurnRef.current)) {
           acc[unit.id] = turn;
         }
         return acc;
@@ -358,9 +387,11 @@ export default function BattleScene({ stageId = "1-1" }) {
   
     // Process pre-attacks using pre-attack stats
     const preAttackCount = Math.floor(attacksThisTurn / 2);
+    let superUsedCount = 0;
     for (let i = 0; i < preAttackCount; i++) {
       if (isEnemyDefeated()) break;
-      const isSuper = !superAttackUsed && Math.random() < (currentEnemy.SA ?? 0) / 100;
+      const isSuper = shouldEnemySuper({ currentEnemy, isPrePhase: true, superUsed: superUsedCount, attackIndex: i });
+      if (isSuper) superUsedCount++;
       // Evasion logic
       const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
         if (
@@ -416,8 +447,6 @@ export default function BattleScene({ stageId = "1-1" }) {
       const updatedTeam = [...playerTeam];
       updatedTeam[activeUnitIndex].currentHp = Math.max(0, activeUnit.currentHp - damage);
       setPlayerTeam(updatedTeam);
-      
-      if (isSuper) superAttackUsed = true;
 
       setLog(prev => ({
         ...prev,
@@ -594,9 +623,11 @@ export default function BattleScene({ stageId = "1-1" }) {
     // Process post-attack enemy attacks post super
     if (!isEnemyDefeated() && playerTeam[activeUnitIndex].currentHp > 0) {
       const postAttackCount = attacksThisTurn - preAttackCount;
+      let superUsedCount = 0;
       for (let i = 0; i < postAttackCount; i++) {
         if (isEnemyDefeated()) break;
-        const isSuper = !superAttackUsed && Math.random() < (currentEnemy.SA ?? 0) / 100;
+        const isSuper = shouldEnemySuper({ currentEnemy, isPrePhase: false, superUsed: superUsedCount, attackIndex: i });
+        if (isSuper) superUsedCount++;
         // Evasion logic
         const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
           if (
@@ -652,8 +683,6 @@ export default function BattleScene({ stageId = "1-1" }) {
         const updatedTeam = [...playerTeam];
         updatedTeam[activeUnitIndex].currentHp = Math.max(0, playerTeam[activeUnitIndex].currentHp - damage);
         setPlayerTeam(updatedTeam);
-        
-        if (isSuper) superAttackUsed = true;
 
         setLog(prev => ({
           ...prev,
@@ -700,12 +729,13 @@ export default function BattleScene({ stageId = "1-1" }) {
         });
 
         setActiveUnitIndex(nextAliveIndex);
-        const newTurnMap = {
-          ...switchInTurnRef.current,
-          [incomingUnit.id]: turn
-        };
-        switchInTurnRef.current = newTurnMap;
-        setSwitchInTurnMap(newTurnMap);        
+        if (!(incomingUnit.id in switchInTurnRef.current)) {
+          switchInTurnRef.current[incomingUnit.id] = turn;
+          setSwitchInTurnMap(prev => ({
+            ...prev,
+            [incomingUnit.id]: turn
+          }));
+        }
         setLog(prev => ({
           ...prev,
           [turn]: [
@@ -900,7 +930,7 @@ export default function BattleScene({ stageId = "1-1" }) {
 
       <div className="mb-6">
         <div className="p-3 bg-zinc-800 rounded mb-2">
-          <p>❤️ HP: {playerTeam[activeUnitIndex]?.currentHp.toLocaleString() || 0} / {playerTeam[activeUnitIndex]?.maxHp.toLocaleString() || 0}</p>
+          <p>{playerTeam[activeUnitIndex].name}: {playerTeam[activeUnitIndex]?.currentHp.toLocaleString() || 0} / {playerTeam[activeUnitIndex]?.maxHp.toLocaleString() || 0} ❤️</p>
           <div className="action-button-group">
             <button
               onClick={async () => {
@@ -990,12 +1020,13 @@ export default function BattleScene({ stageId = "1-1" }) {
               
                   setActiveUnitIndex(idx);
 
-                  const newTurnMap = {
-                    ...switchInTurnRef.current,
-                    [incomingUnit.id]: turn
-                  };
-                  switchInTurnRef.current = newTurnMap;
-                  setSwitchInTurnMap(newTurnMap);
+                  if (!(incomingUnit.id in switchInTurnRef.current)) {
+                    switchInTurnRef.current[incomingUnit.id] = turn;
+                    setSwitchInTurnMap(prev => ({
+                      ...prev,
+                      [incomingUnit.id]: turn
+                    }));
+                  }
                 
                   const logMessages = [`🔁 Switched to ${incomingUnit.name}`];
                   if (swapBuffs.length > 0) {
