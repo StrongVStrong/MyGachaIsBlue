@@ -78,7 +78,7 @@ export function getTypeAdvantageMultiplier(attacker, defender, ctx, characters, 
   return { multiplier: 1.0, label: "➖" };
 }
 
-function shouldEnemySuper({ currentEnemy, isPrePhase, superUsed, attackIndex }) {
+function shouldEnemySuper({ currentEnemy, isPrePhase, superUsed, attackIndex, attackSplit }) {
   const totalAttacks = currentEnemy.attacks || 1;
   const saChance = (currentEnemy.SA ?? 0) / 100;
   const saCount = currentEnemy.saCount ?? Infinity;
@@ -94,16 +94,14 @@ function shouldEnemySuper({ currentEnemy, isPrePhase, superUsed, attackIndex }) 
   if (!validTiming) return false;
   if (superUsed >= saCount) return false;
 
-  const preCount = Math.floor(totalAttacks / 2);
-  const postCount = totalAttacks - preCount;
+  const { pre: preCount, post: postCount } = attackSplit;
 
   const isLastAttack = isPrePhase
     ? attackIndex === preCount - 1
     : attackIndex === postCount - 1;
 
-  const shouldSA = Math.random() < saChance;
-  if (shouldSA) return true;
-  if (isLastAttack && guaranteedFallback && superUsed === 0) return true;
+  if (Math.random() < saChance) return true;
+  if (isLastAttack && guaranteedFallback && superUsed < saCount) return true;
 
   return false;
 }
@@ -128,6 +126,7 @@ export default function BattleScene({ stageId = "1-1" }) {
   const [isTurnInProgress, setIsTurnInProgress] = useState(false);
   const [superAttackCounts, setSuperAttackCounts] = useState({});
   const [hasUsedTurn, setHasUsedTurn] = useState(false);
+  const [animationInProgress, setAnimationInProgress] = useState(false);
   const playClick = useClickSFX();
 
   // Initialize player team state
@@ -215,6 +214,8 @@ export default function BattleScene({ stageId = "1-1" }) {
   const [showEndButtons, setShowEndButtons] = useState(false);
   const [showVictoryPopup, setShowVictoryPopup] = useState(false);
   const [earnedRewards, setEarnedRewards] = useState(null);
+  const [preAttackCount, setPreAttackCount] = useState(0);
+  const [attackSplit, setAttackSplit] = useState({ pre: 0, post: 0 });
 
   useEffect(() => {
     if (turnLogRef.current) {
@@ -252,6 +253,39 @@ export default function BattleScene({ stageId = "1-1" }) {
       '#007f00'
     ];    
     return colors[index % colors.length];
+  }
+
+  function playAttackAnimation(type = "enemy", isSuper = false, videoSrc = null) {
+    return new Promise(resolve => {
+      setAnimationInProgress(true);
+  
+      if (isSuper && videoSrc) {
+        const video = document.createElement("video");
+        video.src = videoSrc;
+        video.autoplay = true;
+        video.onended = () => {
+          video.remove();
+          setAnimationInProgress(false);
+          resolve();
+        };
+        video.className = "super-attack-video";
+        const wrapper = document.querySelector(".portrait-combo-wrapper");
+        if (!wrapper) return resolve();
+        wrapper.appendChild(video);
+      } else {
+        const el = document.querySelector(type === "enemy" ? ".enemy-portrait-wrapper" : ".active-unit-portrait");
+        if (!el) return resolve();
+        el.classList.remove(`${type}-attack-anim`);
+        void el.offsetWidth;
+
+        el.classList.add(`${type}-attack-anim`);
+        setTimeout(() => {
+          el.classList.remove(`${type}-attack-anim`);
+          setAnimationInProgress(false);
+          resolve();
+        }, 600);
+      }
+    });
   }
 
   function HealthBar({ bars }) {
@@ -383,14 +417,17 @@ export default function BattleScene({ stageId = "1-1" }) {
     let activeUnitStats = calculatePreAttackStats(activeUnit, getBattleContext(), activeUnit.id, characters);
     
     const attacksThisTurn = currentEnemy.attacks || 1;
-    let superAttackUsed = false;
   
     // Process pre-attacks using pre-attack stats
-    const preAttackCount = Math.floor(attacksThisTurn / 2);
+    const randomPreCount = Math.floor(Math.random() * (attacksThisTurn + 1));
+    setPreAttackCount(randomPreCount);
+    const preCount = randomPreCount;
+    const postCount = attacksThisTurn - preCount;
+    setAttackSplit({ pre: preCount, post: postCount });
     let superUsedCount = 0;
-    for (let i = 0; i < preAttackCount; i++) {
+    for (let i = 0; i < preCount; i++) {
       if (isEnemyDefeated()) break;
-      const isSuper = shouldEnemySuper({ currentEnemy, isPrePhase: true, superUsed: superUsedCount, attackIndex: i });
+      const isSuper = shouldEnemySuper({ currentEnemy, isPrePhase: true, superUsed: superUsedCount, attackIndex: i, attackSplit: { pre: preCount, post: postCount } });
       if (isSuper) superUsedCount++;
       // Evasion logic
       const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
@@ -447,7 +484,7 @@ export default function BattleScene({ stageId = "1-1" }) {
       const updatedTeam = [...playerTeam];
       updatedTeam[activeUnitIndex].currentHp = Math.max(0, activeUnit.currentHp - damage);
       setPlayerTeam(updatedTeam);
-
+      await playAttackAnimation("enemy", isSuper, currentEnemy.super);
       setLog(prev => ({
         ...prev,
         [turn]: [
@@ -498,7 +535,7 @@ export default function BattleScene({ stageId = "1-1" }) {
           ]
         }
       };
-
+      await playAttackAnimation("player", true, characterDetails[attacker.id].super);
       currentEnemy.hp = Math.max(0, currentEnemy.hp - result.damage);
       setCurrentStage(prev => {
         const updated = structuredClone(prev);
@@ -511,6 +548,7 @@ export default function BattleScene({ stageId = "1-1" }) {
 
       let extraMsg = "";
       if (result.traitCrit) extraMsg = " 💠 (Trait Activated)";
+      await new Promise(resolve => setTimeout(resolve, 200));
       setLog(prev => ({
         ...prev,
         [turn]: [...(prev[turn] ?? []), `🔹 ${result.description}${extraMsg}`]
@@ -560,23 +598,28 @@ export default function BattleScene({ stageId = "1-1" }) {
 
             let extraMsg = "";
             if (addResult.traitCrit) extraMsg = " 💠 (Trait Activated)";
+            const char = characterDetails[attacker.id];
+            const videoToPlay = char.additional || char.super;
+            await playAttackAnimation("player", true, videoToPlay);
+            await new Promise(resolve => setTimeout(resolve, 100));
             setLog(prev => ({
               ...prev,
               [turn]: [...(prev[turn] ?? []), `🔁 Extra Super: ${addResult.description}${extraMsg}`]
             }));
 
             currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
-            if (currentEnemy.hp <= 0) {
-              handlePhaseTransition();
-              endTurnCleanup();
-              return;
-            }
+            setCurrentStage(prev => {
+              const updated = structuredClone(prev);
+              updated.phases[enemyPhaseIndex].hp = currentEnemy.hp;
+              return updated;
+            });
             
           } else {
             const normalResult = performAttack(attackerWithStats, enemyWithType, getBattleContext(), attackerId, false, characters, traitEffects);
             normalResult.damage = Math.floor(normalResult.damage / 10);
             normalResult.description = `${attacker.name} did a normal additional for ${normalResult.damage} damage`;
-
+            await playAttackAnimation("player", false, characterDetails[attacker.id].super);
+            await new Promise(resolve => setTimeout(resolve, 500));
             setLog(prev => ({
               ...prev,
               [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${normalResult.description}`]
@@ -588,7 +631,6 @@ export default function BattleScene({ stageId = "1-1" }) {
               endTurnCleanup();
               return;
             }
-            
           }
         }
       }
@@ -611,22 +653,25 @@ export default function BattleScene({ stageId = "1-1" }) {
         }));
 
         currentEnemy.hp = Math.max(0, currentEnemy.hp - addResult.damage);
+        setCurrentStage(prev => {
+          const updated = structuredClone(prev);
+          updated.phases[enemyPhaseIndex].hp = currentEnemy.hp;
+          return updated;
+        });
         if (currentEnemy.hp <= 0) {
           handlePhaseTransition();
           endTurnCleanup();
           return;
         }
       }
-
     }
   
     // Process post-attack enemy attacks post super
     if (!isEnemyDefeated() && playerTeam[activeUnitIndex].currentHp > 0) {
-      const postAttackCount = attacksThisTurn - preAttackCount;
       let superUsedCount = 0;
-      for (let i = 0; i < postAttackCount; i++) {
+      for (let i = 0; i < postCount; i++) {
         if (isEnemyDefeated()) break;
-        const isSuper = shouldEnemySuper({ currentEnemy, isPrePhase: false, superUsed: superUsedCount, attackIndex: i });
+        const isSuper = shouldEnemySuper({ currentEnemy, isPrePhase: false, superUsed: superUsedCount, attackIndex: i, attackSplit: { pre: preCount, post: postCount } });
         if (isSuper) superUsedCount++;
         // Evasion logic
         const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
@@ -683,7 +728,7 @@ export default function BattleScene({ stageId = "1-1" }) {
         const updatedTeam = [...playerTeam];
         updatedTeam[activeUnitIndex].currentHp = Math.max(0, playerTeam[activeUnitIndex].currentHp - damage);
         setPlayerTeam(updatedTeam);
-
+        await playAttackAnimation("enemy", isSuper, currentEnemy.super);
         setLog(prev => ({
           ...prev,
           [turn]: [
@@ -786,7 +831,7 @@ export default function BattleScene({ stageId = "1-1" }) {
     if (enemyPhaseIndex < currentStage.phases.length - 1) {
       setLog(prev => ({
         ...prev,
-        [turn]: [...(prev[turn] ?? []), `⚔️ Phase changed to ${currentStage.phases[enemyPhaseIndex + 1].name}`]
+        [turn]: [...(prev[turn] ?? []), `⚔️ ${currentStage.phases[enemyPhaseIndex + 1].name} appeared!`]
       }));
       setEnemyPhaseIndex(prev => prev + 1);
     } else {
@@ -867,65 +912,56 @@ export default function BattleScene({ stageId = "1-1" }) {
   return (
     <div className="battle-container">
       <h5 className="text-xl mb-4">{currentStage.name}</h5>
-
-      {playerTeam.every(unit => unit.currentHp <= 0) && (
-        <div className="text-red-500 text-2xl font-bold mb-4">
-          ☠️ Game Over - All units defeated!
-        </div>
-      )}
-
       <div className="mb-4">
       <h3>
         {typeEmojis[currentEnemy.type] || "❓"} Enemy: {currentEnemy.name} (HP: {currentEnemy.hp.toLocaleString()})
       </h3>
         <HealthBar bars={getEnemyHealthBars()} />
       </div>
-
       <div className="portrait-combo-wrapper">
         <div className="enemy-portrait-wrapper">
-        <div className="portrait-health-overlay">
-          {getEnemyHealthBars().map((bar, idx) => (
-            <div
-              key={idx}
-              className="portrait-health-segment"
-              style={{
-                backgroundColor: bar.hp > 0 ? bar.color : "transparent",
-                opacity: bar.hp > 0 ? 1 : 0.3
-              }}
+          <div className="portrait-health-overlay">
+            {getEnemyHealthBars().map((bar, idx) => (
+              <div
+                key={idx}
+                className="portrait-health-segment"
+                style={{
+                  backgroundColor: bar.hp > 0 ? bar.color : "transparent",
+                  opacity: bar.hp > 0 ? 1 : 0.3
+                }}
+              />
+            ))}
+          </div>
+            <img
+              src={currentEnemy.portrait || "./assets/characterPortraits/1.png"}
+              alt={currentEnemy.name}
+              className={`portrait-img ${currentEnemy.hp <= 0 ? "dimmed-portrait" : ""}`}
             />
-          ))}
-        </div>
-          <img
-            src={currentEnemy.portrait || "./assets/characterPortraits/1.png"}
-            alt={currentEnemy.name}
-            className={`portrait-img ${currentEnemy.hp <= 0 ? "dimmed-portrait" : ""}`}
-          />
-        </div>
-        <div className="active-unit-wrapper">
-        <div className="active-unit-portrait">
-          <img
-            src={`./assets/characterPortraits/${playerTeam[activeUnitIndex]?.id}.png`}
-            alt={activeChar.name || "Character"}
-            className={`portrait-img ${playerTeam[activeUnitIndex]?.currentHp <= 0 ? "dimmed-portrait" : ""}`}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = "./assets/fallback.png";
-            }}
-          />
-        </div>
-        <div className="player-health-bar">
-          <div
-            className="player-health-fill"
-            style={{
-              width: `${Math.max(
-                0,
-                (playerTeam[activeUnitIndex]?.currentHp / playerTeam[activeUnitIndex]?.maxHp) * 100
-              )}%`,
-            }}
-          ></div>
-        </div>
-      </div>
-
+          </div>
+          <div className="active-unit-wrapper">
+            <div className="active-unit-portrait">
+              <img
+                src={`./assets/characterPortraits/${playerTeam[activeUnitIndex]?.id}.png`}
+                alt={activeChar.name || "Character"}
+                className={`portrait-img ${playerTeam[activeUnitIndex]?.currentHp <= 0 ? "dimmed-portrait" : ""}`}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "./assets/fallback.png";
+                }}
+              />
+            </div>
+            <div className="player-health-bar">
+              <div
+                className="player-health-fill"
+                style={{
+                  width: `${Math.max(
+                    0,
+                    (playerTeam[activeUnitIndex]?.currentHp / playerTeam[activeUnitIndex]?.maxHp) * 100
+                  )}%`,
+                }}
+              ></div>
+            </div>
+          </div>
       </div>
 
       <div className="mb-6">
@@ -1043,9 +1079,18 @@ export default function BattleScene({ stageId = "1-1" }) {
                   const currentEnemy = currentStage.phases[enemyPhaseIndex];
                   const activeUnit = incomingUnit;
                   const attacksThisTurn = currentEnemy.attacks || 1;
-                
+
+                  let superUsed = 0;
                   for (let i = 0; i < attacksThisTurn; i++) {
-                    const isSuper = Math.random() < (currentEnemy.SA ?? 0) / 100;
+                    const { pre: preCount, post: postCount } = attackSplit;
+                    const isSuper = shouldEnemySuper({
+                      currentEnemy,
+                      isPrePhase: false,
+                      superUsed,
+                      attackIndex: i,
+                      attackSplit: { pre: preCount, post: postCount }
+                    });
+                    if (isSuper) superUsed++;
                     const evadeChance = (activeUnit.passives ?? []).reduce((total, p) => {
                       if ((p.type === "startOfTurn") && (!p.condition || p.condition(getBattleContext(), activeUnit.id))) {
                         return total + (p.evadeChance ?? 0);
@@ -1082,7 +1127,7 @@ export default function BattleScene({ stageId = "1-1" }) {
                     const updatedTeam = [...playerTeam];
                     updatedTeam[idx].currentHp = Math.max(0, updatedTeam[idx].currentHp - damage);
                     setPlayerTeam(updatedTeam);
-                
+                    await playAttackAnimation("enemy", isSuper, currentEnemy.super);
                     setLog(prev => ({
                       ...prev,
                       [turn]: [

@@ -222,7 +222,6 @@ function TeamPresets() {
             playClick();
             localStorage.setItem("selectedTeamId", selectedTeamId);
             navigate(`/battle/${stageId}?team=${selectedTeamId}`);
-            setTimeout(() => window.location.reload(), 100);
           }}
         >
           ▶

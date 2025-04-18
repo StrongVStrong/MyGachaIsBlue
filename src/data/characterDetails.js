@@ -763,6 +763,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/allgodly.mp4",
       },
 
       18: {
