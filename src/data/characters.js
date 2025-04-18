@@ -1,5 +1,5 @@
 const characters = [
-    { "id": 1, "name": "Super Saiyan Goku", "power": 9000, "rarity": "Rare", "type": "grass", music: "./assets/OSTs/1.mp3", details: "Strong Start (5 turns), Dodge", super: "Warp Kamehameha - Raises ATK" },
+    { "id": 1, "name": "Super Saiyan Goku", "power": 9000, "rarity": "Rare", "type": "grass", details: "Strong Start (5 turns), Dodge", super: "Warp Kamehameha - Raises ATK" },
     { "id": 2, "name": "Super Vegeta", "power": 8500, "rarity": "Common", "type": "water", details: "Strong Start (3 turns), Swap-out Support", super: "Burning Stars Cannon - Raises DEF" },
     { "id": 3, "name": "Full Power SSJ Broly", "power": 9500, "rarity": "Ultra", "type": "grass", details: "Slow Start (Turn 6+), Dodge", super: "Blastor Meteor - Raises ATK & DEF for 1 turn" },
     { "id": 4, "name": "Super Vegito", "power": 10500, "rarity": "Legendary", "type": "grass", details: "Slow Start (Stacker), Guard", super: "Vegito Special - Greatly raises ATK & DEF" },

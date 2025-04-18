@@ -59,6 +59,8 @@ const characterDetails = {
           turns: 999
         },
       ],
+      super: "/assets/animations/allgodly.mp4",
+      additional: "/assets/animations/common.mp4",
     },
 
     2: {
@@ -109,6 +111,8 @@ const characterDetails = {
           turns: 999
         }
       ],
+      super: "/assets/animations/allgodly.mp4",
+      additional: "/assets/animations/common.mp4",
     },
 
     3: {
@@ -164,6 +168,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       4: {
@@ -200,7 +206,9 @@ const characterDetails = {
             defBoost: 0.3,
             turns: 999
           }
-          ],
+        ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       5: {
@@ -240,6 +248,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       6: {
@@ -274,6 +284,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       7: {
@@ -312,6 +324,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       8: {
@@ -343,6 +357,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       9: {
@@ -386,6 +402,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       10: {
@@ -427,6 +445,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       11: {
@@ -497,6 +517,8 @@ const characterDetails = {
             atkBoost: (ctx, id) => 0.01 * ctx.superAttackCounts[id], // 1% atk per super
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       12: {
@@ -545,6 +567,8 @@ const characterDetails = {
             defBoost: (ctx, id) => Math.min(0.3 * ctx.superAttackCounts[id], 0.77), // Def +30% (up to 77%) per super
           }          
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       13: {
@@ -606,6 +630,8 @@ const characterDetails = {
             turns: 999
           },
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       14: {
@@ -651,7 +677,9 @@ const characterDetails = {
             atkBoost: 0.3,
             turns: 999
           }
-          ],
+        ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       15: {
@@ -692,6 +720,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       16: {
@@ -727,6 +757,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       17: {
@@ -764,7 +796,7 @@ const characterDetails = {
           }
         ],
         super: "/assets/animations/allgodly.mp4",
-        additional: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       18: {
@@ -809,6 +841,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       19: {
@@ -859,6 +893,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       20: {
@@ -892,6 +928,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       21: {
@@ -942,6 +980,8 @@ const characterDetails = {
             turns: 1
           },
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       22: {
@@ -983,6 +1023,8 @@ const characterDetails = {
             defBoost: (ctx, id) => Math.min(0.3 * ctx.superAttackCounts[id], 0.77), // Def +30% (up to 77%) per super
           }          
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       23: {
@@ -1020,7 +1062,6 @@ const characterDetails = {
           extraAttackChance: 1,
           description: "\nWhen Attacking: ATK +200%, DEF +100%, attacks are super effective, launches an additional Super Attack"
           },
-  
 
           // Super Attack: Timestop: Raises ATK
           {
@@ -1029,6 +1070,8 @@ const characterDetails = {
             turns: 999
           },
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       24: {
@@ -1065,7 +1108,9 @@ const characterDetails = {
             defBoost: 0.1,
             turns: 3
           }
-          ],
+        ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       25: {
@@ -1111,6 +1156,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
   
       26: {
@@ -1155,6 +1202,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       27: {
@@ -1191,6 +1240,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       28: {
@@ -1239,6 +1290,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       29: {
@@ -1282,6 +1335,8 @@ const characterDetails = {
             turns: 999
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       },
 
       30: {
@@ -1307,6 +1362,8 @@ const characterDetails = {
             turns: 1
           }
         ],
+        super: "/assets/animations/allgodly.mp4",
+        additional: "/assets/animations/common.mp4",
       }
   };
   

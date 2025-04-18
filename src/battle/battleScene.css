@@ -396,6 +396,7 @@ h5, h3, h4, .turn-title {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 100;
 }
 
 .health-bar.back {
@@ -554,8 +555,22 @@ h5, h3, h4, .turn-title {
   z-index: 10;
 }
 
+.enemy-evade-anim {
+  transform: translate(calc(-50vw + 50%), calc(10vh - 50%)) rotate(-6deg);
+  transition: transform 0.4s ease;
+  z-index: 10;
+}
+
+.player-evade-anim {
+  transform: translate(calc(36vw - 50%), calc(-35vh + 50%)) rotate(6deg);
+  transition: transform 0.4s ease;
+  z-index: 10;
+}
+
 .enemy-attack-anim::after,
-.player-attack-anim::after {
+.player-attack-anim::after,
+.enemy-evade-anim::after,
+.player-evade-anim::after {
   content: '';
   animation: hit-shake 0.4s;
   display: block;
@@ -603,14 +618,29 @@ h5, h3, h4, .turn-title {
     font-size: 1.2rem;
     padding: 0px;
   }
+
   .enemy-attack-anim {
     transform-origin: center;
-    transform: translate(-60%, 30%) rotate(-6deg);
+    transform: translate(-60%, 40%) rotate(-6deg);
     transition: transform 0.4s ease;
     z-index: 10;
   }
   
   .player-attack-anim {
+    transform-origin: center;
+    transform: translate(60%, -30%) rotate(6deg);
+    transition: transform 0.4s ease;
+    z-index: 10;
+  }
+
+  .enemy-evade-anim {
+    transform-origin: center;
+    transform: translate(-60%, 0%) rotate(-6deg);
+    transition: transform 0.4s ease;
+    z-index: 10;
+  }
+  
+  .player-evade-anim {
     transform-origin: center;
     transform: translate(60%, -30%) rotate(6deg);
     transition: transform 0.4s ease;
@@ -648,5 +678,27 @@ body {
   z-index: 999;
   object-fit: cover;
   pointer-events: none;
-  border-radius: 1rem;
+}
+.enemy-health-container {
+  width: 100%;
+  height: 1.5rem;
+  position: relative;
+  background: #1f1f1f;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.health-layer-stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.layered-bar {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  transition: width 0.4s ease, opacity 0.3s ease;
+  border-radius: 0.75rem;
 }

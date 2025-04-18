@@ -255,7 +255,7 @@ export default function BattleScene({ stageId = "1-1" }) {
     return colors[index % colors.length];
   }
 
-  function playAttackAnimation(type = "enemy", isSuper = false, videoSrc = null) {
+  function playAttackAnimation(type = "enemy", isSuper = false, videoSrc = null, animationType = "attack") {
     return new Promise(resolve => {
       setAnimationInProgress(true);
   
@@ -275,12 +275,15 @@ export default function BattleScene({ stageId = "1-1" }) {
       } else {
         const el = document.querySelector(type === "enemy" ? ".enemy-portrait-wrapper" : ".active-unit-portrait");
         if (!el) return resolve();
-        el.classList.remove(`${type}-attack-anim`);
+  
+        const animClass = `${type}-${animationType}-anim`;
+  
+        el.classList.remove(animClass);
         void el.offsetWidth;
-
-        el.classList.add(`${type}-attack-anim`);
+  
+        el.classList.add(animClass);
         setTimeout(() => {
-          el.classList.remove(`${type}-attack-anim`);
+          el.classList.remove(animClass);
           setAnimationInProgress(false);
           resolve();
         }, 600);
@@ -291,20 +294,18 @@ export default function BattleScene({ stageId = "1-1" }) {
   function HealthBar({ bars }) {
     return (
       <div className="enemy-health-container">
-        <div className="health-bars-wrapper">
-          {bars.map((bar, index) => (
+        <div className="health-layer-stack">
+        {[...bars].reverse().map((bar, index) => (
             <div
               key={index}
-              className={`health-bar ${bar.active ? 'active' : ''}`}
+              className="layered-bar"
               style={{
+                zIndex: bars.length - index,
                 backgroundColor: bar.color,
                 width: `${(bar.hp / bar.maxHp) * 100}%`,
-                display: bar.hp > 0 ? 'block' : 'none',
-                opacity: bar.active ? 1 : 0.7
+                opacity: bar.hp > 0 ? 1 : 0,
               }}
-            >
-              <div className="health-bar-fill" style={{ width: '100%' }} />
-            </div>
+            />
           ))}
         </div>
       </div>
@@ -447,6 +448,7 @@ export default function BattleScene({ stageId = "1-1" }) {
       }
 
       if (evaded) {
+        await playAttackAnimation("enemy", false, null, "evade");
         setLog(prev => ({
           ...prev,
           [turn]: [
@@ -456,6 +458,7 @@ export default function BattleScene({ stageId = "1-1" }) {
         }));
 
         getBattleContext().evaded[activeUnit.id] = true;
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         continue; // Skip damage
       }
@@ -480,11 +483,10 @@ export default function BattleScene({ stageId = "1-1" }) {
       if (damage === 0) {
         damage = Math.floor(Math.random() * 96) + 5;
       }
-
+      await playAttackAnimation("enemy", isSuper, currentEnemy.super);
       const updatedTeam = [...playerTeam];
       updatedTeam[activeUnitIndex].currentHp = Math.max(0, activeUnit.currentHp - damage);
       setPlayerTeam(updatedTeam);
-      await playAttackAnimation("enemy", isSuper, currentEnemy.super);
       setLog(prev => ({
         ...prev,
         [turn]: [
@@ -619,13 +621,18 @@ export default function BattleScene({ stageId = "1-1" }) {
             normalResult.damage = Math.floor(normalResult.damage / 10);
             normalResult.description = `${attacker.name} did a normal additional for ${normalResult.damage} damage`;
             await playAttackAnimation("player", false, characterDetails[attacker.id].super);
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 300));
             setLog(prev => ({
               ...prev,
               [turn]: [...(prev[turn] ?? []), `🔁 Additional Attack: ${normalResult.description}`]
             }));
 
             currentEnemy.hp = Math.max(0, currentEnemy.hp - normalResult.damage);
+            setCurrentStage(prev => {
+              const updated = structuredClone(prev);
+              updated.phases[enemyPhaseIndex].hp = currentEnemy.hp;
+              return updated;
+            });
             if (currentEnemy.hp <= 0) {
               handlePhaseTransition();
               endTurnCleanup();
@@ -691,6 +698,7 @@ export default function BattleScene({ stageId = "1-1" }) {
         }
 
         if (evaded) {
+          await playAttackAnimation("enemy", false, null, "evade");
           setLog(prev => ({
             ...prev,
             [turn]: [
@@ -700,6 +708,7 @@ export default function BattleScene({ stageId = "1-1" }) {
           }));
 
         getBattleContext().evaded[activeUnit.id] = true;
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         continue;
       }
@@ -724,11 +733,10 @@ export default function BattleScene({ stageId = "1-1" }) {
         damage = Math.floor(Math.random() * 96) + 5;
       }
       
-
+        await playAttackAnimation("enemy", isSuper, currentEnemy.super);
         const updatedTeam = [...playerTeam];
         updatedTeam[activeUnitIndex].currentHp = Math.max(0, playerTeam[activeUnitIndex].currentHp - damage);
         setPlayerTeam(updatedTeam);
-        await playAttackAnimation("enemy", isSuper, currentEnemy.super);
         setLog(prev => ({
           ...prev,
           [turn]: [
@@ -1103,10 +1111,12 @@ export default function BattleScene({ stageId = "1-1" }) {
                       evaded = Math.random() < getValueFromTrait(activeUnit.id, "evadeChance", characters);
                     }
                     if (evaded) {
+                      await playAttackAnimation("enemy", false, null, "evade");
                       setLog(prev => ({
                         ...prev,
                         [turn]: [...(prev[turn] ?? []), `💨 ${activeUnit.name} dodged ${currentEnemy.name}'s ${isSuper ? "Super Attack" : "attack"}!`]
                       }));
+                      await new Promise(resolve => setTimeout(resolve, 300));
                       continue;
                     }
                 
