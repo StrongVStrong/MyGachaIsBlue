@@ -231,14 +231,63 @@ export default function BattleScene({ stageId = "1-1" }) {
     return cloned;
   });
   
-
   const currentEnemy = currentStage.phases[enemyPhaseIndex];
 
   const [superEffects, setSuperEffects] = useState({});
 
   const [switchInTurnMap, setSwitchInTurnMap] = useState({});
   const switchInTurnRef = useRef({});
+  const [animatedEnemyHp, setAnimatedEnemyHp] = useState(currentEnemy.hp);
+  const [fillAnimationHp, setFillAnimationHp] = useState(currentEnemy.hp);
+  const [isFillingHp, setIsFillingHp] = useState(true);
 
+  useEffect(() => {
+    if (animatedEnemyHp === currentEnemy.hp) return;
+  
+    const step = () => {
+      setAnimatedEnemyHp(prev => {
+        if (prev > currentEnemy.hp) {
+          const delta = Math.max(1, Math.floor((prev - currentEnemy.hp) / 10));
+          return prev - delta;
+        }
+        return currentEnemy.hp;
+      });
+    };
+  
+    const interval = setInterval(() => {
+      step();
+    }, 16);
+  
+    return () => clearInterval(interval);
+  }, [currentEnemy.hp, animatedEnemyHp]);
+
+  useEffect(() => {
+    if (!currentEnemy) return;
+  
+    setIsFillingHp(true);
+    setFillAnimationHp(0);
+    setAnimatedEnemyHp(0);
+  
+    const interval = setInterval(() => {
+      setFillAnimationHp(prev => {
+        const maxHp = currentEnemy.hp;
+        const delta = Math.ceil(maxHp / 100);
+        const next = prev + delta;
+  
+        if (next >= maxHp) {
+          clearInterval(interval);
+          setIsFillingHp(false);
+          setAnimatedEnemyHp(maxHp);
+          return maxHp;
+        }
+  
+        return next;
+      });
+    }, 16);
+  
+    return () => clearInterval(interval);
+  }, [enemyPhaseIndex]);
+   
 
   const audioRef = useRef(null);
   const bgm = currentEnemy.bgm || "./assets/OSTs/default.mp3";
@@ -246,12 +295,17 @@ export default function BattleScene({ stageId = "1-1" }) {
 
   function getBarColor(index, total) {
     const colors = [
-      '#b30000',
-      '#cc5200',
-      '#ffcc00',
-      '#66cc66',
-      '#007f00'
-    ];    
+      '#b30000', // red
+      '#cc5200', // orange
+      '#ffcc00', // yellow
+      '#66cc66', // green
+      '#007f00', // dark green
+      '#00e0ff', // light blue / cyan
+      '#0077cc', // standard blue
+      '#001d8f', // deeper navy blue
+      '#4b0082', // indigo
+      '#5e005e', // dark purple
+    ];
     return colors[index % colors.length];
   }
 
@@ -312,30 +366,32 @@ export default function BattleScene({ stageId = "1-1" }) {
     );
   }
   
-  const totalBars = 5;
+  const totalBars = currentEnemy.bars ?? 10;
 
   const getEnemyHealthBars = () => {
     const maxHp = currentEnemy.maxHp;
-    const currentHp = currentEnemy.hp;
+    const currentHp = isFillingHp ? fillAnimationHp : animatedEnemyHp;
     const barHp = Math.floor(maxHp / totalBars);
     const bars = [];
-
+  
     for (let i = 0; i < totalBars; i++) {
       const start = i * barHp;
       const end = start + barHp;
       const barMax = (i === totalBars - 1) ? maxHp - (barHp * (totalBars - 1)) : barHp;
-
       const remainingInBar = Math.max(0, Math.min(barHp, currentHp - start));
+  
       bars.push({
         hp: remainingInBar,
         maxHp: barMax,
-        color: getBarColor(i, totalBars),
+        color: getBarColor(i),
         active: currentHp >= start && currentHp < end
       });
     }
-
+  
     return bars;
   };
+  
+  
 
 
   function getBattleContext() {
@@ -915,7 +971,6 @@ export default function BattleScene({ stageId = "1-1" }) {
     window.location.href = `/#/battle/${nextStageId}`;
     setTimeout(() => window.location.reload(), 100);
   }
-  
 
   return (
     <div className="battle-container">
@@ -974,7 +1029,7 @@ export default function BattleScene({ stageId = "1-1" }) {
 
       <div className="mb-6">
         <div className="p-3 bg-zinc-800 rounded mb-2">
-          <p>{playerTeam[activeUnitIndex].name}: {playerTeam[activeUnitIndex]?.currentHp.toLocaleString() || 0} / {playerTeam[activeUnitIndex]?.maxHp.toLocaleString() || 0} ❤️</p>
+          <p>{activeTypeIcon} {activeChar.name || playerTeam[activeUnitIndex].name}: {playerTeam[activeUnitIndex]?.currentHp.toLocaleString() || 0} / {playerTeam[activeUnitIndex]?.maxHp.toLocaleString() || 0} ❤️</p>
           <div className="action-button-group">
             <button
               onClick={async () => {

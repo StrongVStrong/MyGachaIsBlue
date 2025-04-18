@@ -1340,7 +1340,7 @@ const characterDetails = {
       },
 
       30: {
-        name: "Gary Oak Arceus",
+        name: "Gary Oak (Arceus)",
         baseAtk: 14000,
         baseDef: 17000,
         baseHp: 99000,
